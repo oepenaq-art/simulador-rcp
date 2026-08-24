@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador Avanzado RCP Pediátrica - HPTU</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        .monitor-text { font-family: 'Share Tech Mono', monospace; }
+        .log-container { height: 480px; overflow-y: auto; scroll-behavior: smooth; }
+        .alarm-blink { animation: blinker 1s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
+        
+        .btn-cat-eval { @apply bg-blue-50 text-blue-900 border border-blue-300 hover:bg-blue-100 transition-colors py-2 px-3 rounded text-sm text-left shadow-sm font-medium; }
+        .btn-cat-rcp { @apply bg-red-50 text-red-900 border border-red-300 hover:bg-red-100 transition-colors py-2 px-3 rounded text-sm text-left shadow-sm font-medium; }
+        .btn-cat-defib { @apply bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100 transition-colors py-2 px-3 rounded text-sm text-left shadow-sm font-medium; }
+        .btn-cat-meds { @apply bg-purple-50 text-purple-900 border border-purple-300 hover:bg-purple-100 transition-colors py-2 px-3 rounded text-sm text-left shadow-sm font-medium; }
+        
+        .chat-bubble { max-width: 90%; font-size: 0.875rem; border-radius: 0.5rem; }
+        
+        .msg-lider { background-color: #fdf2f8; border-left: 4px solid #db2777; }
+        .msg-compresor { background-color: #fef2f2; border-left: 4px solid #ef4444; }
+        .msg-viaaerea { background-color: #ecfeff; border-left: 4px solid #06b6d4; }
+        .msg-desfib { background-color: #fefce8; border-left: 4px solid #eab308; }
+        .msg-meds { background-color: #faf5ff; border-left: 4px solid #a855f7; }
+        .msg-registro { background-color: #f0fdf4; border-left: 4px solid #22c55e; }
+        .msg-familia { background-color: #fff7ed; border-left: 4px solid #f97316; }
+        .msg-alerta { background-color: #fff1f2; border-left: 4px solid #f43f5e; }
+        .msg-sistema { background-color: #f8fafc; border-left: 4px solid #64748b; }
+
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%; background: #d97706; cursor: pointer; margin-top: -10px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: #fde68a; border-radius: 3px; border: 1px solid #d97706; }
+
+        .ecg-grid {
+            background-color: #050b05;
+            background-image: 
+                linear-gradient(rgba(0, 80, 0, 0.25) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 80, 0, 0.25) 1px, transparent 1px),
+                linear-gradient(rgba(0, 120, 0, 0.4) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 120, 0, 0.4) 1px, transparent 1px);
+            background-size: 10px 10px, 10px 10px, 50px 50px, 50px 50px;
+        }
+
+        .btn-ayuda-glow {
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.6);
+            animation: pulse-glow 2.5s infinite;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 8px rgba(245, 158, 11, 0.6); }
+            50% { transform: scale(1.03); box-shadow: 0 0 16px rgba(245, 158, 11, 0.9); }
+        }
+    </style>
+</head>
+<body class="bg-gray-200 p-2 md:p-6 font-sans">
+    
+    <!-- MODAL: AYUDAS COGNITIVAS (HPTU) -->
+    <div id="modal-ayudas" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex justify-center items-center p-2 md:p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-[920px] max-w-full h-[94vh] flex flex-col overflow-hidden border-2 border-blue-600">
+            <!-- Header Modal -->
+            <div class="bg-blue-900 text-white px-5 py-3 flex justify-between items-center shadow">
+                <div class="flex items-center space-x-2">
+                    <i class="fas fa-book-medical text-yellow-400 text-lg"></i>
+                    <h3 class="font-bold text-lg">Ayuda Cognitiva Institucional - HPTU</h3>
+                </div>
+                <button onclick="closeModal('modal-ayudas')" class="text-gray-300 hover:text-white text-2xl font-bold leading-none">&times;</button>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="bg-gray-100 border-b flex px-4 pt-2 gap-2 text-sm font-bold">
+                <button id="tab-btn-algoritmo" onclick="switchAyudaTab('algoritmo')" class="py-2.5 px-5 bg-white border-t-2 border-blue-600 text-blue-900 rounded-t shadow-sm">
+                    <i class="fas fa-project-diagram mr-1.5"></i> Algoritmo RCP Pediátrico
+                </button>
+                <button id="tab-btn-causas" onclick="switchAyudaTab('causas')" class="py-2.5 px-5 bg-gray-200 text-gray-600 hover:bg-gray-50 rounded-t">
+                    <i class="fas fa-search-plus mr-1.5"></i> Causas Reversibles (Hs y Ts)
+                </button>
+            </div>
+
+            <!-- Content Area -->
+            <div class="p-3 md:p-4 overflow-y-auto flex-1 text-sm bg-gray-100 flex flex-col items-center">
+                <!-- Tab 1: FOTO DEL ALGORITMO INSTITUCIONAL -->
+                <div id="tab-content-algoritmo" class="w-full flex flex-col items-center">
+                    <div class="bg-white p-2 rounded-lg shadow border border-gray-300 max-w-3xl w-full">
+                        <img src="algoritmo_rcp.png" alt="Algoritmo de RCP Pediátrico HPTU" class="w-full h-auto rounded border border-gray-200 object-contain shadow-sm" />
+                    </div>
+                </div>
+
+                <!-- Tab 2: Causas Reversibles (Tabla HPTU) -->
+                <div id="tab-content-causas" class="w-full hidden space-y-3 max-w-3xl">
+                    <div class="bg-white p-4 rounded-lg border shadow-sm">
+                        <h4 class="font-bold text-blue-900 text-base mb-3 border-b pb-2 flex items-center">
+                            <i class="fas fa-clipboard-list mr-2 text-blue-700"></i> Tabla Institucional de Causas Reversibles (HPTU)
+                        </h4>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-xs text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-blue-900 text-white">
+                                        <th class="p-2.5 border">Causa</th>
+                                        <th class="p-2.5 border">Manejo y Dosis según Guía HPTU</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    <tr class="bg-red-50 font-semibold text-red-950">
+                                        <td class="p-2.5 border font-bold">Hipercalemia (K alto) ⚠️</td>
+                                        <td class="p-2.5 border">
+                                            • <strong>Gluconato de Calcio:</strong> 50 mg/kg IV o IO (estabilizador de membrana).<br/>
+                                            • <strong>Bicarbonato de Sodio:</strong> 1-2 mEq/kg IV o IO.<br/>
+                                            <em>(Indicación excepcional autorizada en paro secundario a falla renal / hipercalemia).</em>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2.5 border font-bold">Hipovolemia</td>
+                                        <td class="p-2.5 border">10 a 20 mL/kg de SS 0.9% o Lactato de Ringer.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2.5 border font-bold">Hipoxia</td>
+                                        <td class="p-2.5 border">Optimizar ventilación con BVM y considerar vía aérea avanzada.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2.5 border font-bold">Hidrogeniones (Acidosis)</td>
+                                        <td class="p-2.5 border">Prioridad: ventilación asistida efectiva. Bicarbonato 1-2 mEq/kg solo en acidosis metabólica severa documentada.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2.5 border font-bold">Hipoglicemia</td>
+                                        <td class="p-2.5 border">Glicemia &lt; 60 mg/dL &rarr; Dextrosa al 10% a 2-4 mL/kg en bolo.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2.5 border font-bold">Hipotermia</td>
+                                        <td class="p-2.5 border">Líquidos tibios y recalentamiento activo.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2.5 border font-bold">Neumotórax a Tensión</td>
+                                        <td class="p-2.5 border">Descompresión con Yelco N. 18 en 2do EIC línea medioclavicular.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2.5 border font-bold">Taponamiento Cardíaco</td>
+                                        <td class="p-2.5 border">POCUS (FAST) y pericardiocentesis evacuadora.</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2.5 border font-bold">Tóxicos (Opioides)</td>
+                                        <td class="p-2.5 border">Naloxona 0.1 mg/kg IV-IO (máx 2 mg).</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="p-2.5 border font-bold">Trombosis (TEP / IAM)</td>
+                                        <td class="p-2.5 border">Evaluar factores de riesgo y trombolíticos/heparina según caso.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Modal -->
+            <div class="bg-gray-100 px-5 py-2.5 border-t flex justify-between items-center text-xs text-gray-500">
+                <span>Directrices de Reanimación Pediátrica - Hospital Pablo Tobón Uribe</span>
+                <button onclick="closeModal('modal-ayudas')" class="px-4 py-1.5 bg-blue-700 hover:bg-blue-800 text-white rounded font-bold">Cerrar Ayuda</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: ASIGNACIÓN DE ROLES (LISTA ÚNICA) -->
+    <div id="modal-roles" class="fixed inset-0 bg-black bg-opacity-60 hidden z-50 flex justify-center items-center">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-[540px] max-w-full max-h-[90vh] overflow-y-auto">
+            <h3 class="font-bold text-lg mb-2 text-blue-800"><i class="fas fa-users-cog mr-2"></i>Asignación de Roles del Equipo</h3>
+            <p class="text-xs text-gray-600 mb-4">Selecciona los roles que asignarás a los miembros del equipo que acaban de llegar con el carro de paros:</p>
+            
+            <div class="space-y-2 text-sm">
+                <label class="flex items-start p-2 border rounded hover:bg-gray-50 cursor-pointer">
+                    <input type="checkbox" id="role-compresor" class="mt-1 mr-3 h-4 w-4 text-blue-600 rounded">
+                    <div>
+                        <span class="font-bold text-gray-800">🫀 Compresor (Masaje Cardíaco)</span>
+                        <p class="text-xs text-gray-500">Compresiones de alta calidad sobre tabla rígida y relevo cada 2 min.</p>
+                    </div>
+                </label>
+
+                <label class="flex items-start p-2 border rounded hover:bg-gray-50 cursor-pointer">
+                    <input type="checkbox" id="role-patinador" class="mt-1 mr-3 h-4 w-4 text-blue-600 rounded">
+                    <div>
+                        <span class="font-bold text-gray-800">🏃 Patinador</span>
+                        <p class="text-xs text-gray-500">Ir a la farmacia o a traer insumos que se necesiten.</p>
+                    </div>
+                </label>
+
+                <label class="flex items-start p-2 border rounded hover:bg-gray-50 cursor-pointer">
+                    <input type="checkbox" id="role-viaaerea" class="mt-1 mr-3 h-4 w-4 text-blue-600 rounded">
+                    <div>
+                        <span class="font-bold text-gray-800">🫁 Vía Aérea y Ventilación</span>
+                        <p class="text-xs text-gray-500">Manejo de BVM con O2, aspiración y asistencia en intubación.</p>
+                    </div>
+                </label>
+
+                <label class="flex items-start p-2 border rounded hover:bg-gray-50 cursor-pointer">
+                    <input type="checkbox" id="role-ayudascog" class="mt-1 mr-3 h-4 w-4 text-blue-600 rounded">
+                    <div>
+                        <span class="font-bold text-gray-800">📖 Ayudas Cognitivas</span>
+                        <p class="text-xs text-gray-500">Encargado de sostener y leer las tarjetas de algoritmos de paro.</p>
+                    </div>
+                </label>
+
+                <label class="flex items-start p-2 border rounded hover:bg-gray-50 cursor-pointer">
+                    <input type="checkbox" id="role-desfib" class="mt-1 mr-3 h-4 w-4 text-blue-600 rounded">
+                    <div>
+                        <span class="font-bold text-gray-800">🖥️ Monitor / Desfibrilador</span>
+                        <p class="text-xs text-gray-500">Instala parches, opera el desfibrilador y administra descargas.</p>
+                    </div>
+                </label>
+
+                <label class="flex items-start p-2 border rounded hover:bg-gray-50 cursor-pointer">
+                    <input type="checkbox" id="role-pulso" class="mt-1 mr-3 h-4 w-4 text-blue-600 rounded">
+                    <div>
+                        <span class="font-bold text-gray-800">🖐️ Verificador de Pulso</span>
+                        <p class="text-xs text-gray-500">Persona palpando el pulso carotídeo tras terminar cada ciclo de compresiones.</p>
+                    </div>
+                </label>
+
+                <label class="flex items-start p-2 border rounded hover:bg-gray-50 cursor-pointer">
+                    <input type="checkbox" id="role-meds" class="mt-1 mr-3 h-4 w-4 text-blue-600 rounded">
+                    <div>
+                        <span class="font-bold text-gray-800">💉 Medicamentos y Accesos Vasculares</span>
+                        <p class="text-xs text-gray-500">Garantiza acceso venoso/IO, prepara y administra fármacos y bolos.</p>
+                    </div>
+                </label>
+
+                <label class="flex items-start p-2 border rounded hover:bg-gray-50 cursor-pointer">
+                    <input type="checkbox" id="role-familia" class="mt-1 mr-3 h-4 w-4 text-blue-600 rounded">
+                    <div>
+                        <span class="font-bold text-gray-800">👨‍👩‍👦 Acompañamiento a la Familia</span>
+                        <p class="text-xs text-gray-500">Facilitador familiar para brindar soporte continuo y explicar la situación.</p>
+                    </div>
+                </label>
+
+                <label class="flex items-start p-2 border rounded hover:bg-gray-50 cursor-pointer">
+                    <input type="checkbox" id="role-registrador" class="mt-1 mr-3 h-4 w-4 text-blue-600 rounded">
+                    <div>
+                        <span class="font-bold text-gray-800">📋 Registro / Tiempo</span>
+                        <p class="text-xs text-gray-500">Lleva el tiempo de ciclos (2 min), registro de dosis y avisa próximos eventos.</p>
+                    </div>
+                </label>
+            </div>
+
+            <div class="flex justify-end gap-2 mt-4 pt-3 border-t">
+                <button onclick="closeModal('modal-roles')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded text-sm">Cancelar</button>
+                <button onclick="submitRoles()" class="px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded font-bold text-sm">Confirmar Roles</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: SELECCIÓN DE VOLUMEN DE ADRENALINA -->
+    <div id="modal-adrenalina" class="fixed bottom-6 right-6 md:right-12 hidden z-40 w-[420px] max-w-full">
+        <div class="bg-white border-2 border-purple-500 p-5 rounded-xl shadow-2xl">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="font-bold text-base text-purple-900 flex items-center">
+                    <i class="fas fa-syringe mr-2 text-purple-600"></i>Dilución Adrenalina
+                </h3>
+            </div>
+            <p class="text-xs text-gray-700 font-medium mb-3 leading-relaxed">
+                Para 20 kg, ¿cuánto volumen de la mezcla de una ampolla de adrenalina llevada a 10 mL de SSN debe administrar?
+            </p>
+            
+            <div class="space-y-2 text-xs mb-3">
+                <label class="flex items-center p-2.5 border border-gray-200 rounded hover:bg-purple-50 cursor-pointer transition-colors">
+                    <input type="radio" name="adrenalina-vol" value="0.2" class="mr-2.5 text-purple-600">
+                    <span class="font-bold text-gray-800 text-sm">0.2 mL</span>
+                </label>
+                <label class="flex items-center p-2.5 border border-gray-200 rounded hover:bg-purple-50 cursor-pointer transition-colors">
+                    <input type="radio" name="adrenalina-vol" value="1" class="mr-2.5 text-purple-600">
+                    <span class="font-bold text-gray-800 text-sm">1.0 mL</span>
+                </label>
+                <label class="flex items-center p-2.5 border border-gray-200 rounded hover:bg-purple-50 cursor-pointer transition-colors">
+                    <input type="radio" name="adrenalina-vol" value="2" class="mr-2.5 text-purple-600">
+                    <span class="font-bold text-gray-800 text-sm">2.0 mL</span>
+                </label>
+                <label class="flex items-center p-2.5 border border-gray-200 rounded hover:bg-purple-50 cursor-pointer transition-colors">
+                    <input type="radio" name="adrenalina-vol" value="20" class="mr-2.5 text-purple-600">
+                    <span class="font-bold text-gray-800 text-sm">20.0 mL</span>
+                </label>
+            </div>
+
+            <div class="flex justify-end gap-2">
+                <button onclick="closeModal('modal-adrenalina')" class="px-3 py-1.5 text-gray-500 hover:bg-gray-100 rounded text-xs font-medium">Cancelar</button>
+                <button onclick="submitAdrenalinaVol()" class="px-4 py-1.5 bg-purple-700 hover:bg-purple-800 text-white rounded font-bold text-xs shadow">Confirmar Dosis</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: IDENTIFICACIÓN DEL RITMO (DISEÑO FLOTANTE) -->
+    <div id="modal-ritmo" class="fixed bottom-6 right-6 md:right-12 hidden z-40 w-96 max-w-full">
+        <div class="bg-white border-2 border-yellow-500 p-5 rounded-xl shadow-2xl">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="font-bold text-base text-yellow-800 flex items-center">
+                    <i class="fas fa-heartbeat mr-2 text-yellow-600 animate-pulse"></i>Identificación del Ritmo
+                </h3>
+                <span class="text-[10px] bg-yellow-100 text-yellow-800 font-bold px-2 py-0.5 rounded">Observa el osciloscopio</span>
+            </div>
+            <p class="text-xs text-gray-600 mb-3">Con base en el trazado que observa arriba, seleccione el ritmo:</p>
+            
+            <div class="space-y-2 text-xs mb-3">
+                <label class="flex items-center p-2 border border-gray-200 rounded hover:bg-yellow-50 cursor-pointer transition-colors">
+                    <input type="radio" name="ritmo-eval" value="FV" class="mr-2 text-yellow-600">
+                    <span class="font-bold text-gray-800">Fibrilación Ventricular (FV)</span>
+                </label>
+                <label class="flex items-center p-2 border border-gray-200 rounded hover:bg-yellow-50 cursor-pointer transition-colors">
+                    <input type="radio" name="ritmo-eval" value="TVSP" class="mr-2 text-yellow-600">
+                    <span class="font-bold text-gray-800">Taquicardia Ventricular Sin Pulso (TVSP)</span>
+                </label>
+                <label class="flex items-center p-2 border border-gray-200 rounded hover:bg-yellow-50 cursor-pointer transition-colors">
+                    <input type="radio" name="ritmo-eval" value="AESP" class="mr-2 text-yellow-600">
+                    <span class="font-bold text-gray-800">Actividad Eléctrica Sin Pulso (AESP)</span>
+                </label>
+                <label class="flex items-center p-2 border border-gray-200 rounded hover:bg-yellow-50 cursor-pointer transition-colors">
+                    <input type="radio" name="ritmo-eval" value="ASISTOLIA" class="mr-2 text-yellow-600">
+                    <span class="font-bold text-gray-800">Asistolia</span>
+                </label>
+                <label class="flex items-center p-2 border border-gray-200 rounded hover:bg-yellow-50 cursor-pointer transition-colors">
+                    <input type="radio" name="ritmo-eval" value="SINUS" class="mr-2 text-yellow-600">
+                    <span class="font-bold text-gray-800">Ritmo Organizado / Sinusal</span>
+                </label>
+            </div>
+
+            <div class="flex justify-end gap-2">
+                <button onclick="closeModal('modal-ritmo')" class="px-3 py-1 text-gray-500 hover:bg-gray-100 rounded text-xs">Minimizar</button>
+                <button onclick="submitRitmo()" class="px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 text-white rounded font-bold text-xs shadow">Confirmar Diagnóstico</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: PARÁMETROS DE RCP -->
+    <div id="modal-rcp" class="fixed inset-0 bg-black bg-opacity-60 hidden z-50 flex justify-center items-center">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-96 max-w-full">
+            <h3 class="font-bold text-lg mb-4 text-red-700"><i class="fas fa-heartbeat mr-2"></i>Parámetros de Compresiones</h3>
+            <div class="mb-3">
+                <label class="block text-sm font-bold text-gray-700 mb-1">Frecuencia de compresiones:</label>
+                <select id="rcp-freq" class="w-full border rounded p-2 bg-gray-50 text-sm">
+                    <option value="80-100">80 a 100 por minuto</option>
+                    <option value="100-120">100 a 120 por minuto</option>
+                    <option value="120-140">120 a 140 por minuto</option>
+                    <option value=">140">Más de 140 por minuto</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-gray-700 mb-1">Profundidad de compresiones:</label>
+                <select id="rcp-depth" class="w-full border rounded p-2 bg-gray-50 text-sm">
+                    <option value="<1/3">Menos de 1/3 del diámetro anteroposterior del tórax</option>
+                    <option value="1/3-1/2">1/3 a 1/2 del diámetro anteroposterior (~5 cm) con reexpansión completa</option>
+                    <option value=">1/2">Más de 1/2 del diámetro anteroposterior del tórax</option>
+                </select>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button onclick="closeModal('modal-rcp')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded text-sm">Cancelar</button>
+                <button onclick="submitRCP()" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-bold text-sm">Indicar Parámetros e Iniciar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: VÍA AÉREA -->
+    <div id="modal-via-aerea" class="fixed inset-0 bg-black bg-opacity-60 hidden z-50 flex justify-center items-center">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-96 max-w-full">
+            <h3 class="font-bold text-lg mb-4 text-blue-700"><i class="fas fa-lungs mr-2"></i>Parámetros de Intubación</h3>
+            <div class="mb-3">
+                <label class="block text-sm font-bold text-gray-700 mb-1">Número de Tubo Orotraqueal:</label>
+                <select id="tubo-size" class="w-full border rounded p-2 bg-gray-50 text-sm">
+                    <option value="4.0">Tubo # 4.0</option>
+                    <option value="4.5">Tubo # 4.5</option>
+                    <option value="5.0">Tubo # 5.0</option>
+                    <option value="5.5">Tubo # 5.5</option>
+                    <option value="6.0">Tubo # 6.0</option>
+                    <option value="7.0">Tubo # 7.0</option>
+                </select>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-bold text-gray-700 mb-1">Método de confirmación y monitorización:</label>
+                <select id="tubo-conf" class="w-full border rounded p-2 bg-gray-50 text-sm">
+                    <option value="auscultacion">Únicamente auscultación y expansión torácica</option>
+                    <option value="etco2">Capnógrafo cuantitativo continuo (ETCO2) / detector colorimétrico</option>
+                </select>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button onclick="closeModal('modal-via-aerea')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded text-sm">Cancelar</button>
+                <button onclick="submitIntubacion()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-sm">Proceder a Intubar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CUIDADOS POSPARO -->
+    <div id="modal-posparo" class="fixed inset-0 bg-black bg-opacity-70 hidden z-50 flex justify-center items-center">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-[500px] max-w-full">
+            <h3 class="font-bold text-lg mb-2 text-green-800"><i class="fas fa-clipboard-check mr-2"></i>Lista de Chequeo: Cuidados Posparo</h3>
+            <p class="text-xs text-gray-600 mb-4">Seleccione las indicaciones inmediatas para el manejo post reanimación (RCE):</p>
+            
+            <div class="space-y-2 text-sm max-h-[60vh] overflow-y-auto pr-2">
+                <label class="flex items-start p-2 border rounded hover:bg-green-50 cursor-pointer">
+                    <input type="checkbox" id="pos-via" class="mt-1 mr-3 h-4 w-4 text-green-600 rounded">
+                    <div>
+                        <span class="font-bold text-gray-800">Optimizar Vía Aérea y Ventilación</span>
+                        <p class="text-xs text-gray-500">Mantener SatO2 94-99% y normocapnia (PaCO2 35-45). Evitar hiperventilación.</p>
+                    </div>
+                </label>
+                <label class="flex items-start p-2 border rounded hover:bg-green-50 cursor-pointer">
+                    <input type="checkbox" id="pos-oxigeno" class="mt-1 mr-3 h-4 w-4 text-red-600 rounded">
+                    <div>
+                        <span class="font-bold text-gray-800">Colocar Oxígeno al 100% permanente</span>
+                        <p class="text-xs text-gray-500">Mantener FiO2 al 100% indiscriminadamente para maximizar oxigenación.</p>
+                    </div>
+                </label>
+                <label class="flex items-start p-2 border rounded hover:bg-green-50 cursor-pointer">
+                    <input type="checkbox" id="pos-hemo" class="mt-1 mr-3 h-4 w-4 text-green-600 rounded">
+                    <div>
+                        <span class="font-bold text-gray-800">Soporte Hemodinámico</span>
+                        <p class="text-xs text-gray-500">Administrar bolos de líquidos y vasoactivos para mantener PAS ≥ percentil 10 para la edad.</p>
+                    </div>
+                </label>
+                <label class="flex items-start p-2 border rounded hover:bg-green-50 cursor-pointer">
+                    <input type="checkbox" id="pos-neuro" class="mt-1 mr-3 h-4 w-4 text-green-600 rounded">
+                    <div>
+                        <span class="font-bold text-gray-800">Neuroprotección y Temperatura</span>
+                        <p class="text-xs text-gray-500">Control selectivo de temperatura (32-36°C) y control de convulsiones.</p>
+                    </div>
+                </label>
+                <label class="flex items-start p-2 border rounded hover:bg-green-50 cursor-pointer">
+                    <input type="checkbox" id="pos-rm" class="mt-1 mr-3 h-4 w-4 text-red-600 rounded">
+                    <div>
+                        <span class="font-bold text-gray-800">Solicitar Resonancia Magnética Inmediata</span>
+                        <p class="text-xs text-gray-500">Traslado urgente a RM para evaluar daño hipóxico-isquémico.</p>
+                    </div>
+                </label>
+                <label class="flex items-start p-2 border rounded hover:bg-green-50 cursor-pointer">
+                    <input type="checkbox" id="pos-causas" class="mt-1 mr-3 h-4 w-4 text-green-600 rounded">
+                    <div>
+                        <span class="font-bold text-gray-800">Reevaluar Hs y Ts</span>
+                        <p class="text-xs text-gray-500">Tratar causas reversibles persistentes (ej. hipercalemia/acidosis).</p>
+                    </div>
+                </label>
+            </div>
+            <div class="flex justify-end gap-2 mt-4 pt-3 border-t">
+                <button onclick="closeModal('modal-posparo')" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded text-sm">Cancelar</button>
+                <button onclick="submitPosparo()" class="px-4 py-2 bg-green-700 hover:bg-green-800 text-white rounded font-bold text-sm">Confirmar Órdenes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div class="max-w-6xl mx-auto bg-white shadow-2xl rounded-xl overflow-hidden flex flex-col h-[92vh]">
+        
+        <!-- Header con Botón de Ayuda Cognitiva Altamente Visible -->
+        <div class="bg-blue-900 text-white p-3 flex justify-between items-center shadow-md z-30 relative">
+            <div class="flex items-center space-x-3">
+                <h1 class="text-xl font-bold"><i class="fas fa-hospital-user mr-2"></i> Sala de Reanimación - HPTU</h1>
+                <span class="text-xs bg-blue-800 px-3 py-1 rounded hidden md:inline">Augusto | 7 años | 20 kg</span>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <button onclick="consultarAyudaCognitiva()" class="bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-blue-950 font-extrabold px-3.5 py-1.5 rounded-lg shadow-lg text-xs flex items-center btn-ayuda-glow border-2 border-yellow-200 transition-all cursor-pointer">
+                    <i class="fas fa-book-medical mr-2 text-base text-blue-950"></i> 
+                    <span class="tracking-wide uppercase">Ayudas Cognitivas (HPTU)</span>
+                </button>
+
+                <div class="bg-black bg-opacity-40 px-3 py-1 rounded border border-blue-400 flex items-center">
+                    <i class="fas fa-stopwatch text-yellow-400 mr-2 text-base animate-pulse"></i>
+                    <span class="text-xs text-gray-300 mr-2">TIEMPO:</span>
+                    <span class="font-mono text-base font-bold text-yellow-300" id="timer-display">00:00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monitor Vital -->
+        <div class="bg-black text-green-400 p-4 flex flex-col md:flex-row justify-between items-center monitor-text border-b-8 border-gray-800 relative z-30 shadow-inner">
+            <div class="absolute top-2 right-3 text-xs text-gray-500">CORPULS 3 / ZOLL X SERIES</div>
+            
+            <div class="w-full md:w-1/2 grid grid-cols-2 gap-3 pr-0 md:pr-4">
+                <div class="bg-gray-900 p-2 rounded border border-gray-700">
+                    <div class="text-xs text-gray-400">ESTADO MONITOR</div>
+                    <div class="text-base font-bold truncate text-green-400" id="val-rhythm">No conectado</div>
+                </div>
+                <div class="bg-gray-900 p-2 rounded border border-gray-700">
+                    <div class="text-xs text-green-500 font-bold">FC (lpm)</div>
+                    <div class="text-3xl font-bold text-green-400" id="val-hr">---</div>
+                </div>
+                <div class="bg-gray-900 p-2 rounded border border-gray-700">
+                    <div class="text-xs text-blue-400 font-bold">SpO2 (%)</div>
+                    <div class="text-3xl font-bold text-blue-400" id="val-spo2">---</div>
+                </div>
+                <div class="bg-gray-900 p-2 rounded border border-gray-700">
+                    <div class="text-xs text-yellow-400 font-bold">EtCO2 (mmHg)</div>
+                    <div class="text-3xl font-bold text-yellow-400" id="val-etco2">---</div>
+                </div>
+            </div>
+            
+            <!-- Osciloscopio ECG en Tiempo Real -->
+            <div class="w-full md:w-1/2 h-28 mt-3 md:mt-0 rounded border-2 border-green-800 relative overflow-hidden ecg-grid">
+                <canvas id="ecg-canvas" class="w-full h-full"></canvas>
+                <div class="absolute top-1 left-2 text-[10px] text-green-600 font-mono tracking-widest" id="lead-label">DERIVACIÓN II (1 mV / 25 mm/s)</div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="flex flex-col md:flex-row flex-1 overflow-hidden relative z-10">
+            
+            <!-- Logs / Chat Area con Time Stamps en Cada Mensaje -->
+            <div class="w-full md:w-3/5 p-4 bg-gray-50 border-r log-container" id="chat-box"></div>
+
+            <!-- Controls Panel -->
+            <div class="w-full md:w-2/5 p-4 bg-gray-100 overflow-y-auto border-l border-gray-300 shadow-inner" id="controls-panel">
+                <div class="flex justify-between items-center border-b pb-2 mb-3">
+                    <h2 class="font-bold text-gray-700"><i class="fas fa-clipboard-list mr-2"></i> Órdenes Clínicas</h2>
+                    <button onclick="consultarAyudaCognitiva()" class="text-xs text-amber-700 font-bold hover:underline flex items-center">
+                        <i class="fas fa-book-open mr-1"></i> Abrir Ayudas
+                    </button>
+                </div>
+                
+                <div class="mb-4">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase mb-2">Evaluación y Equipo</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="takeAction('verificar_pulso')" class="btn-cat-eval"><i class="fas fa-hand-holding-medical mr-1"></i> Comprobar Pulso y Respiración</button>
+                        <button onclick="takeAction('codigo_azul')" class="btn-cat-eval font-bold border-blue-500"><i class="fas fa-bullhorn mr-1"></i> Activar Código Azul (#90)</button>
+                        <button onclick="takeAction('tranquilizar_madre')" class="btn-cat-eval"><i class="fas fa-heart mr-1"></i> Tranquilizar a la Madre</button>
+                        <button onclick="openModal('modal-roles')" class="btn-cat-eval font-bold border-blue-500"><i class="fas fa-users-cog mr-1"></i> Asignar Roles de Equipo...</button>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase mb-2">Vía Aérea y Oxigenación</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="takeAction('oxigeno_mascara')" class="btn-cat-eval"><i class="fas fa-mask mr-1"></i> Máscara No Reinhalación</button>
+                        <button onclick="takeAction('oxigeno_venturi')" class="btn-cat-eval"><i class="fas fa-wind mr-1"></i> Sistema Venturi</button>
+                        <button onclick="takeAction('bvm')" class="btn-cat-rcp"><i class="fas fa-lungs mr-1"></i> Ventilar BVM (15:2 con O2)</button>
+                        <button onclick="openModal('modal-via-aerea')" class="btn-cat-rcp"><i class="fas fa-tube mr-1"></i> Intubación Orotraqueal...</button>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase mb-2">Compresiones Torácicas</h3>
+                    <div class="grid grid-cols-1 gap-2">
+                        <button onclick="openModal('modal-rcp')" class="btn-cat-rcp font-bold border-red-500"><i class="fas fa-hands-bubbles mr-1"></i> Iniciar / Reanudar Compresiones...</button>
+                        <button onclick="takeAction('esperar_2_minutos')" class="btn-cat-rcp font-bold text-red-900 border-red-400 bg-red-100 hover:bg-red-200"><i class="fas fa-hourglass-half mr-1 text-red-700"></i> Esperar a cumplir los 2 minutos del ciclo</button>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase mb-2">Monitor / Desfibrilador</h3>
+                    <div class="grid grid-cols-2 gap-2 mb-2">
+                        <button onclick="takeAction('conectar_monitor')" class="btn-cat-defib font-bold"><i class="fas fa-plug mr-1"></i> Conectar Palas / Parches</button>
+                        <button onclick="openModal('modal-ritmo')" class="btn-cat-defib font-bold border-yellow-500"><i class="fas fa-heartbeat mr-1"></i> Identificar Ritmo de Paro...</button>
+                    </div>
+                    
+                    <div class="bg-yellow-50 border border-yellow-400 p-3 rounded mt-2 shadow-sm">
+                        <label class="text-xs font-bold text-yellow-800 block mb-2"><i class="fas fa-sliders-h mr-1"></i> Perilla de Energía (Joules)</label>
+                        <div class="flex items-center gap-3">
+                            <input type="range" id="energy-dial" min="10" max="200" step="10" value="10" class="flex-1" oninput="document.getElementById('energy-val').innerText = this.value + ' J'">
+                            <span id="energy-val" class="font-bold text-xl text-yellow-800 w-16 text-right">10 J</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 mt-3">
+                            <button onclick="cargarDefibrilador()" class="bg-yellow-400 hover:bg-yellow-500 text-yellow-900 py-2 rounded text-sm font-bold shadow transition-colors"><i class="fas fa-battery-half mr-1"></i> Cargar</button>
+                            <button onclick="takeAction('descargar')" class="bg-red-600 hover:bg-red-700 text-white py-2 rounded text-sm font-bold shadow transition-colors animate-pulse"><i class="fas fa-bolt mr-1"></i> ¡DESCARGAR!</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Medicamentos: Estandarización Adrenalina HPTU -->
+                <div class="mb-4 mt-4">
+                    <h3 class="text-xs font-bold text-gray-500 uppercase mb-2">Medicamentos</h3>
+                    <div class="grid grid-cols-1 gap-2">
+                        <button onclick="takeAction('adrenalina_ampolla_directa')" class="btn-cat-meds"><i class="fas fa-syringe mr-1"></i> Administrar 1 ampolla de Adrenalina</button>
+                        <button onclick="openModal('modal-adrenalina')" class="btn-cat-meds"><i class="fas fa-vial mr-1"></i> Administrar dilución de adrenalina...</button>
+                        <button onclick="takeAction('amiodarona')" class="btn-cat-meds"><i class="fas fa-vial mr-1"></i> Amiodarona: 100 mg (5 mg/kg)</button>
+                        <button onclick="takeAction('lidocaina')" class="btn-cat-meds"><i class="fas fa-vial mr-1"></i> Lidocaína: 20 mg (1 mg/kg)</button>
+                        <button onclick="takeAction('calcio_bicarbonato')" class="btn-cat-meds"><i class="fas fa-flask mr-1"></i> Gluconato de Calcio + Bicarbonato</button>
+                    </div>
+                </div>
+
+                <div class="mb-4 hidden" id="posparo-container">
+                    <h3 class="text-xs font-bold text-green-600 uppercase mb-2">Cuidados Posparo</h3>
+                    <button onclick="openModal('modal-posparo')" class="w-full bg-green-100 hover:bg-green-200 border-2 border-green-500 text-green-900 font-bold py-2 px-3 rounded text-sm text-left shadow-sm animate-pulse">
+                        <i class="fas fa-heartbeat mr-1"></i> Iniciar Cuidados Post Reanimación...
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Contenedor Final de Debriefing -->
+            <div class="w-full md:w-2/5 p-4 bg-gray-100 overflow-y-auto border-l border-gray-300 shadow-inner hidden" id="debriefing-panel">
+                <h2 class="font-bold text-2xl text-gray-800 mb-4 border-b-2 border-green-500 pb-2"><i class="fas fa-clipboard-check mr-2"></i> Resumen de Simulación</h2>
+                <div class="bg-white p-4 rounded shadow-sm mb-4 text-sm" id="debrief-metrics"></div>
+                
+                <button id="btn-ia-debrief" onclick="iniciarDebriefingIA()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-bold shadow-lg text-base flex items-center justify-center transition-colors">
+                    <i class="fas fa-robot mr-2"></i> Iniciar Debriefing Avanzado con IA (ORDEN)
+                </button>
+
+                <div id="ai-loading" class="hidden my-4 p-4 bg-indigo-50 border border-indigo-200 rounded-lg text-center">
+                    <i class="fas fa-spinner fa-spin text-indigo-600 text-2xl mb-2"></i>
+                    <p class="text-xs font-semibold text-indigo-800">Analizando desempeño clínico con guías AHA 2025 y Protocolo HPTU...</p>
+                </div>
+
+                <div id="ai-debrief-result" class="hidden mt-4 p-4 bg-white border border-gray-200 rounded-lg shadow-sm text-sm text-gray-800 leading-relaxed overflow-x-auto prose prose-sm max-w-none"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- ESTADO GLOBAL ---
+        let state = {
+            fase: 0,
+            omisiones: 0,
+            parchesConectados: false,
+            energiaCargada: 0,
+            ritmoECG: 'OFF',
+            ritmoIdentificado: false,
+            rcpEnCurso: false,
+            esperandoReanudacionRCP: false,
+            descargasDadas: 0,
+            adrenalinaDada: false,
+            calcioDado: false,
+            amiodaronaDada: false,
+            tuboColocado: false,
+            rolesAsignados: [],
+            rolesInnecesarios: [],
+            consultoAyudasCognitivas: false,
+            logDeAcciones: [],
+            timerSegundos: 0,
+            timerActivo: false,
+            rcpInicioTiempo: null,
+            adrenalinaTiempo: null
+        };
+
+        const chatBox = document.getElementById('chat-box');
+
+        function formatTimer(s) {
+            const min = Math.floor(s / 60).toString().padStart(2, '0');
+            const sec = (s % 60).toString().padStart(2, '0');
+            return `${min}:${sec}`;
+        }
+
+        setInterval(() => {
+            if (state.timerActivo) {
+                state.timerSegundos++;
+                document.getElementById('timer-display').innerText = formatTimer(state.timerSegundos);
+
+                // Notificaciones de RCP
+                if (state.rcpEnCurso && state.rcpInicioTiempo !== null) {
+                    let transcurridoRCP = state.timerSegundos - state.rcpInicioTiempo;
+                    if (transcurridoRCP === 60) {
+                        printRegistro('Va 1 minuto de este ciclo de las compresiones.');
+                    } else if (transcurridoRCP === 110) {
+                        printRegistro('Faltan 10 segundos para acabar este ciclo.');
+                    } else if (transcurridoRCP === 120) {
+                        printRegistro('Tiempo cumplido: 2 minutos de este ciclo de RCP. Sugiero reevaluar el ritmo.');
+                        state.rcpEnCurso = false; // Se suspende el conteo automático de RCP para que el líder decida
+                        state.rcpInicioTiempo = null;
+                        if (state.descargasDadas >= 3) {
+                            state.ritmoECG = 'SINUS';
+                            updateMonitor({ rhythm: 'Trazado Activo' });
+                        }
+                    }
+                }
+
+                // Notificaciones de Adrenalina
+                if (state.adrenalinaTiempo !== null) {
+                    let transcurridoAdr = state.timerSegundos - state.adrenalinaTiempo;
+                    if (transcurridoAdr === 150) {
+                        printRegistro('Faltan 30 segundos para cumplir los 3 minutos de la ultima dosis de adrenalina.');
+                    } else if (transcurridoAdr === 180) {
+                        printRegistro('Ya pasaron 3 minutos desde la ultima dosis de adrenalina. ¿Ordena nueva dosis?');
+                        state.adrenalinaTiempo = null; // Reiniciar el aviso de adrenalina para este ciclo
+                    }
+                }
+            }
+        }, 1000);
+
+        function iniciarTimer() {
+            if (!state.timerActivo) state.timerActivo = true;
+        }
+
+        function consultarAyudaCognitiva() {
+            state.consultoAyudasCognitivas = true;
+            openModal('modal-ayudas');
+        }
+
+        function switchAyudaTab(tab) {
+            const btnAlg = document.getElementById('tab-btn-algoritmo');
+            const btnCau = document.getElementById('tab-btn-causas');
+            const conAlg = document.getElementById('tab-content-algoritmo');
+            const conCau = document.getElementById('tab-content-causas');
+
+            if (tab === 'algoritmo') {
+                btnAlg.className = "py-2.5 px-5 bg-white border-t-2 border-blue-600 text-blue-900 rounded-t shadow-sm font-bold";
+                btnCau.className = "py-2.5 px-5 bg-gray-200 text-gray-600 hover:bg-gray-50 rounded-t font-bold";
+                conAlg.classList.remove('hidden');
+                conCau.classList.add('hidden');
+            } else {
+                btnCau.className = "py-2.5 px-5 bg-white border-t-2 border-blue-600 text-blue-900 rounded-t shadow-sm font-bold";
+                btnAlg.className = "py-2.5 px-5 bg-gray-200 text-gray-600 hover:bg-gray-50 rounded-t font-bold";
+                conCau.classList.remove('hidden');
+                conAlg.classList.add('hidden');
+            }
+        }
+
+        const canvas = document.getElementById('ecg-canvas');
+        const ctx = canvas.getContext('2d');
+        let scanX = 0;
+        const scanSpeed = 2.5;
+
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            ctx.fillStyle = '#050b05';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function getEcgY(x, type, height) {
+            const mid = height / 2;
+            if (type === 'OFF') return mid + (Math.random() - 0.5) * 1.5;
+            if (type === 'VF') {
+                const t = x * 0.12;
+                return mid + Math.sin(t) * 22 + Math.sin(t * 2.3 + 1.2) * 14 + Math.sin(t * 4.7) * 8 + (Math.random() - 0.5) * 6;
+            }
+            if (type === 'SINUS') {
+                const cycle = (x % 90);
+                if (cycle > 10 && cycle < 20) return mid - Math.sin((cycle - 10) * Math.PI / 10) * 6;
+                if (cycle >= 28 && cycle < 32) return mid + 4;
+                if (cycle >= 32 && cycle < 38) return mid - 38;
+                if (cycle >= 38 && cycle < 42) return mid + 10;
+                if (cycle > 50 && cycle < 70) return mid - Math.sin((cycle - 50) * Math.PI / 20) * 10;
+                return mid + (Math.random() - 0.5) * 1.2;
+            }
+            return mid;
+        }
+
+        let prevY = canvas.height / 2;
+
+        function drawEcg() {
+            const h = canvas.height;
+            const w = canvas.width;
+
+            ctx.fillStyle = 'rgba(5, 11, 5, 0.15)';
+            ctx.fillRect(scanX, 0, 12, h);
+
+            const nextX = scanX + scanSpeed;
+            const curY = getEcgY(scanX, state.ritmoECG, h);
+
+            ctx.beginPath();
+            ctx.strokeStyle = '#22c55e';
+            ctx.lineWidth = 2.2;
+            ctx.shadowBlur = 6;
+            ctx.shadowColor = '#4ade80';
+            ctx.moveTo(scanX, prevY);
+            ctx.lineTo(nextX, curY);
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            prevY = curY;
+            scanX = nextX;
+            if (scanX >= w) scanX = 0;
+
+            requestAnimationFrame(drawEcg);
+        }
+        drawEcg();
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function submitRoles() {
+            closeModal('modal-roles');
+            const esenciales = [];
+            const innecesarios = [];
+
+            if (document.getElementById('role-compresor').checked) esenciales.push("Compresor");
+            if (document.getElementById('role-viaaerea').checked) esenciales.push("Vía Aérea");
+            if (document.getElementById('role-desfib').checked) esenciales.push("Monitor/Desfibrilador");
+            if (document.getElementById('role-meds').checked) esenciales.push("Medicamentos");
+            if (document.getElementById('role-registrador').checked) esenciales.push("Registro / Tiempo");
+            if (document.getElementById('role-familia').checked) esenciales.push("Acompañamiento a la familia");
+
+            if (document.getElementById('role-patinador').checked) innecesarios.push("Patinador a farmacia");
+            if (document.getElementById('role-ayudascog').checked) innecesarios.push("Ayudas Cognitivas");
+            if (document.getElementById('role-pulso').checked) innecesarios.push("Verificador de Pulso");
+
+            takeAction('asignar_roles_custom', { esenciales, innecesarios });
+        }
+
+        function submitAdrenalinaVol() {
+            closeModal('modal-adrenalina');
+            const radios = document.getElementsByName('adrenalina-vol');
+            let selected = null;
+            for (let r of radios) {
+                if (r.checked) { selected = r.value; break; }
+            }
+            if (selected) {
+                takeAction('adrenalina_diluida_submit', selected);
+            }
+        }
+
+        function submitRitmo() {
+            closeModal('modal-ritmo');
+            const radios = document.getElementsByName('ritmo-eval');
+            let selected = null;
+            for (let r of radios) {
+                if (r.checked) { selected = r.value; break; }
+            }
+            if (selected) {
+                takeAction('identificar_ritmo_submit', selected);
+            }
+        }
+
+        function submitRCP() {
+            closeModal('modal-rcp');
+            const freq = document.getElementById('rcp-freq').value;
+            const depth = document.getElementById('rcp-depth').value;
+            takeAction('iniciar_rcp_params', { freq, depth });
+        }
+        
+        function submitIntubacion() {
+            closeModal('modal-via-aerea');
+            const size = document.getElementById('tubo-size').value;
+            const conf = document.getElementById('tubo-conf').value;
+            takeAction('intubar_params', { size, conf });
+        }
+
+        function submitPosparo() {
+            closeModal('modal-posparo');
+            const distractores = [];
+            const adecuados = [];
+            if (document.getElementById('pos-oxigeno').checked) distractores.push("Oxígeno al 100% permanente");
+            if (document.getElementById('pos-rm').checked) distractores.push("RM Cerebral Inmediata");
+            if (document.getElementById('pos-via').checked) adecuados.push("Optimizar Vía Aérea");
+            if (document.getElementById('pos-hemo').checked) adecuados.push("Soporte Hemodinámico");
+            if (document.getElementById('pos-neuro').checked) adecuados.push("Neuroprotección");
+            if (document.getElementById('pos-causas').checked) adecuados.push("Reevaluar Hs y Ts");
+            
+            takeAction('cuidados_posparo_submit', { distractores, adecuados });
+        }
+
+        // --- SISTEMA DE MENSAJES CON CRONÓMETRO DIGITAL INCORPORADO ---
+        function printMsg(senderIcon, roleName, text, styleClass) {
+            const timeStr = formatTimer(state.timerSegundos);
+            const div = document.createElement('div');
+            div.className = `p-3 my-2.5 shadow-sm text-sm chat-bubble ${styleClass}`;
+            div.innerHTML = `
+                <div class="font-bold flex items-center justify-between mb-1.5 text-xs uppercase tracking-wider border-b border-black border-opacity-10 pb-1">
+                    <div class="flex items-center">
+                        <span class="mr-1.5 text-base">${senderIcon}</span> <span>${roleName}</span>
+                    </div>
+                    <span class="font-mono text-[11px] bg-white bg-opacity-90 px-2 py-0.5 rounded border border-gray-300 text-gray-700 font-bold shadow-xs flex items-center">
+                        <i class="fas fa-stopwatch mr-1 text-yellow-600"></i> ${timeStr}
+                    </span>
+                </div>
+                <div class="text-gray-800 leading-relaxed">${text}</div>
+            `;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            state.logDeAcciones.push({ roleName, text, time: timeStr });
+        }
+
+        function printLeader(text) { printMsg('🩺', 'Tú (Líder del Código)', text, 'msg-lider'); }
+        function printCompresor(text) { printMsg('🫀', 'Compresor', text, 'msg-compresor'); }
+        function printViaAerea(text) { printMsg('🫁', 'Vía Aérea', text, 'msg-viaaerea'); }
+        function printDesfib(text) { printMsg('🖥️', 'Monitor / Desfibrilador', text, 'msg-desfib'); }
+        function printMeds(text) { printMsg('💉', 'Medicamentos', text, 'msg-meds'); }
+        function printRegistro(text) { printMsg('📋', 'Registro / Tiempo', text, 'msg-registro'); }
+        function printFamilia(text) { printMsg('👨‍👩‍👦', 'Acompañamiento a la Familia', text, 'msg-familia'); }
+        function printAlert(text) { printMsg('⚠️', 'Ayuda Cognitiva (Rescate)', text, 'msg-alerta'); }
+        function printSystem(text) { printMsg('🏥', 'Contexto Clínico / Laboratorio', text, 'msg-sistema'); }
+
+        // Mensaje inicial con tiempo 00:00
+        printSystem("Ingresas al cubículo de urgencias. Augusto (7 años, 20 kg) tiene antecedente de Enfermedad Renal Crónica. La madre refiere que la diálisis peritoneal ha estado disfuncional en los últimos días y le acababan de tomar unos exámenes de control. Repentinamente, la madre grita angustiada: '¡Doctor, mi hijo no me responde!'. Ves a Augusto flácido, cianótico y en apnea. ¿Cuál es tu primera acción?");
+
+        function updateMonitor(params) {
+            if(params.rhythm) document.getElementById('val-rhythm').innerText = params.rhythm;
+            if(params.hr) document.getElementById('val-hr').innerText = params.hr;
+            if(params.spo2) document.getElementById('val-spo2').innerText = params.spo2;
+            if(params.etco2) document.getElementById('val-etco2').innerText = params.etco2;
+            if(params.alarm) document.getElementById('val-rhythm').classList.add('alarm-blink', 'text-yellow-400');
+            else document.getElementById('val-rhythm').classList.remove('alarm-blink', 'text-yellow-400');
+        }
+
+        function cargarDefibrilador() {
+            const energy = parseInt(document.getElementById('energy-dial').value);
+            takeAction('cargar_energia', energy);
+        }
+        
+        function finalizarSimulacion() {
+            document.getElementById('controls-panel').classList.add('hidden');
+            document.getElementById('debriefing-panel').classList.remove('hidden');
+            
+            let feedbackRoles = '';
+            if (state.rolesInnecesarios.length > 0) {
+                feedbackRoles = `
+                    <div class="mt-2 p-2 bg-yellow-50 border-l-4 border-yellow-500 text-xs text-yellow-800">
+                        <strong>⚠️ Desviación en Liderazgo y Asignación de Roles:</strong><br/>
+                        Asignaste roles que no se recomiendan o saturan el espacio: <em>${state.rolesInnecesarios.join(', ')}</em>.<br/>
+                        • El carro de paros cuenta con todo lo necesario en la sala, el rol de "patinador" no es necesario de entrada.<br/>
+                        • Las ayudas cognitivas deben ser consultadas y gestionadas directamente por el Líder del código.<br/>
+                        • El chequeo de pulso solo se realiza tras 2 minutos de RCP en la pausa de ritmo, no requiere una persona dedicada en exclusividad. El exceso de personal entorpece la reanimación.
+                    </div>
+                `;
+            } else {
+                feedbackRoles = `
+                    <div class="mt-2 p-2 bg-green-50 border-l-4 border-green-500 text-xs text-green-800">
+                        <strong>✓ Excelente asignación de roles:</strong> Asignaste estrictamente los roles necesarios de alto rendimiento sin sobrecargar el cubículo.
+                    </div>
+                `;
+            }
+
+            const feedbackAyuda = state.consultoAyudasCognitivas ? 
+                `<div class="mt-1 p-2 bg-blue-50 border-l-4 border-blue-500 text-xs text-blue-800"><strong>✓ Uso de Ayudas Cognitivas:</strong> Consultaste proactivamente las guías institucionales del HPTU durante la reanimación (Excelente práctica de CRM).</div>` :
+                `<div class="mt-1 p-2 bg-gray-50 border-l-4 border-gray-400 text-xs text-gray-700"><strong>Información:</strong> No abriste el panel de ayudas cognitivas durante el caso. Recuerda que las guías AHA 2025 promueven su uso rutinario en eventos críticos.</div>`;
+
+            let posparoText = '';
+            if (state.posparoErrores && state.posparoErrores.length > 0) {
+                posparoText = `<li>Errores en cuidados posparo: <span class="text-red-600 font-bold">${state.posparoErrores.join(', ')}</span> (No recomendados)</li>`;
+            } else if (state.posparoAdecuados) {
+                posparoText = `<li>Cuidados posparo indicados: <span class="text-green-600 font-bold">${state.posparoAdecuados.join(', ')}</span></li>`;
+            }
+
+            document.getElementById('debrief-metrics').innerHTML = `
+                <h4 class="font-bold text-gray-700 mb-2">Métricas Capturadas para el Debriefing (Framework ORDEN):</h4>
+                <ul class="list-disc pl-4 text-gray-600 space-y-1">
+                    <li>Tiempo total de reanimación: <strong>${formatTimer(state.timerSegundos)}</strong></li>
+                    <li>Intervenciones totales ordenadas: ${state.logDeAcciones.length}</li>
+                    <li>Roles asignados: ${state.rolesAsignados.join(', ') || 'Ninguno específico'}</li>
+                    <li>Intervenciones de rescate requeridas: ${state.omisiones}</li>
+                    <li>Manejo de vía aérea avanzada: ${state.tuboColocado ? 'IOT correcta #5.5 con ETCO2' : 'BVM'}</li>
+                    <li>Resultado clínico: Retorno a Circulación Espontánea (RCE)</li>
+                    ${posparoText}
+                </ul>
+                ${feedbackRoles}
+                ${feedbackAyuda}
+                <p class="mt-4 text-xs italic text-gray-500">Haz clic abajo para generar el debriefing completo con IA estructurado en las dimensiones O-R-D-E-N.</p>
+            `;
+        }
+
+        async function iniciarDebriefingIA() {
+            const btn = document.getElementById('btn-ia-debrief');
+            const loading = document.getElementById('ai-loading');
+            const resultBox = document.getElementById('ai-debrief-result');
+
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            loading.classList.remove('hidden');
+            resultBox.classList.add('hidden');
+            resultBox.innerHTML = '';
+
+            const simulationData = {
+                tiempoTotal: formatTimer(state.timerSegundos),
+                rolesAsignados: state.rolesAsignados,
+                rolesInnecesarios: state.rolesInnecesarios,
+                consultoAyudasCognitivas: state.consultoAyudasCognitivas,
+                tuboColocado: state.tuboColocado,
+                adrenalinaDada: state.adrenalinaDada,
+                calcioDado: state.calcioDado,
+                amiodaronaDada: state.amiodaronaDada,
+                descargasDadas: state.descargasDadas,
+                omisiones: state.omisiones,
+                posparoAdecuados: state.posparoAdecuados || [],
+                posparoErrores: state.posparoErrores || [],
+                logDeAcciones: state.logDeAcciones
+            };
+
+            try {
+                const response = await fetch('/api/debrief', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(simulationData)
+                });
+
+                if (!response.ok) {
+                    const errJson = await response.json().catch(() => ({}));
+                    throw new Error(errJson.error || `Error del servidor: ${response.status}`);
+                }
+
+                const data = await response.json();
+                loading.classList.add('hidden');
+                resultBox.classList.remove('hidden');
+
+                if (window.marked && window.marked.parse) {
+                    resultBox.innerHTML = marked.parse(data.feedback);
+                } else {
+                    resultBox.innerText = data.feedback;
+                }
+            } catch (err) {
+                loading.classList.add('hidden');
+                resultBox.classList.remove('hidden');
+                resultBox.innerHTML = `
+                    <div class="p-3 bg-red-50 border border-red-200 text-red-700 rounded text-xs">
+                        <strong><i class="fas fa-exclamation-triangle mr-1"></i> No se pudo conectar con el servicio de IA:</strong><br>
+                        ${err.message}<br><br>
+                        <span class="text-gray-500">Nota: Al desplegar en Vercel, recuerda agregar la variable de entorno <strong>GEMINI_API_KEY</strong> en la configuración del proyecto.</span>
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function takeAction(actionId, payload = null) {
+            let accionEsCorrecta = false;
+            iniciarTimer();
+            
+            if (actionId === 'asignar_roles_custom') {
+                state.rolesAsignados = payload.esenciales;
+                state.rolesInnecesarios = payload.innecesarios;
+                const total = [...payload.esenciales, ...payload.innecesarios].join(', ');
+                printLeader(`"Asignemos los siguientes roles al equipo: ${total || 'Sin definir'}."`);
+            } else if (actionId === 'adrenalina_diluida_submit') {
+                printLeader(`"Administren ${payload} mL de la dilución de Adrenalina."`);
+            } else if (actionId === 'adrenalina_ampolla_directa') {
+                printLeader(`"Administren 1 ampolla de Adrenalina directa IV."`);
+            } else if (actionId === 'identificar_ritmo_submit') {
+                const nameMap = {
+                    'FV': 'Fibrilación Ventricular (FV)',
+                    'TVSP': 'Taquicardia Ventricular Sin Pulso (TVSP)',
+                    'AESP': 'Actividad Eléctrica Sin Pulso (AESP)',
+                    'ASISTOLIA': 'Asistolia'
+                };
+                printLeader(`"El ritmo en el osciloscopio es: ${nameMap[payload]}."`);
+            } else if (actionId === 'iniciar_rcp_params') {
+                const depthText = payload.depth === '1/3-1/2' ? '1/3 a 1/2 del tórax (~5 cm) con reexpansión completa' : (payload.depth === '<1/3' ? 'menos de 1/3 del tórax' : 'más de 1/2 del tórax');
+                printLeader(`"Inicien / reanuden compresiones torácicas a ${payload.freq} por minuto, con profundidad de ${depthText} sobre tabla rígida."`);
+            } else if (actionId === 'intubar_params') {
+                const confText = payload.conf === 'etco2' ? 'Capnografía continua (ETCO2)' : 'Auscultación únicamente';
+                printLeader(`"Procedan a intubación orotraqueal con tubo #${payload.size}. Confirmaremos y monitorizaremos con ${confText}."`);
+            } else if (actionId === 'cargar_energia') {
+                printLeader(`"Carguen el desfibrilador a ${payload} Joules."`);
+            } else {
+                const map = {
+                    'verificar_pulso': 'Comprobar respiración y pulso central (<10 segundos)',
+                    'codigo_azul': 'Activar Código Azul pediátrico (#90) y solicitar carro de paros',
+                    'tranquilizar_madre': 'Pedir a la madre que espere a una distancia prudente con facilitador familiar',
+                    'oxigeno_mascara': 'Colocar Máscara de No Reinhalación',
+                    'oxigeno_venturi': 'Colocar Sistema Venturi',
+                    'bvm': 'Iniciar ventilación bolsa-válvula-máscara (15:2) conectada a O2',
+                    'conectar_monitor': 'Conectar palas/parches del monitor desfibrilador',
+                    'descargar': '¡Despejen al paciente! Administrar descarga.',
+                    'amiodarona': 'Administrar Amiodarona 100 mg en bolo IV',
+                    'lidocaina': 'Administrar Lidocaína 20 mg en bolo IV',
+                    'calcio_bicarbonato': 'Administrar Gluconato de Calcio + Bicarbonato de Sodio',
+                    'esperar_2_minutos': 'Continuar compresiones de alta calidad y esperar a completar los 2 minutos de este ciclo'
+                };
+                if(map[actionId]) printLeader(`"Procedan a: ${map[actionId]}"`);
+            }
+
+            if (actionId === 'tranquilizar_madre') {
+                printFamilia("<strong>¡Orden recibida!</strong> Acompaño a la madre a un lado del cubículo brindándole soporte compasivo e información continua.");
+                return;
+            }
+
+            if (actionId === 'esperar_2_minutos') {
+                if (state.esperandoReanudacionRCP) {
+                    printDesfib("Doctor, acabamos de dar una descarga. Primero debemos indicar reanudar compresiones inmediatamente.");
+                    return;
+                }
+                if (state.fase === 0) {
+                    printRegistro("Doctor, aún no se ha confirmado el paro ni iniciado maniobras de reanimación.");
+                    return;
+                }
+                if (!state.rcpEnCurso && state.fase === 1) {
+                    printRegistro("Doctor, primero debemos iniciar las compresiones torácicas con los parámetros adecuados.");
+                    return;
+                }
+
+                // Avanzar el cronómetro para completar los 2 minutos (120 s) del ciclo actual
+                let segsToAdd = 120;
+                if (state.rcpInicioTiempo !== null) {
+                    let transcurrido = state.timerSegundos - state.rcpInicioTiempo;
+                    segsToAdd = Math.max(15, 120 - transcurrido);
+                }
+
+                state.timerSegundos += segsToAdd;
+                document.getElementById('timer-display').innerText = formatTimer(state.timerSegundos);
+
+                printCompresor("<strong>¡Entendido!</strong> Compresiones continuas a 100-120/min con profundidad de 1/3 a 1/2 del tórax (~5 cm) y reexpansión torácica completa sobre tabla rígida, sin pausas.");
+                printRegistro(`¡Tiempo! Se han completado los 2 minutos de este ciclo de RCP. Sugiero pausar compresiones y reevaluar ritmo / pulso.`);
+
+                state.rcpEnCurso = false;
+                state.rcpInicioTiempo = null;
+                
+                if (state.descargasDadas >= 3) {
+                    state.ritmoECG = 'SINUS';
+                    updateMonitor({ rhythm: 'Trazado Activo' });
+                }
+
+                accionEsCorrecta = true;
+                return;
+            }
+
+            if (actionId === 'conectar_monitor') {
+                state.parchesConectados = true;
+                state.ritmoECG = 'VF';
+                updateMonitor({ rhythm: 'Trazado Activo' });
+                printDesfib("<strong>¡Orden recibida!</strong> Parches instalados en posición anterolateral y monitor en modo desfibrilador. Observe el trazado en el osciloscopio...");
+                setTimeout(() => openModal('modal-ritmo'), 4000);
+                return;
+            }
+
+            if (actionId === 'identificar_ritmo_submit') {
+                state.rcpEnCurso = false;
+                state.rcpInicioTiempo = null;
+                if (!state.parchesConectados) {
+                    state.parchesConectados = true;
+                    state.ritmoECG = 'VF';
+                    updateMonitor({ rhythm: 'Trazado Activo' });
+                }
+                
+                if (state.descargasDadas >= 3) {
+                    if (payload === 'SINUS') {
+                        state.ritmoIdentificado = true;
+                        printDesfib("<strong>Confirmado:</strong> El ritmo es organizado (Sinusal). ¿Cuál es su siguiente orden?");
+                        accionEsCorrecta = true;
+                    } else {
+                        printDesfib(`Doctor, observe el trazado. Parece ser un ritmo organizado (Ritmo Sinusal). Por favor reevalúe.`);
+                    }
+                } else {
+                    if (payload === 'FV') {
+                        state.ritmoIdentificado = true;
+                        if (state.fase === 4) {
+                            state.fase = 5;
+                        } else {
+                            state.fase = Math.max(state.fase, 2);
+                        }
+                        printDesfib("<strong>Confirmado:</strong> El ritmo es Fibrilación Ventricular (Ritmo desfibrilable). ¿Cuál es su siguiente orden?");
+                        accionEsCorrecta = true;
+                    } else {
+                        printDesfib(`Doctor, ese no parece ser el ritmo en el trazado. Por favor reevalúe el osciloscopio.`);
+                    }
+                }
+            }
+
+            if (actionId === 'cuidados_posparo_submit') {
+                state.posparoErrores = payload.distractores;
+                state.posparoAdecuados = payload.adecuados;
+                if (payload.distractores.length > 0) {
+                     printLeader(`"Iniciemos cuidados posparo guiados por metas e incluyan: ${[...payload.adecuados, ...payload.distractores].join(', ')}."`);
+                     printMeds("Doctor, las guías AHA recomiendan titular el O2 para evitar hiperoxia (SatO2 94-99%) y priorizar la estabilización antes de traslados a Resonancia. Ajustaremos a las metas.");
+                } else {
+                     printLeader(`"Iniciemos cuidados posparo guiados por metas: ${payload.adecuados.join(', ')}."`);
+                     printMeds("¡Entendido! Ajustando FIO2 para saturación 94-99%, preparando inotrópicos y programando control de temperatura.");
+                }
+                setTimeout(finalizarSimulacion, 4000);
+                accionEsCorrecta = true;
+                return;
+            }
+
+            if (actionId === 'verificar_pulso') {
+                state.rcpEnCurso = false;
+                state.rcpInicioTiempo = null;
+                if (state.fase === 0) {
+                    printRegistro("<strong>¡Orden recibida!</strong> No se palpa pulso central en 10s y el paciente está en apnea. ¡Activado Código Azul pediátrico (#90)! Llega el carro de paros con el equipo de 6 personas. ¿Cuál es su siguiente orden?");
+                    state.fase = 1;
+                    accionEsCorrecta = true;
+                } else if (state.descargasDadas >= 3 && state.ritmoIdentificado && state.ritmoECG === 'SINUS') {
+                    updateMonitor({
+                        rhythm: 'Trazado Activo (Organizado)',
+                        hr: '135',
+                        spo2: '95',
+                        etco2: '38',
+                        alarm: false
+                    });
+                    printCompresor("<strong>¡Palpo pulso central carotídeo y femoral presente!</strong> Tensión arterial en 80/50 mmHg. ¡RCE confirmado!");
+                    printRegistro("¡Retorno a la Circulación Espontánea logrado a los " + formatTimer(state.timerSegundos) + "! ¿Cuáles son sus órdenes de cuidados posparo?");
+                    document.getElementById('posparo-container').classList.remove('hidden');
+                    state.fase = 6;
+                    accionEsCorrecta = true;
+                } else {
+                    printCompresor("Doctor, no se palpa pulso central. ¿Cuál es su siguiente orden?");
+                }
+                return;
+            }
+
+            if (actionId === 'codigo_azul' && state.fase === 0) {
+                printRegistro("<strong>¡Orden recibida!</strong> ¡Activado Código Azul pediátrico (#90)! Llega el carro de paros. ¿Cuál es su siguiente orden?");
+                state.fase = 1;
+                accionEsCorrecta = true;
+                return;
+            }
+
+            if (actionId === 'oxigeno_mascara' || actionId === 'oxigeno_venturi') {
+                if(state.fase > 0) printViaAerea("Doctor, el paciente se encuentra en paro cardiorrespiratorio y apnea. Estos dispositivos no brindan ventilación a presión positiva. ¿Cuál es su siguiente orden?");
+                else printViaAerea("Dispositivo colocado, pero el paciente continúa en apnea y cianótico. ¿Cuál es su siguiente orden?");
+                return;
+            }
+
+            if (actionId === 'adrenalina_ampolla_directa') {
+                printMeds("Doctor/a, en pediatría 1 ampolla directa (1 mg) es una sobredosis masiva para 20 kg. El protocolo institucional del HPTU exige diluir 1 ampolla en 10 mL (0.1 mL/kg). ¿Cuántos mL de la dilución preparo?");
+                return;
+            }
+
+            if (state.esperandoReanudacionRCP) {
+                if (actionId === 'iniciar_rcp_params' || actionId === 'bvm') {
+                    state.esperandoReanudacionRCP = false;
+                    state.rcpEnCurso = true;
+                    state.rcpInicioTiempo = state.timerSegundos;
+                    printCompresor("<strong>¡Orden recibida!</strong> Reanudando compresiones torácicas inmediatamente sin pausar para ver ritmo.");
+                    accionEsCorrecta = true;
+                    
+                    if (state.descargasDadas === 1) {
+                        state.fase = 3;
+                        printRegistro("Iniciado ciclo de 2 minutos de RCP tras 1ra descarga. ¿Cuál es su siguiente orden?");
+                    } else if (state.descargasDadas === 2) {
+                        state.fase = 4;
+                        setTimeout(() => {
+                            printSystem("📋 Registro / Tiempo: 'Doctor, acaban de llegar del laboratorio los gases tomados previo al evento: pH 7.18, pCO2 75 mmHg, pO2 60 mmHg, Potasio 7.8 mEq/L, Sodio 135 mEq/L, Calcio iónico 0.9 mmol/L'. ¿Cuál es su siguiente orden?");
+                        }, 1800);
+                    } else if (state.descargasDadas >= 3) {
+                        // Aquí no se avanza la fase aún. Se queda en la fase 5 o avanza a la 6 tras los 2 minutos.
+                        printRegistro("Ciclo de RCP en curso tras la 3ra descarga con medicación. ¿Cuál es su siguiente orden?");
+                    }
+                    return;
+                } else {
+                    printDesfib("Doctor, tras entregar la descarga, ¿cuál es su orden inmediata?");
+                    state.omisiones++;
+                    if (state.omisiones >= 2) {
+                        printAlert("Descarga entregada. Las guías exigen reanudar inmediatamente las compresiones sin verificar pulso ni ritmo.");
+                        state.omisiones = 0;
+                    }
+                    return;
+                }
+            }
+
+            switch (state.fase) {
+                case 1:
+                    if (actionId === 'asignar_roles_custom') {
+                        printRegistro(`<strong>¡Orden recibida!</strong> Roles asumidos por el equipo de reanimación. ¿Cuál es su siguiente orden?`);
+                        accionEsCorrecta = true;
+                    }
+                    if (actionId === 'iniciar_rcp_params') {
+                        if (payload.freq === '100-120' && payload.depth === '1/3-1/2') {
+                            state.rcpEnCurso = true;
+                            state.rcpInicioTiempo = state.timerSegundos;
+                            printCompresor("<strong>¡Orden recibida!</strong> Iniciando compresiones de alta calidad a 100-120/min, profundidad 1/3 a 1/2 del tórax (~5 cm) con reexpansión completa sobre tabla rígida.");
+                            if (!state.parchesConectados) {
+                                printRegistro("Compresiones en curso. Coloque los parches del desfibrilador para monitorizar.");
+                            } else {
+                                printRegistro("Compresiones en curso. ¿Cuál es su siguiente orden?");
+                            }
+                            state.fase = 2;
+                            accionEsCorrecta = true;
+                        } else {
+                            printCompresor(`Doctor, ¿me confirma la técnica? ${payload.freq !== '100-120' ? 'Esa frecuencia está fuera de meta (100-120/min).' : ''} ${payload.depth !== '1/3-1/2' ? 'La profundidad o reexpansión no son las indicadas.' : ''} ¿Cuál es su siguiente orden?`);
+                        }
+                    }
+                    if (actionId === 'bvm') {
+                        printViaAerea("<strong>¡Orden recibida!</strong> Ventilando con bolsa-válvula-máscara (BVM) con reservorio conectado a O2 a 15 L/min, relación 15:2 con elevación torácica visible. ¿Cuál es su siguiente orden?");
+                        accionEsCorrecta = true;
+                    }
+                    break;
+
+                case 2:
+                    if (actionId === 'cargar_energia') {
+                        state.energiaCargada = payload;
+                        printDesfib(`<strong>¡Orden recibida!</strong> Cargando desfibrilador a ${payload} Joules... ¡Tono continuo de carga listo! ¿Cuál es su siguiente orden?`);
+                        if(payload === 40) accionEsCorrecta = true;
+                    } 
+                    if (actionId === 'descargar' && state.energiaCargada === 40) {
+                        state.descargasDadas = 1;
+                        state.energiaCargada = 0;
+                        state.esperandoReanudacionRCP = true;
+                        printDesfib("<strong>¡Descarga de 40 J entregada!</strong> ¿Cuál es su siguiente orden?");
+                        accionEsCorrecta = true;
+                    } else if (actionId === 'descargar' && state.energiaCargada !== 40 && state.energiaCargada > 0) {
+                        printSystem(`Efecto clínico: La energía seleccionada (${state.energiaCargada} J) no corresponde a la dosis inicial de 2 J/kg (40 J para 20 kg). El trazo persiste caótico. ¿Cuál es su siguiente orden?`);
+                        state.energiaCargada = 0;
+                    }
+                    break;
+
+                case 3:
+                    if (actionId === 'cargar_energia') {
+                        state.energiaCargada = payload;
+                        printDesfib(`<strong>¡Orden recibida!</strong> Cargando a ${payload} Joules... ¿Cuál es su siguiente orden?`);
+                        if(payload === 80) accionEsCorrecta = true;
+                    }
+                    if (actionId === 'descargar' && state.energiaCargada === 80) {
+                        state.descargasDadas = 2;
+                        state.energiaCargada = 0;
+                        state.esperandoReanudacionRCP = true;
+                        printDesfib("<strong>¡Descarga de 80 J (4 J/kg) entregada!</strong> ¿Cuál es su siguiente orden?");
+                        accionEsCorrecta = true;
+                    }
+                    if (actionId === 'adrenalina_diluida_submit') {
+                        if (payload === '2') {
+                            state.adrenalinaDada = true;
+                            state.adrenalinaTiempo = state.timerSegundos;
+                            printMeds("<strong>¡Orden recibida: Adrenalina 2 mL de la dilución 1:10,000!</strong> Administrando 2 mL (0.1 mL/kg = 0.01 mg/kg) en bolo IV rápido y lavado con 5 cc de SSN. ¿Cuál es su siguiente orden?");
+                            accionEsCorrecta = true;
+                        } else {
+                            printMeds(`Doctor/a, para un paciente de 20 kg de la dilución estándar, el volumen indicado no es ${payload} mL. ¿Me confirma la dosis correcta?`);
+                        }
+                    }
+                    if (actionId === 'bvm' || actionId === 'iniciar_rcp_params') {
+                        printCompresor("<strong>¡Orden recibida!</strong> RCP de alta calidad en curso. ¿Cuál es su siguiente orden?");
+                        accionEsCorrecta = true;
+                    }
+                    break;
+
+                case 4:
+                    if (actionId === 'calcio_bicarbonato') {
+                        state.calcioDado = true;
+                        printMeds("<strong>¡Orden recibida!</strong> Identificada causa reversible de Hipercalemia. Administrando Gluconato de Calcio 1 g (50 mg/kg) IV lento y Bicarbonato de Sodio 20 mEq (1 mEq/kg) IV. ¿Cuál es su siguiente orden?");
+                        accionEsCorrecta = true;
+                    }
+                    if (actionId === 'adrenalina_diluida_submit' && !state.adrenalinaDada) {
+                        if (payload === '2') {
+                            state.adrenalinaDada = true;
+                            state.adrenalinaTiempo = state.timerSegundos;
+                            printMeds("<strong>¡Orden recibida!</strong> Administrando 2 mL de Adrenalina dilución 1:10,000 con lavado de SSN. ¿Cuál es su siguiente orden?");
+                            accionEsCorrecta = true;
+                        }
+                    }
+                    if (actionId === 'bvm' || actionId === 'iniciar_rcp_params') {
+                        printCompresor("<strong>¡Orden recibida!</strong> Compresiones torácicas continuas. ¿Cuál es su siguiente orden?");
+                        accionEsCorrecta = true;
+                    }
+                    break;
+                
+                case 5:
+                    if (actionId === 'amiodarona' || actionId === 'lidocaina') {
+                        state.amiodaronaDada = true;
+                        printMeds(`<strong>¡Orden recibida!</strong> ${actionId === 'amiodarona' ? 'Amiodarona 100 mg (5 mg/kg)' : 'Lidocaína 20 mg (1 mg/kg)'} administrada en bolo IV rápido con lavado de SSN. ¿Cuál es su siguiente orden?`);
+                        accionEsCorrecta = true;
+                    }
+                    if (actionId === 'cargar_energia') {
+                        state.energiaCargada = payload;
+                        printDesfib(`<strong>¡Orden recibida!</strong> Cargando a ${payload} Joules... ¿Cuál es su siguiente orden?`);
+                        if(payload >= 80) accionEsCorrecta = true;
+                    }
+                    if (actionId === 'descargar' && state.energiaCargada >= 80) {
+                        state.descargasDadas = 3;
+                        state.energiaCargada = 0;
+                        state.esperandoReanudacionRCP = true;
+                        printDesfib(`<strong>¡Descarga de ${state.energiaCargada || '80'} J entregada!</strong> ¿Cuál es su siguiente orden?`);
+                        accionEsCorrecta = true;
+                    }
+                    if (actionId === 'intubar_params') {
+                        if (payload.size === '5.5' && payload.conf === 'etco2') {
+                            state.tuboColocado = true;
+                            updateMonitor({ etco2: '18' });
+                            printViaAerea("<strong>¡Orden recibida!</strong> Intubación orotraqueal exitosa con Tubo # 5.5 con neumotaponador. Capnografía continua conectada marcando ETCO2 en 18 mmHg. Frecuencia ventilatoria ajustada a 1 ventilación cada 2 a 3 segundos (20-30/min) sin pausar compresiones. Han pasado 2 minutos de RCP. ¿Cuál es su siguiente orden?");
+                            state.fase = 6;
+                            accionEsCorrecta = true;
+                        } else {
+                            printViaAerea(`Doctor: ${payload.size !== '5.5' ? 'El tamaño de tubo seleccionado difiere de la fórmula para 7 años (Edad/4 + 4 = 5.75 / Tubo 5.5).' : ''} ${payload.conf !== 'etco2' ? 'Las guías 2025 exigen capnografía cuantitativa continua para confirmar el tubo.' : ''} ¿Cuál es su siguiente orden?`);
+                        }
+                    }
+                    break;
+            }
+
+            if (!accionEsCorrecta) {
+                state.omisiones++;
+                if (state.omisiones >= 2) {
+                    const rescates = {
+                        0: "Doctor, el niño está muy frío y no parece respirar, ¿verifico el pulso central?",
+                        1: "Doctor, ¿A qué frecuencia (100-120) y profundidad (1/3 a 1/2) comprimo?",
+                        2: "Descarga entregada, ¿sigo con las compresiones inmediatamente para minimizar la pausa?",
+                        3: "Llevamos 2 minutos tras la 1ra descarga y persiste en FV. ¿Descargamos a 4 J/kg (80 J) y preparamos Adrenalina diluida?",
+                        4: "Llegaron los gases con Potasio alto y el paciente tiene ERC... Las guías permiten usar Calcio y Bicarbonato en hiperkalemia severa, ¿los administro?",
+                        5: "Ya van 3 descargas y sigue en FV. ¿Administro Amiodarona (5 mg/kg) y aseguramos vía aérea avanzada con capnografía?"
+                    };
+                    if (rescates[state.fase]) printAlert(rescates[state.fase]);
+                    state.omisiones = 0;
+                }
+            } else {
+                state.omisiones = 0;
+            }
+        }
+    </script>
+</body>
+</html>
