@@ -112,10 +112,11 @@ Por favor genera el debriefing completo con el modelo ORDEN.`;
 
     // 1. Intentar descubrir dinámicamente los modelos disponibles para esta API Key
     let availableModelName = null;
+    let listData = null;
     try {
       const listResp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
       if (listResp.ok) {
-        const listData = await listResp.json();
+        listData = await listResp.json();
         const validModels = (listData.models || []).filter(m => 
           m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent')
         );
@@ -133,9 +134,18 @@ Por favor genera el debriefing completo con el modelo ORDEN.`;
     }
 
     const candidateUrls = [];
+    if (listData && listData.models) {
+      const allFlash = listData.models
+        .filter(m => m.name.includes('flash') && m.supportedGenerationMethods?.includes('generateContent'))
+        .reverse(); // Empezar por los mas recientes (ej. 3.7-flash en vez de 2.5)
+      
+      for (const m of allFlash) {
+        candidateUrls.push(`https://generativelanguage.googleapis.com/v1beta/${m.name}:generateContent?key=${apiKey}`);
+      }
+    }
+    
     if (availableModelName) {
       candidateUrls.push(`https://generativelanguage.googleapis.com/v1beta/${availableModelName}:generateContent?key=${apiKey}`);
-      candidateUrls.push(`https://generativelanguage.googleapis.com/v1/${availableModelName}:generateContent?key=${apiKey}`);
     }
 
     // Modelos de respaldo comunes
