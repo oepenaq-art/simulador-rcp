@@ -459,31 +459,31 @@
         </div>
     </div>
 
-    <!-- MODAL: DESFIBRILADOR (ZOLL / CORPULS CIRCULAR DIAL) -->
+    <!-- MODAL: DESFIBRILADOR MANUAL (CIRCULAR DIAL) -->
     <div id="modal-desfibrilador" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex justify-center items-center p-2">
         <div class="bg-gray-900 border-4 border-gray-700 p-5 rounded-2xl shadow-2xl w-full max-w-sm text-white flex flex-col items-center">
             
             <!-- Header Monitor -->
             <div class="w-full flex justify-between items-center border-b border-gray-700 pb-2 mb-3">
                 <div class="flex items-center space-x-2">
-                    <span class="bg-yellow-400 text-black text-[10px] font-black px-1.5 py-0.5 rounded">PEDIÁTRICO</span>
-                    <h3 class="font-bold text-sm text-gray-200 tracking-wide">ZOLL X SERIES / CORPULS</h3>
+                    <i class="fas fa-bolt text-yellow-400 text-base"></i>
+                    <h3 class="font-extrabold text-sm text-gray-100 tracking-wider uppercase">Desfibrilador Manual</h3>
                 </div>
                 <button onclick="closeModal('modal-desfibrilador')" class="text-gray-400 hover:text-white text-lg font-bold">&times;</button>
             </div>
 
             <!-- Display Digital de Energía -->
-            <div class="w-full bg-black border-2 border-green-700 rounded-lg p-2.5 mb-3 text-center shadow-inner">
+            <div class="w-full bg-black border-2 border-green-700 rounded-lg p-3 mb-3 text-center shadow-inner">
                 <div class="text-[10px] text-green-500 font-mono tracking-wider uppercase font-bold">ENERGÍA SELECCIONADA</div>
-                <div id="defib-energy-display" class="font-mono text-4xl font-extrabold text-green-400 tracking-tight my-0.5">40 J</div>
-                <div id="defib-energy-calc" class="text-xs text-green-300 font-medium">2 J/kg (Dosis 1ra descarga para 20 kg)</div>
+                <div id="defib-energy-display" class="font-mono text-4xl font-extrabold text-green-400 tracking-tight my-0.5">10 J</div>
+                <div class="text-xs text-gray-400 font-medium">Peso del paciente: 20 kg</div>
             </div>
 
-            <!-- PASO 1: PERILLA CIRCULAR ROTATORIA (ESTILO ZOLL) -->
+            <!-- PASO 1: PERILLA CIRCULAR ROTATORIA -->
             <div class="relative w-full flex flex-col items-center my-1">
                 <div class="flex items-center justify-between w-full mb-1">
                     <span class="text-xs font-black text-green-400 bg-gray-800 px-2 py-0.5 rounded border border-green-600">1. SELECCIONAR ENERGÍA</span>
-                    <span class="text-[11px] text-gray-400">Gira o usa los botones</span>
+                    <span class="text-[11px] text-gray-400">Ajusta con la perilla o botones</span>
                 </div>
 
                 <!-- Contenedor Perilla Circular -->
@@ -511,21 +511,23 @@
                     </div>
                 </div>
 
-                <!-- Botones Rápidos de Energía / Ajuste Fino -->
-                <div class="flex items-center gap-1.5 mt-2 w-full justify-center">
-                    <button onclick="cambiarEnergiaManual(-10)" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded text-xs font-bold text-gray-300">-10 J</button>
-                    <button onclick="fijarEnergia(40)" class="px-2.5 py-1 bg-teal-900 hover:bg-teal-800 border border-teal-500 rounded text-xs font-bold text-teal-200">40 J (2J/kg)</button>
-                    <button onclick="fijarEnergia(80)" class="px-2.5 py-1 bg-teal-900 hover:bg-teal-800 border border-teal-500 rounded text-xs font-bold text-teal-200">80 J (4J/kg)</button>
-                    <button onclick="cambiarEnergiaManual(10)" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded text-xs font-bold text-gray-300">+10 J</button>
+                <!-- Botones de Ajuste Fino de 10 en 10 -->
+                <div class="flex items-center gap-3 mt-3 w-full justify-center">
+                    <button onclick="cambiarEnergiaManual(-10)" class="flex-1 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded-lg text-sm font-bold text-gray-200 transition-colors shadow">
+                        <i class="fas fa-minus mr-1.5 text-yellow-400"></i> -10 Joules
+                    </button>
+                    <button onclick="cambiarEnergiaManual(10)" class="flex-1 py-2 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded-lg text-sm font-bold text-gray-200 transition-colors shadow">
+                        <i class="fas fa-plus mr-1.5 text-yellow-400"></i> +10 Joules
+                    </button>
                 </div>
             </div>
 
             <!-- Banner Estado de Carga -->
-            <div id="defib-status-msg" class="w-full text-center text-xs py-1.5 px-2 bg-gray-800 rounded border border-gray-700 my-2 font-medium text-gray-300">
-                Selecciona la energía y presiona "2. Cargar"
+            <div id="defib-status-msg" class="w-full text-center text-xs py-2 px-2 bg-gray-800 rounded-lg border border-gray-700 my-2 font-medium text-gray-300">
+                Selecciona los Joules y presiona "2. Cargar"
             </div>
 
-            <!-- PASO 2 Y 3: BOTÓN DE CARGA Y DESCARGA (ESTILO ZOLL) -->
+            <!-- PASO 2 Y 3: BOTÓN DE CARGA Y DESCARGA -->
             <div class="grid grid-cols-2 gap-3 w-full mt-1">
                 <!-- 2. CARGAR (AMARILLO) -->
                 <button id="btn-defib-charge" onclick="iniciarCargaDefib()" class="bg-yellow-400 hover:bg-yellow-300 text-yellow-950 p-3 rounded-xl font-black text-sm shadow-lg flex flex-col items-center justify-center border-2 border-yellow-200 transition-all transform active:scale-95">
@@ -760,13 +762,18 @@
                     </div>
                 </div>
 
-                <!-- SECCIÓN 6: CUIDADOS POSPARO (VERDE / ESMERALDA) -->
-                <div class="bg-emerald-50 border-2 border-emerald-400 rounded-xl p-2.5 shadow-sm hidden" id="posparo-container">
-                    <div class="flex items-center text-emerald-900 font-extrabold text-xs uppercase tracking-wider mb-2">
-                        <i class="fas fa-heart text-emerald-600 mr-1.5"></i> Cuidados Post-Reanimación
+                <!-- SECCIÓN 6: CUIDADOS POSPARO (DESTACADO EN VERDE BRILLANTE) -->
+                <div class="bg-gradient-to-r from-emerald-600 via-green-600 to-teal-700 border-4 border-green-300 rounded-2xl p-4 shadow-2xl text-white my-3 hidden animate-pulse" id="posparo-container">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="bg-white text-emerald-900 text-[11px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow">
+                            <i class="fas fa-star text-yellow-500 mr-1"></i> ¡RCE LOGRADO!
+                        </span>
+                        <i class="fas fa-heartbeat text-2xl text-green-200"></i>
                     </div>
-                    <button onclick="openModal('modal-posparo')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-3 rounded-lg text-xs text-center shadow-md flex items-center justify-center transition-all animate-pulse">
-                        <i class="fas fa-clipboard-check text-sm mr-1.5"></i> Iniciar Lista de Chequeo Post-Paro
+                    <h3 class="font-black text-sm text-white mb-1 tracking-wide uppercase">CUIDADOS POST-REANIMACIÓN</h3>
+                    <p class="text-xs text-green-100 mb-3 font-medium">El paciente ha recuperado el pulso central. Inicia inmediatamente el manejo posparo guiado por metas.</p>
+                    <button onclick="openModal('modal-posparo')" class="w-full bg-yellow-400 hover:bg-yellow-300 text-green-950 font-black py-3 px-4 rounded-xl text-sm shadow-xl flex items-center justify-center transition-transform transform hover:scale-105 active:scale-95 border-2 border-white">
+                        <i class="fas fa-clipboard-check text-lg mr-2 text-green-950"></i> ABRIR LISTA DE CUIDADOS POSPARO
                     </button>
                 </div>
             </div>
@@ -1096,8 +1103,8 @@
             else document.getElementById('val-rhythm').classList.remove('alarm-blink', 'text-yellow-400');
         }
 
-        // --- CONTROL DESFIBRILADOR ZOLL / CORPULS ---
-        let selectedDefibEnergy = 40;
+        // --- CONTROL DESFIBRILADOR MANUAL ---
+        let selectedDefibEnergy = 10;
         let defibEstaCargado = false;
 
         function fijarEnergia(joules) {
@@ -1106,12 +1113,6 @@
             // Actualizar display
             const display = document.getElementById('defib-energy-display');
             if (display) display.innerText = `${selectedDefibEnergy} J`;
-            
-            const calc = document.getElementById('defib-energy-calc');
-            if (calc) {
-                const jkg = (selectedDefibEnergy / 20).toFixed(1);
-                calc.innerText = `${jkg} J/kg para 20 kg ${selectedDefibEnergy === 40 ? '(1ra Descarga Recomendada)' : (selectedDefibEnergy === 80 ? '(2da Descarga Recomendada)' : '')}`;
-            }
 
             // Calcular rotación perilla (grados según energía de 5J a 200J)
             const knob = document.getElementById('defib-knob-dial');
@@ -1551,7 +1552,7 @@
                         } else {
                             state.fase = Math.max(state.fase, 2);
                         }
-                        printDesfib("<strong>Confirmado:</strong> El ritmo es Fibrilación Ventricular (Ritmo desfibrilable). ¿Cuál es su siguiente orden?");
+                        printDesfib("<strong>Confirmado:</strong> El ritmo es Fibrilación Ventricular. ¿Cuál es su siguiente orden?");
                         accionEsCorrecta = true;
                     } else {
                         printDesfib(`Doctor, ese no parece ser el ritmo en el trazado. Por favor reevalúe el osciloscopio.`);
@@ -1690,13 +1691,14 @@
                     } 
                     if (actionId === 'descargar' && state.energiaCargada === 40) {
                         state.descargasDadas = 1;
+                        const shockE = state.energiaCargada;
                         state.energiaCargada = 0;
                         state.esperandoReanudacionRCP = true;
-                        state.descargas.push({ time: formatTimer(state.timerSegundos), energy: 40 });
-                        printDesfib("<strong>¡Descarga de 40 J entregada!</strong> ¿Cuál es su siguiente orden?");
+                        state.descargas.push({ time: formatTimer(state.timerSegundos), energy: shockE });
+                        printDesfib("<strong>¡Descarga administrada!</strong> ¿Cuál es su siguiente orden?");
                         accionEsCorrecta = true;
                     } else if (actionId === 'descargar' && state.energiaCargada !== 40 && state.energiaCargada > 0) {
-                        printSystem(`Efecto clínico: La energía seleccionada (${state.energiaCargada} J) no corresponde a la dosis inicial de 2 J/kg (40 J para 20 kg). El trazo persiste caótico. ¿Cuál es su siguiente orden?`);
+                        printSystem(`Efecto clínico: La energía seleccionada (${state.energiaCargada} J) no corresponde a la dosis recomendada para 20 kg. El trazo persiste caótico. ¿Cuál es su siguiente orden?`);
                         state.energiaCargada = 0;
                     }
                     break;
@@ -1709,10 +1711,11 @@
                     }
                     if (actionId === 'descargar' && state.energiaCargada === 80) {
                         state.descargasDadas = 2;
+                        const shockE = state.energiaCargada;
                         state.energiaCargada = 0;
                         state.esperandoReanudacionRCP = true;
-                        state.descargas.push({ time: formatTimer(state.timerSegundos), energy: 80 });
-                        printDesfib("<strong>¡Descarga de 80 J (4 J/kg) entregada!</strong> ¿Cuál es su siguiente orden?");
+                        state.descargas.push({ time: formatTimer(state.timerSegundos), energy: shockE });
+                        printDesfib("<strong>¡Descarga administrada!</strong> ¿Cuál es su siguiente orden?");
                         accionEsCorrecta = true;
                     }
                     if (actionId === 'adrenalina_diluida_submit') {
@@ -1771,10 +1774,11 @@
                     }
                     if (actionId === 'descargar' && state.energiaCargada >= 80) {
                         state.descargasDadas = 3;
+                        const shockE = state.energiaCargada;
                         state.energiaCargada = 0;
                         state.esperandoReanudacionRCP = true;
-                        state.descargas.push({ time: formatTimer(state.timerSegundos), energy: payload });
-                        printDesfib(`<strong>¡Descarga de ${payload} J entregada!</strong> ¿Cuál es su siguiente orden?`);
+                        state.descargas.push({ time: formatTimer(state.timerSegundos), energy: shockE });
+                        printDesfib("<strong>¡Descarga administrada!</strong> ¿Cuál es su siguiente orden?");
                         accionEsCorrecta = true;
                     }
                     if (actionId === 'intubar_params') {
