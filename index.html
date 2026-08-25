@@ -913,6 +913,8 @@
         // --- ESTADO GLOBAL ---
         let state = {
             fase: 0,
+            codigoAzulActivado: false,
+            pulsoVerificado: false,
             participante: { nombre: '', email: '' },
             omisiones: 0,
             parchesConectados: false,
@@ -1092,7 +1094,13 @@
         }
         drawEcg();
 
-        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function openModal(id) {
+            if (id === 'modal-roles' && !state.codigoAzulActivado) {
+                printRegistro("Doctor(a), el equipo de reanimación aún no ha llegado al cubículo. Primero debe activar el <strong>Código Azul (#90)</strong> para que acuda el personal con el carro de paro.");
+                return;
+            }
+            document.getElementById(id).classList.remove('hidden');
+        }
         function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
         function submitRoles() {
@@ -1468,6 +1476,10 @@
             const dateStr = now.toLocaleDateString('es-ES') + ' ' + now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
             
             if (actionId === 'asignar_roles_custom') {
+                if (!state.codigoAzulActivado) {
+                    printRegistro("Doctor(a), el equipo de reanimación aún no ha llegado al cubículo. Primero debe activar el <strong>Código Azul (#90)</strong>.");
+                    return;
+                }
                 state.rolesAsignados = payload.esenciales;
                 state.rolesInnecesarios = payload.innecesarios;
                 const total = [...payload.esenciales, ...payload.innecesarios].join(', ');
@@ -1625,10 +1637,10 @@
                 state.rcpEnCurso = false;
                 state.rcpInicioTiempo = null;
                 if (state.fase === 0) {
-                    state.horaActivacion = state.horaActivacion || dateStr;
-                    printRegistro("<strong>¡Orden recibida!</strong> No se palpa pulso central en 10s y el paciente está en apnea. ¡Activado Código Azul pediátrico (#90)! Llega el carro de paros con el equipo de 6 personas. ¿Cuál es su siguiente orden?");
-                    state.fase = 1;
+                    state.pulsoVerificado = true;
+                    printCompresor("<strong>¡Comprobación realizada!</strong> No se palpa pulso central carotídeo ni femoral en menos de 10 segundos y el paciente no respira (en apnea). ¡El paciente se encuentra en Paro Cardiorrespiratorio! ¿Cuál es su siguiente orden?");
                     accionEsCorrecta = true;
+                    return;
                 } else if ((state.descargasDadas >= 3 || state.comprobacionesRitmo >= 4) && state.ritmoIdentificado && state.ritmoECG === 'SINUS') {
                     updateMonitor({
                         rhythm: 'Trazado Activo (Organizado)',
@@ -1648,10 +1660,13 @@
                 return;
             }
 
-            if (actionId === 'codigo_azul' && state.fase === 0) {
+            if (actionId === 'codigo_azul') {
                 state.horaActivacion = state.horaActivacion || dateStr;
-                printRegistro("<strong>¡Orden recibida!</strong> ¡Activado Código Azul pediátrico (#90)! Llega el carro de paros. ¿Cuál es su siguiente orden?");
-                state.fase = 1;
+                state.codigoAzulActivado = true;
+                if (state.fase === 0) {
+                    state.fase = 1;
+                }
+                printRegistro("<strong>¡Orden recibida!</strong> ¡Activado Código Azul pediátrico (#90) por altavoz! Llega inmediatamente el equipo de reanimación con el carro de paro y desfibrilador. ¿Cuál es su siguiente orden?");
                 accionEsCorrecta = true;
                 return;
             }
