@@ -42,17 +42,20 @@ module.exports = async (req, res) => {
           knowledgeBase += \
 \
 --- INICIO DOCUMENTO:  ---\
-\
---- FIN DOCUMENTO ---;
+          knowledgeBase += `
+
+--- INICIO DOCUMENTO: ${file} ---
+${content}
+--- FIN DOCUMENTO ---`;
         }
       }
     }
 
-    const systemPrompt = Eres un Instructor Experto en Simulación Clínica Pediátrica y Reanimación Avanzada (PALS/AHA) del Hospital Pablo Tobón Uribe (HPTU).
-Tu misión es generar un DEBRIEFING FORMATIVO, PROFUNDO, EMPÁTICO Y ESTRUCTURADO para un médico participante que acaba de liderar el caso de paro cardíaco pediátrico (Caso: Augusto, 7 años, 20 kg, FV secundaria a Hipercalemia severa en ERC).
+    const systemPrompt = `Eres un Instructor Experto en Simulación Clínica Pediátrica y Reanimación Avanzada (PALS/AHA) del Hospital Pablo Tobón Uribe (HPTU).
+Tu misión es generar un DEBRIEFING FORMATIVO, PROFUNDO, EMPÁTICO Y ESTRUCTURADO para el médico participante ${simulationData.participante?.nombre ? ('(' + simulationData.participante.nombre + ')') : ''} que acaba de liderar el caso de paro cardíaco pediátrico (Caso: Augusto, 7 años, 20 kg, FV secundaria a Hipercalemia severa en ERC).
 
 Debes basar tu evaluación estrictamente en las siguientes FUENTES DE CONOCIMIENTO INSTITUCIONAL Y GUÍAS INTERNACIONALES:
-
+${knowledgeBase}
 
 ESTRUCTURA OBLIGATORIA DEL DEBRIEFING (Framework ORDEN):
 Usa formato Markdown con encabezados claros, emojis profesionales y viñetas concisas:

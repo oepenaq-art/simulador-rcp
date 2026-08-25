@@ -442,6 +442,33 @@
         </div>
     </div>
 
+    <!-- MODAL: DESFIBRILADOR -->
+    <div id="modal-desfibrilador" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex justify-center items-center">
+        <div class="bg-gray-800 border-2 border-gray-600 p-6 rounded-xl shadow-2xl w-96 text-white">
+            <h3 class="font-bold text-xl mb-6 text-center text-yellow-400 border-b border-gray-600 pb-2"><i class="fas fa-heartbeat mr-2"></i>Desfibrilador Manual</h3>
+            
+            <div class="mb-8 text-center">
+                <label class="block text-sm font-bold text-gray-300 mb-4 uppercase tracking-wider">Perilla de Energía</label>
+                <div class="flex items-center justify-center gap-4 bg-gray-900 p-4 rounded-lg border border-gray-700 shadow-inner">
+                    <input type="range" id="energy-dial" min="5" max="200" step="5" value="40" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-yellow-400" oninput="document.getElementById('energy-val').innerText = this.value + ' J'">
+                    <span id="energy-val" class="font-mono text-3xl font-bold text-yellow-400 w-20 text-right">40 J</span>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Dosis pediátrica: 1ra 2 J/kg, 2da 4 J/kg, 3ra ≥4 J/kg</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <button onclick="cargarDefibrilador(); closeModal('modal-desfibrilador');" class="bg-yellow-500 hover:bg-yellow-400 text-black py-4 rounded-lg text-lg font-bold shadow-lg transition-transform transform active:scale-95">
+                    <i class="fas fa-battery-half mr-2"></i> 2. Cargar
+                </button>
+                <button onclick="takeAction('descargar'); closeModal('modal-desfibrilador');" class="bg-red-600 hover:bg-red-500 text-white py-4 rounded-lg text-lg font-bold shadow-lg transition-transform transform active:scale-95 animate-pulse">
+                    <i class="fas fa-bolt mr-2"></i> 3. Choque
+                </button>
+            </div>
+            
+            <button onclick="closeModal('modal-desfibrilador')" class="mt-6 w-full text-center text-gray-400 hover:text-white text-sm underline">Cancelar</button>
+        </div>
+    </div>
+
     <!-- MODAL: NOTA RCP -->
     <div id="modal-nota-rcp" class="fixed inset-0 bg-black bg-opacity-70 hidden z-50 flex justify-center items-center overflow-y-auto">
         <div class="bg-white p-6 rounded-lg shadow-xl w-11/12 max-w-5xl my-8">
@@ -458,6 +485,32 @@
                 <button onclick="window.print()" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded font-bold text-sm"><i class="fas fa-print mr-1"></i> Imprimir</button>
                 <button onclick="closeModal('modal-nota-rcp')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-sm">Cerrar</button>
             </div>
+        </div>
+    </div>
+
+    <!-- MODAL: REGISTRO PARTICIPANTE -->
+    <div id="modal-registro" class="fixed inset-0 bg-black bg-opacity-80 z-50 flex justify-center items-center">
+        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md mx-4">
+            <div class="text-center mb-6">
+                <i class="fas fa-user-md text-5xl text-blue-600 mb-4"></i>
+                <h2 class="text-2xl font-bold text-gray-800">Simulador Avanzado HPTU</h2>
+                <p class="text-sm text-gray-500 mt-2">Por favor ingresa tus datos para llevar el registro de tu desempeño y enviarte el debriefing con IA.</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Nombre Completo</label>
+                    <input type="text" id="participante-nombre" class="w-full border border-gray-300 rounded p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ej. Dr. Juan Pérez">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-gray-700 mb-1">Correo Electrónico</label>
+                    <input type="email" id="participante-email" class="w-full border border-gray-300 rounded p-3 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="juan.perez@hospital.com">
+                </div>
+            </div>
+
+            <button onclick="iniciarSimulador()" class="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-lg transition-colors">
+                <i class="fas fa-play-circle mr-2"></i> Iniciar Simulación
+            </button>
         </div>
     </div>
 
@@ -564,19 +617,13 @@
                         <button onclick="takeAction('conectar_monitor')" class="btn-cat-defib font-bold"><i class="fas fa-plug mr-1"></i> Conectar Palas / Parches</button>
                         <button onclick="openModal('modal-ritmo')" class="btn-cat-defib font-bold border-yellow-500"><i class="fas fa-heartbeat mr-1"></i> Identificar Ritmo de Paro...</button>
                     </div>
-                    
-                    <div class="bg-yellow-50 border border-yellow-400 p-3 rounded mt-2 shadow-sm">
-                        <label class="text-xs font-bold text-yellow-800 block mb-2"><i class="fas fa-sliders-h mr-1"></i> Perilla de Energía (Joules)</label>
-                        <div class="flex items-center gap-3">
-                            <input type="range" id="energy-dial" min="10" max="200" step="10" value="10" class="flex-1" oninput="document.getElementById('energy-val').innerText = this.value + ' J'">
-                            <span id="energy-val" class="font-bold text-xl text-yellow-800 w-16 text-right">10 J</span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2 mt-3">
-                            <button onclick="cargarDefibrilador()" class="bg-yellow-400 hover:bg-yellow-500 text-yellow-900 py-2 rounded text-sm font-bold shadow transition-colors"><i class="fas fa-battery-half mr-1"></i> Cargar</button>
-                            <button onclick="takeAction('descargar')" class="bg-red-600 hover:bg-red-700 text-white py-2 rounded text-sm font-bold shadow transition-colors animate-pulse"><i class="fas fa-bolt mr-1"></i> ¡DESCARGAR!</button>
-                        </div>
                     </div>
+                    
+                    <button onclick="openModal('modal-desfibrilador')" class="w-full bg-red-100 border-2 border-red-500 text-red-900 hover:bg-red-200 transition-colors py-3 px-3 rounded-lg text-sm text-center shadow font-bold mt-3">
+                        <i class="fas fa-bolt text-lg mr-2"></i> Preparar Desfibrilación...
+                    </button>
                 </div>
+
 
                 <!-- Medicamentos: Estandarización Adrenalina HPTU -->
                 <div class="mb-4 mt-4">
@@ -626,6 +673,7 @@
         // --- ESTADO GLOBAL ---
         let state = {
             fase: 0,
+            participante: { nombre: '', email: '' },
             omisiones: 0,
             parchesConectados: false,
             energiaCargada: 0,
@@ -634,6 +682,7 @@
             rcpEnCurso: false,
             esperandoReanudacionRCP: false,
             descargasDadas: 0,
+            comprobacionesRitmo: 0,
             adrenalinaDada: false,
             calcioDado: false,
             amiodaronaDada: false,
@@ -653,6 +702,20 @@
             meds: [], // Array to store medication logs: { name, route, time, obs }
             descargas: [] // Array to store shock logs
         };
+
+        function iniciarSimulador() {
+            const nombre = document.getElementById('participante-nombre').value.trim();
+            const email = document.getElementById('participante-email').value.trim();
+            if(!nombre || !email) {
+                alert("Por favor ingresa tu nombre y correo para continuar.");
+                return;
+            }
+            state.participante.nombre = nombre;
+            state.participante.email = email;
+            document.getElementById('modal-registro').classList.add('hidden');
+            document.getElementById('btn-ayudas').classList.add('animate-pulse');
+            setTimeout(() => document.getElementById('btn-ayudas').classList.remove('animate-pulse'), 5000);
+        }
 
         const chatBox = document.getElementById('chat-box');
 
@@ -974,6 +1037,7 @@
             resultBox.innerHTML = '';
 
             const simulationData = {
+                participante: state.participante,
                 tiempoTotal: formatTimer(state.timerSegundos),
                 rolesAsignados: state.rolesAsignados,
                 rolesInnecesarios: state.rolesInnecesarios,
@@ -1109,7 +1173,7 @@
                         </tr>
                         <tr>
                             <td colspan="2" class="border p-2"><span class="font-bold">Número de reanimadores:</span> ${state.rolesAsignados.length || 6}</td>
-                            <td colspan="2" class="border p-2"><span class="font-bold">Nombre del líder de la reanimación:</span> __________________________</td>
+                            <td colspan="2" class="border p-2"><span class="font-bold">Nombre del líder de la reanimación:</span> ${state.participante.nombre || '__________________________'}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -1142,7 +1206,8 @@
                     'FV': 'Fibrilación Ventricular (FV)',
                     'TVSP': 'Taquicardia Ventricular Sin Pulso (TVSP)',
                     'AESP': 'Actividad Eléctrica Sin Pulso (AESP)',
-                    'ASISTOLIA': 'Asistolia'
+                    'ASISTOLIA': 'Asistolia',
+                    'SINUS': 'Ritmo Organizado (Sinusal)'
                 };
                 printLeader(`"El ritmo en el osciloscopio es: ${nameMap[payload]}."`);
             } else if (actionId === 'iniciar_rcp_params') {
@@ -1190,7 +1255,6 @@
                     return;
                 }
 
-                // Avanzar el cronómetro para completar los 2 minutos (120 s) del ciclo actual
                 let segsToAdd = 120;
                 if (state.rcpInicioTiempo !== null) {
                     let transcurrido = state.timerSegundos - state.rcpInicioTiempo;
@@ -1199,6 +1263,7 @@
 
                 state.timerSegundos += segsToAdd;
                 document.getElementById('timer-display').innerText = formatTimer(state.timerSegundos);
+                state.comprobacionesRitmo++;
 
                 printCompresor("<strong>¡Entendido!</strong> Compresiones continuas a 100-120/min con profundidad de 1/3 a 1/2 del tórax (~5 cm) y reexpansión torácica completa sobre tabla rígida, sin pausas.");
                 printRegistro(`¡Tiempo! Se han completado los 2 minutos de este ciclo de RCP. Sugiero pausar compresiones y reevaluar ritmo / pulso.`);
@@ -1206,7 +1271,7 @@
                 state.rcpEnCurso = false;
                 state.rcpInicioTiempo = null;
                 
-                if (state.descargasDadas >= 3) {
+                if (state.descargasDadas >= 3 || state.comprobacionesRitmo >= 4) {
                     state.ritmoECG = 'SINUS';
                     updateMonitor({ rhythm: 'Trazado Activo' });
                 }
@@ -1217,7 +1282,11 @@
 
             if (actionId === 'conectar_monitor') {
                 state.parchesConectados = true;
-                state.ritmoECG = 'VF';
+                if (state.descargasDadas >= 3 || state.comprobacionesRitmo >= 4) {
+                    state.ritmoECG = 'SINUS';
+                } else {
+                    state.ritmoECG = 'VF';
+                }
                 updateMonitor({ rhythm: 'Trazado Activo' });
                 printDesfib("<strong>¡Orden recibida!</strong> Parches instalados en posición anterolateral y monitor en modo desfibrilador. Observe el trazado en el osciloscopio...");
                 setTimeout(() => openModal('modal-ritmo'), 4000);
@@ -1229,14 +1298,18 @@
                 state.rcpInicioTiempo = null;
                 if (!state.parchesConectados) {
                     state.parchesConectados = true;
-                    state.ritmoECG = 'VF';
+                    if (state.descargasDadas >= 3 || state.comprobacionesRitmo >= 4) {
+                        state.ritmoECG = 'SINUS';
+                    } else {
+                        state.ritmoECG = 'VF';
+                    }
                     updateMonitor({ rhythm: 'Trazado Activo' });
                 }
                 
-                if (state.descargasDadas >= 3) {
+                if (state.descargasDadas >= 3 || state.comprobacionesRitmo >= 4) {
                     if (payload === 'SINUS') {
                         state.ritmoIdentificado = true;
-                        printDesfib("<strong>Confirmado:</strong> El ritmo es organizado (Sinusal). ¿Cuál es su siguiente orden?");
+                        printDesfib("<strong>Confirmado:</strong> El ritmo es organizado (Sinusal). Doctor, por favor verifique si el paciente tiene pulso.");
                         accionEsCorrecta = true;
                     } else {
                         printDesfib(`Doctor, observe el trazado. Parece ser un ritmo organizado (Ritmo Sinusal). Por favor reevalúe.`);
@@ -1280,7 +1353,7 @@
                     printRegistro("<strong>¡Orden recibida!</strong> No se palpa pulso central en 10s y el paciente está en apnea. ¡Activado Código Azul pediátrico (#90)! Llega el carro de paros con el equipo de 6 personas. ¿Cuál es su siguiente orden?");
                     state.fase = 1;
                     accionEsCorrecta = true;
-                } else if (state.descargasDadas >= 3 && state.ritmoIdentificado && state.ritmoECG === 'SINUS') {
+                } else if ((state.descargasDadas >= 3 || state.comprobacionesRitmo >= 4) && state.ritmoIdentificado && state.ritmoECG === 'SINUS') {
                     updateMonitor({
                         rhythm: 'Trazado Activo (Organizado)',
                         hr: '135',
