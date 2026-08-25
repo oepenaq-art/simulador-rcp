@@ -106,31 +106,53 @@ ${(simulationData.logDeAcciones || []).join('\n')}
 
 Por favor genera el debriefing completo con el modelo ORDEN.`;
 
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+    const modelsToTry = [
+      'gemini-2.0-flash',
+      'gemini-1.5-flash-latest',
+      'gemini-2.5-flash',
+      'gemini-1.5-flash',
+      'gemini-1.5-pro-latest',
+      'gemini-1.5-pro',
+      'gemini-pro'
+    ];
 
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [
-          { role: 'user', parts: [{ text: systemPrompt + "\n\n" + userPrompt }] }
-        ],
-        generationConfig: {
-          temperature: 0.3,
-          maxOutputTokens: 2048
+    let feedbackText = '';
+    let lastError = null;
+
+    for (const model of modelsToTry) {
+      try {
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [
+              { role: 'user', parts: [{ text: systemPrompt + "\n\n" + userPrompt }] }
+            ],
+            generationConfig: {
+              temperature: 0.3,
+              maxOutputTokens: 2048
+            }
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          feedbackText = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          if (feedbackText) break;
+        } else {
+          lastError = await response.text();
         }
-      })
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      return res.status(response.status).json({
-        error: `Error en la API de Gemini (${response.status}): ${errText}`
-      });
+      } catch (err) {
+        lastError = err.message;
+      }
     }
 
-    const data = await response.json();
-    const feedbackText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No se pudo generar el texto de debriefing.';
+    if (!feedbackText) {
+      return res.status(500).json({
+        error: `Error conectando con Gemini: ${lastError || 'No se obtuvo respuesta del modelo.'}`
+      });
+    }
 
     // Opcional: Integración con Webhook (Zapier/Make) para enviar a correo y drive
     const webhookUrl = process.env.WEBHOOK_URL;
