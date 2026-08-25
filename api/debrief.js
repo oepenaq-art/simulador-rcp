@@ -188,7 +188,9 @@ Por favor genera el debriefing completo con el modelo ORDEN.`;
 
     if (!feedbackText) {
       return res.status(500).json({
-        error: `Error conectando con Gemini: ${lastError || 'No se obtuvo respuesta de ningún modelo disponible.'}`
+        error: `Error conectando con Gemini: ${lastError || 'No se obtuvo respuesta de ningún modelo disponible.'}`,
+        details: candidateUrls,
+        lastErrorRaw: lastError
       });
     }
 
