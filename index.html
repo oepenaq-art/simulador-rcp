@@ -442,6 +442,25 @@
         </div>
     </div>
 
+    <!-- MODAL: NOTA RCP -->
+    <div id="modal-nota-rcp" class="fixed inset-0 bg-black bg-opacity-70 hidden z-50 flex justify-center items-center overflow-y-auto">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-11/12 max-w-5xl my-8">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h3 class="font-bold text-xl text-gray-800"><i class="fas fa-file-medical-alt mr-2"></i>Registro Clínico de Reanimación Cardiopulmonar</h3>
+                <button onclick="closeModal('modal-nota-rcp')" class="text-gray-500 hover:text-red-500"><i class="fas fa-times text-2xl"></i></button>
+            </div>
+            
+            <div id="nota-rcp-content" class="text-xs border border-gray-300 rounded print-container" style="font-family: Arial, sans-serif;">
+                <!-- El contenido se generará dinámicamente en mostrarNotaRCP() -->
+            </div>
+
+            <div class="flex justify-end gap-2 mt-4 pt-3 border-t print:hidden">
+                <button onclick="window.print()" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded font-bold text-sm"><i class="fas fa-print mr-1"></i> Imprimir</button>
+                <button onclick="closeModal('modal-nota-rcp')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-sm">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MAIN APP CONTAINER -->
     <div class="max-w-6xl mx-auto bg-white shadow-2xl rounded-xl overflow-hidden flex flex-col h-[92vh]">
         
@@ -582,6 +601,11 @@
             <!-- Contenedor Final de Debriefing -->
             <div class="w-full md:w-2/5 p-4 bg-gray-100 overflow-y-auto border-l border-gray-300 shadow-inner hidden" id="debriefing-panel">
                 <h2 class="font-bold text-2xl text-gray-800 mb-4 border-b-2 border-green-500 pb-2"><i class="fas fa-clipboard-check mr-2"></i> Resumen de Simulación</h2>
+                
+                <button onclick="mostrarNotaRCP()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-bold shadow-lg text-base flex items-center justify-center mb-4 transition-colors">
+                    <i class="fas fa-file-medical-alt mr-2"></i> Generar Registro Clínico (Nota RCP)
+                </button>
+                
                 <div class="bg-white p-4 rounded shadow-sm mb-4 text-sm" id="debrief-metrics"></div>
                 
                 <button id="btn-ia-debrief" onclick="iniciarDebriefingIA()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-bold shadow-lg text-base flex items-center justify-center transition-colors">
@@ -621,7 +645,13 @@
             timerSegundos: 0,
             timerActivo: false,
             rcpInicioTiempo: null,
-            adrenalinaTiempo: null
+            adrenalinaTiempo: null,
+            // Variables para la nota de RCP:
+            horaActivacion: null,
+            horaInicioRCPBasica: null,
+            horaInicioRCPAvanzada: null,
+            meds: [], // Array to store medication logs: { name, route, time, obs }
+            descargas: [] // Array to store shock logs
         };
 
         const chatBox = document.getElementById('chat-box');
@@ -998,9 +1028,104 @@
             }
         }
 
+        function mostrarNotaRCP() {
+            const tableHTML = `
+                <table class="w-full border-collapse border border-gray-300 text-left">
+                    <tbody>
+                        <tr>
+                            <th class="border p-2 bg-gray-100" style="width: 30%">Fecha y hora de activación de código azul:</th>
+                            <td class="border p-2" style="width: 40%">${state.horaActivacion || 'N/A'}</td>
+                            <th class="border p-2 bg-gray-100">Peso (Kg)</th>
+                            <td class="border p-2 text-center">20</td>
+                        </tr>
+                        <tr>
+                            <th class="border p-2 bg-gray-100">Lugar de ocurrencia del evento:</th>
+                            <td class="border p-2">A-08-UCE PEDIATRIA</td>
+                            <th class="border p-2 bg-gray-100">Evento inicial:</th>
+                            <td class="border p-2">Fibrilación Ventricular (FV) / TVSP</td>
+                        </tr>
+                        <tr>
+                            <th class="border p-2 bg-gray-100">¿Se realizan maniobras de reanimación?</th>
+                            <td class="border p-2">Si</td>
+                            <td colspan="2" class="border p-0">
+                                <table class="w-full border-collapse">
+                                    <tr><td class="border-b p-2" style="width:65%">Fecha y hora de inicio de reanimación cardiopulmonar básica (RCP):</td><td class="border-b border-l p-2">${state.horaInicioRCPBasica || 'N/A'}</td></tr>
+                                    <tr><td class="p-2">Fecha y hora de inicio de reanimación cardiopulmonar avanzada (RCP):</td><td class="border-l p-2">${state.horaInicioRCPAvanzada || 'N/A'}</td></tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th class="border p-2 bg-gray-100">Causas de no reanimación:</th>
+                            <td colspan="3" class="border p-2"></td>
+                        </tr>
+                        <tr>
+                            <th colspan="4" class="border p-2 bg-gray-200">^ Maniobras de reanimación cardiopulmonar básica:</th>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="border p-2"><span class="font-bold">Compresiones torácicas:</span> Si</td>
+                            <td colspan="2" class="border p-2"><span class="font-bold">Ventilación con presión positiva:</span> Si</td>
+                        </tr>
+                        <tr>
+                            <th colspan="4" class="border p-2 bg-gray-200">^ Maniobras de reanimación avanzada:</th>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="border p-2"><span class="font-bold">Tipo de acceso circulatorio:</span> IV / IO</td>
+                            <td colspan="2" class="border p-2"><span class="font-bold">Tipo de acceso ventilatorio:</span> ${state.tuboColocado ? 'Intubación Orotraqueal' : 'Bolsa-Válvula-Máscara (BVM)'}</td>
+                        </tr>
+                        <tr>
+                            <th class="border p-2 bg-gray-100">Recibió terapia eléctrica:</th>
+                            <td colspan="3" class="border p-2">${state.descargasDadas > 0 ? 'Si (' + state.descargasDadas + ' descargas dadas)' : 'No'}</td>
+                        </tr>
+                        <tr>
+                            <th colspan="2" class="border p-2 bg-gray-100 text-center">Medicamentos:</th>
+                            <td colspan="2" class="border p-0">
+                                <table class="w-full border-collapse h-full">
+                                    <tr><th class="border-b p-2 bg-gray-100" style="width:65%">Retorno a la circulación espontánea:</th><td class="border-b border-l p-2 font-bold">${state.fase >= 6 ? 'Si' : 'No'}</td></tr>
+                                    <tr><th class="border-b p-2 bg-gray-100">Tiempo total de reanimación cardiopulmonar (minutos):</th><td class="border-b border-l p-2 font-bold">${formatTimer(state.timerSegundos)}</td></tr>
+                                    <tr><th class="p-2 bg-gray-100" valign="top">Observaciones:</th><td class="border-l p-2" valign="top">RCP de alta calidad guiada por metas. ${state.posparoAdecuados ? 'Cuidados posparo iniciados.' : ''}</td></tr>
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" class="border p-0">
+                                <table class="w-full border-collapse text-center">
+                                    <tr class="bg-gray-100">
+                                        <th class="border p-2">Nombre del medicamento</th>
+                                        <th class="border p-2">Vía de administración</th>
+                                        <th class="border p-2">Hora inicio (Relativo)</th>
+                                        <th class="border p-2">Observaciones (dosis, frecuencia...)</th>
+                                    </tr>
+                                    ${state.meds.length > 0 ? state.meds.map(m => `
+                                    <tr>
+                                        <td class="border p-2 font-semibold">${m.name}</td>
+                                        <td class="border p-2">${m.route}</td>
+                                        <td class="border p-2">Minuto ${m.time}</td>
+                                        <td class="border p-2">${m.obs}</td>
+                                    </tr>`).join('') : `
+                                    <tr><td colspan="4" class="border p-2 text-center text-gray-500">Ningún medicamento administrado</td></tr>
+                                    `}
+                                </table>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="border p-2"><span class="font-bold">Número de reanimadores:</span> ${state.rolesAsignados.length || 6}</td>
+                            <td colspan="2" class="border p-2"><span class="font-bold">Nombre del líder de la reanimación:</span> __________________________</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+            
+            document.getElementById('nota-rcp-content').innerHTML = tableHTML;
+            openModal('modal-nota-rcp');
+        }
+
         function takeAction(actionId, payload = null) {
             let accionEsCorrecta = false;
             iniciarTimer();
+            
+            // Format current Date as DD/MM/YYYY HH:MM
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('es-ES') + ' ' + now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
             
             if (actionId === 'asignar_roles_custom') {
                 state.rolesAsignados = payload.esenciales;
@@ -1010,6 +1135,7 @@
             } else if (actionId === 'adrenalina_diluida_submit') {
                 printLeader(`"Administren ${payload} mL de la dilución de Adrenalina."`);
             } else if (actionId === 'adrenalina_ampolla_directa') {
+                state.meds.push({ name: 'Adrenalina', route: 'IV directa', time: formatTimer(state.timerSegundos), obs: '1 ampolla (1 mg) SIN DILUIR' });
                 printLeader(`"Administren 1 ampolla de Adrenalina directa IV."`);
             } else if (actionId === 'identificar_ritmo_submit') {
                 const nameMap = {
@@ -1150,6 +1276,7 @@
                 state.rcpEnCurso = false;
                 state.rcpInicioTiempo = null;
                 if (state.fase === 0) {
+                    state.horaActivacion = state.horaActivacion || dateStr;
                     printRegistro("<strong>¡Orden recibida!</strong> No se palpa pulso central en 10s y el paciente está en apnea. ¡Activado Código Azul pediátrico (#90)! Llega el carro de paros con el equipo de 6 personas. ¿Cuál es su siguiente orden?");
                     state.fase = 1;
                     accionEsCorrecta = true;
@@ -1173,6 +1300,7 @@
             }
 
             if (actionId === 'codigo_azul' && state.fase === 0) {
+                state.horaActivacion = state.horaActivacion || dateStr;
                 printRegistro("<strong>¡Orden recibida!</strong> ¡Activado Código Azul pediátrico (#90)! Llega el carro de paros. ¿Cuál es su siguiente orden?");
                 state.fase = 1;
                 accionEsCorrecta = true;
@@ -1230,6 +1358,7 @@
                     }
                     if (actionId === 'iniciar_rcp_params') {
                         if (payload.freq === '100-120' && payload.depth === '1/3-1/2') {
+                            state.horaInicioRCPBasica = state.horaInicioRCPBasica || dateStr;
                             state.rcpEnCurso = true;
                             state.rcpInicioTiempo = state.timerSegundos;
                             printCompresor("<strong>¡Orden recibida!</strong> Iniciando compresiones de alta calidad a 100-120/min, profundidad 1/3 a 1/2 del tórax (~5 cm) con reexpansión completa sobre tabla rígida.");
@@ -1245,6 +1374,7 @@
                         }
                     }
                     if (actionId === 'bvm') {
+                        state.horaInicioRCPBasica = state.horaInicioRCPBasica || dateStr;
                         printViaAerea("<strong>¡Orden recibida!</strong> Ventilando con bolsa-válvula-máscara (BVM) con reservorio conectado a O2 a 15 L/min, relación 15:2 con elevación torácica visible. ¿Cuál es su siguiente orden?");
                         accionEsCorrecta = true;
                     }
@@ -1260,6 +1390,7 @@
                         state.descargasDadas = 1;
                         state.energiaCargada = 0;
                         state.esperandoReanudacionRCP = true;
+                        state.descargas.push({ time: formatTimer(state.timerSegundos), energy: 40 });
                         printDesfib("<strong>¡Descarga de 40 J entregada!</strong> ¿Cuál es su siguiente orden?");
                         accionEsCorrecta = true;
                     } else if (actionId === 'descargar' && state.energiaCargada !== 40 && state.energiaCargada > 0) {
@@ -1278,6 +1409,7 @@
                         state.descargasDadas = 2;
                         state.energiaCargada = 0;
                         state.esperandoReanudacionRCP = true;
+                        state.descargas.push({ time: formatTimer(state.timerSegundos), energy: 80 });
                         printDesfib("<strong>¡Descarga de 80 J (4 J/kg) entregada!</strong> ¿Cuál es su siguiente orden?");
                         accionEsCorrecta = true;
                     }
@@ -1285,6 +1417,7 @@
                         if (payload === '2') {
                             state.adrenalinaDada = true;
                             state.adrenalinaTiempo = state.timerSegundos;
+                            state.meds.push({ name: 'Adrenalina', route: 'IV/IO', time: formatTimer(state.timerSegundos), obs: '2 mL (0.1 mL/kg) dilución 1:10,000' });
                             printMeds("<strong>¡Orden recibida: Adrenalina 2 mL de la dilución 1:10,000!</strong> Administrando 2 mL (0.1 mL/kg = 0.01 mg/kg) en bolo IV rápido y lavado con 5 cc de SSN. ¿Cuál es su siguiente orden?");
                             accionEsCorrecta = true;
                         } else {
@@ -1300,6 +1433,9 @@
                 case 4:
                     if (actionId === 'calcio_bicarbonato') {
                         state.calcioDado = true;
+                        state.horaInicioRCPAvanzada = state.horaInicioRCPAvanzada || dateStr;
+                        state.meds.push({ name: 'Gluconato de Calcio 10%', route: 'IV lento', time: formatTimer(state.timerSegundos), obs: '1 g (50 mg/kg)' });
+                        state.meds.push({ name: 'Bicarbonato de Sodio', route: 'IV lento', time: formatTimer(state.timerSegundos), obs: '20 mEq (1 mEq/kg)' });
                         printMeds("<strong>¡Orden recibida!</strong> Identificada causa reversible de Hipercalemia. Administrando Gluconato de Calcio 1 g (50 mg/kg) IV lento y Bicarbonato de Sodio 20 mEq (1 mEq/kg) IV. ¿Cuál es su siguiente orden?");
                         accionEsCorrecta = true;
                     }
@@ -1307,6 +1443,7 @@
                         if (payload === '2') {
                             state.adrenalinaDada = true;
                             state.adrenalinaTiempo = state.timerSegundos;
+                            state.meds.push({ name: 'Adrenalina', route: 'IV/IO', time: formatTimer(state.timerSegundos), obs: '2 mL (0.1 mL/kg) dilución 1:10,000' });
                             printMeds("<strong>¡Orden recibida!</strong> Administrando 2 mL de Adrenalina dilución 1:10,000 con lavado de SSN. ¿Cuál es su siguiente orden?");
                             accionEsCorrecta = true;
                         }
@@ -1320,7 +1457,9 @@
                 case 5:
                     if (actionId === 'amiodarona' || actionId === 'lidocaina') {
                         state.amiodaronaDada = true;
-                        printMeds(`<strong>¡Orden recibida!</strong> ${actionId === 'amiodarona' ? 'Amiodarona 100 mg (5 mg/kg)' : 'Lidocaína 20 mg (1 mg/kg)'} administrada en bolo IV rápido con lavado de SSN. ¿Cuál es su siguiente orden?`);
+                        const isAmio = actionId === 'amiodarona';
+                        state.meds.push({ name: isAmio ? 'Amiodarona' : 'Lidocaína', route: 'IV bolo', time: formatTimer(state.timerSegundos), obs: isAmio ? '100 mg (5 mg/kg)' : '20 mg (1 mg/kg)' });
+                        printMeds(`<strong>¡Orden recibida!</strong> ${isAmio ? 'Amiodarona 100 mg (5 mg/kg)' : 'Lidocaína 20 mg (1 mg/kg)'} administrada en bolo IV rápido con lavado de SSN. ¿Cuál es su siguiente orden?`);
                         accionEsCorrecta = true;
                     }
                     if (actionId === 'cargar_energia') {
@@ -1332,15 +1471,16 @@
                         state.descargasDadas = 3;
                         state.energiaCargada = 0;
                         state.esperandoReanudacionRCP = true;
-                        printDesfib(`<strong>¡Descarga de ${state.energiaCargada || '80'} J entregada!</strong> ¿Cuál es su siguiente orden?`);
+                        state.descargas.push({ time: formatTimer(state.timerSegundos), energy: payload });
+                        printDesfib(`<strong>¡Descarga de ${payload} J entregada!</strong> ¿Cuál es su siguiente orden?`);
                         accionEsCorrecta = true;
                     }
                     if (actionId === 'intubar_params') {
+                        state.horaInicioRCPAvanzada = state.horaInicioRCPAvanzada || dateStr;
                         if (payload.size === '5.5' && payload.conf === 'etco2') {
                             state.tuboColocado = true;
                             updateMonitor({ etco2: '18' });
                             printViaAerea("<strong>¡Orden recibida!</strong> Intubación orotraqueal exitosa con Tubo # 5.5 con neumotaponador. Capnografía continua conectada marcando ETCO2 en 18 mmHg. Frecuencia ventilatoria ajustada a 1 ventilación cada 2 a 3 segundos (20-30/min) sin pausar compresiones. Han pasado 2 minutos de RCP. ¿Cuál es su siguiente orden?");
-                            state.fase = 6;
                             accionEsCorrecta = true;
                         } else {
                             printViaAerea(`Doctor: ${payload.size !== '5.5' ? 'El tamaño de tubo seleccionado difiere de la fórmula para 7 años (Edad/4 + 4 = 5.75 / Tubo 5.5).' : ''} ${payload.conf !== 'etco2' ? 'Las guías 2025 exigen capnografía cuantitativa continua para confirmar el tubo.' : ''} ¿Cuál es su siguiente orden?`);
