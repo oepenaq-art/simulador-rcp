@@ -165,9 +165,7 @@ Por favor genera el debriefing completo con el modelo ORDEN.`;
           },
           body: JSON.stringify({
             contents: [
-              { role: 'user', parts: [{ text: systemPrompt + "
-
-" + userPrompt }] }
+              { role: 'user', parts: [{ text: systemPrompt + "\n\n" + userPrompt }] }
             ],
             generationConfig: {
               temperature: 0.3,
@@ -192,6 +190,25 @@ Por favor genera el debriefing completo con el modelo ORDEN.`;
       return res.status(500).json({
         error: `Error conectando con Gemini: ${lastError || 'No se obtuvo respuesta de ningún modelo disponible.'}`
       });
+    }
+
+    // Integración con Webhook (Zapier/Make) para enviar a correo y drive
+    const webhookUrl = process.env.WEBHOOK_URL;
+    if (webhookUrl && simulationData.participante?.email) {
+      try {
+        await fetch(webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nombre: simulationData.participante.nombre || 'Participante',
+            email: simulationData.participante.email,
+            debriefing: feedbackText,
+            fecha: new Date().toLocaleString('es-ES')
+          })
+        });
+      } catch (e) {
+        console.error("Error enviando al webhook:", e);
+      }
     }
 
     return res.status(200).json({ feedback: feedbackText });
