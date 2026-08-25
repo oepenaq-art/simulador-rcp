@@ -75,7 +75,7 @@ Usa formato Markdown con encabezados claros, emojis profesionales y viñetas con
 - Ritmo de salida: transición a Ritmo Sinusal organizado y confirmación de pulso central.
 
 ### 💉 E - Empleo de Fármacos y Causas Reversibles (Hs y Ts)
-- Estandarización de Adrenalina: dosis correcta.
+- Estandarización de Adrenalina: dosis correcta. Si el participante ordenó 1 ampolla (1 mg) directa, enfatiza fuertemente que esto es una sobredosis letal para 20 kg. Recuérdale que SIEMPRE se debe diluir 1 ampolla en 10 mL de SSN y de ahí administrar 0.1 mL/kg (es decir, 2 mL para este paciente).
 - Manejo de Hipercalemia: Gluconato de Calcio y Bicarbonato.
 - Manejo de arritmia refractaria (Amiodarona o Lidocaína).
 
@@ -94,6 +94,7 @@ Usa formato Markdown con encabezados claros, emojis profesionales y viñetas con
 - Roles asignados: ${simulationData.rolesAsignados ? 'Sí' : 'No'}
 - Consultó ayudas cognitivas: ${simulationData.consultoAyudasCognitivas ? 'Sí' : 'No'}
 - Tubo endotraqueal y capnografía: ${simulationData.tuboColocado ? 'Sí' : 'No'}
+- Error grave en Adrenalina: ${simulationData.errorAdrenalinaDirecta ? 'Sí (ordenó 1 ampolla de 1 mg directa sin diluir)' : 'No'}
 - Dosis de adrenalina administrada: ${simulationData.adrenalinaDada ? 'Sí' : 'No'}
 - Calcio y Bicarbonato para Hipercalemia: ${simulationData.calcioDado ? 'Sí' : 'No'}
 - Amiodarona tras 3ra descarga: ${simulationData.amiodaronaDada ? 'Sí' : 'No'}
@@ -160,8 +161,7 @@ Por favor genera el debriefing completo con el modelo ORDEN.`;
         const response = await fetch(url, {
           method: 'POST',
           headers: { 
-            'Content-Type': 'application/json',
-            'x-goog-api-key': apiKey
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({
             contents: [

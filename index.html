@@ -926,6 +926,7 @@
             descargasDadas: 0,
             comprobacionesRitmo: 0,
             adrenalinaDada: false,
+            errorAdrenalinaDirecta: false,
             calcioDado: false,
             amiodaronaDada: false,
             tuboColocado: false,
@@ -1415,6 +1416,7 @@
                 consultoAyudasCognitivas: state.consultoAyudasCognitivas,
                 tuboColocado: state.tuboColocado,
                 adrenalinaDada: state.adrenalinaDada,
+                errorAdrenalinaDirecta: state.errorAdrenalinaDirecta,
                 calcioDado: state.calcioDado,
                 amiodaronaDada: state.amiodaronaDada,
                 descargasDadas: state.descargasDadas,
@@ -1678,6 +1680,7 @@
             }
 
             if (actionId === 'adrenalina_ampolla_directa') {
+                state.errorAdrenalinaDirecta = true;
                 printMeds("Doctor(a), en pediatría 1 ampolla directa (1 mg) es una sobredosis masiva para 20 kg. El protocolo institucional del HPTU exige diluir 1 ampolla en 10 mL (0.1 mL/kg). ¿Cuántos mL de la dilución preparo?");
                 return;
             }
