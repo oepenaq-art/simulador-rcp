@@ -612,13 +612,21 @@
             <td colspan="3" class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white" placeholder="Si / No (Jules...)"></td>
         </tr>
         <tr>
-            <th colspan="2" class="border p-2 bg-gray-100 text-center">Medicamentos:</th>
+            <th colspan="2" class="border p-2 bg-gray-100 text-center">Resultado de la Reanimación:</th>
             <td colspan="2" class="border p-0">
                 <table class="w-full border-collapse h-full">
                     <tr><th class="border-b p-2 bg-gray-100" style="width:65%">Retorno a la circulación espontánea:</th><td class="border-b border-l p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white" placeholder="Si / No"></td></tr>
-                    <tr><th class="border-b p-2 bg-gray-100">Tiempo total de reanimación cardiopulmonar (minutos):</th><td class="border-b border-l p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td></tr>
-                    <tr><th class="p-2 bg-gray-100" valign="top">Observaciones:</th><td class="border-l p-1" valign="top"><textarea class="w-full h-12 border-0 p-1 resize-none bg-blue-50 focus:bg-white"></textarea></td></tr>
+                    <tr><th class="p-2 bg-gray-100">Tiempo total de reanimación cardiopulmonar (minutos):</th><td class="border-l p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white" placeholder="Ej. 6 minutos"></td></tr>
                 </table>
+            </td>
+        </tr>
+        <tr>
+            <th class="border p-2 bg-gray-100" style="width: 25%; vertical-align: top;">
+                Observaciones:<br>
+                <span class="text-[11px] text-gray-600 font-bold">(describa el evento)</span>
+            </th>
+            <td colspan="3" class="border p-2">
+                <textarea class="w-full h-28 border border-gray-300 p-2 text-xs bg-blue-50 focus:bg-white rounded leading-relaxed" placeholder="Observaciones (describa el evento: ritmo inicial, intervenciones realizadas, descargas administradas, medicamentos aplicados, respuesta clínica y condición al RCE)..."></textarea>
             </td>
         </tr>
         <tr>
@@ -832,7 +840,7 @@
                         </button>
                     </div>
                     <button onclick="openModal('modal-desfibrilador')" class="w-full bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 text-white font-extrabold py-2.5 px-3 rounded-lg text-xs text-center shadow-md flex items-center justify-center transition-all transform active:scale-98">
-                        <i class="fas fa-bolt text-base mr-2"></i> DESFIBRILAR MANUALMENTE (ZOLL / CORPULS)
+                        <i class="fas fa-bolt text-base mr-2"></i> DESFIBRILAR MANUALMENTE
                     </button>
                 </div>
 
@@ -860,18 +868,18 @@
                     </div>
                 </div>
 
-                <!-- SECCIÓN 6: CUIDADOS POSPARO (DESTACADO EN VERDE BRILLANTE) -->
-                <div class="bg-gradient-to-r from-emerald-600 via-green-600 to-teal-700 border-4 border-green-300 rounded-2xl p-4 shadow-2xl text-white my-3 hidden animate-pulse" id="posparo-container">
+                <!-- SECCIÓN 6: CUIDADOS POSPARO (DESTACADO EN VERDE CLARO CON TEXTO NEGRO) -->
+                <div class="bg-emerald-100 border-4 border-emerald-500 rounded-2xl p-4 shadow-xl text-black my-3 hidden" id="posparo-container">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="bg-white text-emerald-900 text-[11px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider shadow">
-                            <i class="fas fa-star text-yellow-500 mr-1"></i> ¡RCE LOGRADO!
+                        <span class="bg-emerald-700 text-white text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider shadow">
+                            <i class="fas fa-star text-yellow-300 mr-1"></i> ¡RCE LOGRADO!
                         </span>
-                        <i class="fas fa-heartbeat text-2xl text-green-200"></i>
+                        <i class="fas fa-heartbeat text-2xl text-emerald-700"></i>
                     </div>
-                    <h3 class="font-black text-sm text-white mb-1 tracking-wide uppercase">CUIDADOS POST-REANIMACIÓN</h3>
-                    <p class="text-xs text-green-100 mb-3 font-medium">El paciente ha recuperado el pulso central. Inicia inmediatamente el manejo posparo guiado por metas.</p>
-                    <button onclick="openModal('modal-posparo')" class="w-full bg-yellow-400 hover:bg-yellow-300 text-green-950 font-black py-3 px-4 rounded-xl text-sm shadow-xl flex items-center justify-center transition-transform transform hover:scale-105 active:scale-95 border-2 border-white">
-                        <i class="fas fa-clipboard-check text-lg mr-2 text-green-950"></i> ABRIR LISTA DE CUIDADOS POSPARO
+                    <h3 class="font-black text-base text-black mb-1 tracking-wide uppercase">CUIDADOS POST-REANIMACIÓN</h3>
+                    <p class="text-xs text-black mb-3 font-bold">El paciente ha recuperado el pulso central. Inicia inmediatamente el manejo posparo guiado por metas.</p>
+                    <button onclick="openModal('modal-posparo')" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-black py-3 px-4 rounded-xl text-sm shadow-lg flex items-center justify-center transition-transform transform hover:scale-102 active:scale-95 border-2 border-emerald-950">
+                        <i class="fas fa-clipboard-check text-lg mr-2 text-white"></i> ABRIR LISTA DE CUIDADOS POSPARO
                     </button>
                 </div>
             </div>
