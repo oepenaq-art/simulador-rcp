@@ -30,7 +30,7 @@ module.exports = async (req, res) => {
   try {
     const simulationData = req.body || {};
 
-    // Cargar documentos de conocimiento clínico de /knowledge
+    // Cargar documentos de conocimiento clinico
     let knowledgeBase = '';
     const knowledgeDir = path.join(process.cwd(), 'knowledge');
     if (fs.existsSync(knowledgeDir)) {
@@ -39,14 +39,7 @@ module.exports = async (req, res) => {
         if (file.endsWith('.md') || file.endsWith('.txt')) {
           const filePath = path.join(knowledgeDir, file);
           const content = fs.readFileSync(filePath, 'utf8');
-          knowledgeBase += \
-\
---- INICIO DOCUMENTO:  ---\
-          knowledgeBase += `
-
---- INICIO DOCUMENTO: ${file} ---
-${content}
---- FIN DOCUMENTO ---`;
+          knowledgeBase += `\n--- INICIO DOCUMENTO: ${file} ---\n${content}\n--- FIN DOCUMENTO ---\n`;
         }
       }
     }
@@ -60,71 +53,67 @@ ${knowledgeBase}
 ESTRUCTURA OBLIGATORIA DEL DEBRIEFING (Framework ORDEN):
 Usa formato Markdown con encabezados claros, emojis profesionales y viñetas concisas:
 
-# 📊 Debriefing Clínico Estructurado - Modelo O-R-D-E-N
+# 🏥 Debriefing Clínico Estructurado - Modelo O-R-D-E-N
 
 ### 🎯 Resumen Ejecutivo del Desempeño
 - Evaluación global del liderazgo y resultado clínico (RCE alcanzado en el tiempo registrado).
 
 ---
 
-### 🔹 O - Organización y Liderazgo (Teamwork & CRM)
-- Asignación de los 6 roles clave.
+### 🗣️ O - Organización y Liderazgo (Teamwork & CRM)
+- Asignación de los roles clave.
 - Uso y verificación de comunicación de circuito cerrado (closed-loop).
 - Uso de Ayudas Cognitivas (felicitar si las consultó o recordar su importancia si no lo hizo).
 
-### 🔹 R - Reanimación Cardiopulmonar de Alta Calidad
-- Parámetros técnicos: frecuencia (100-120), profundidad (1/3-1/2 AP ~5 cm), reexpansión, tabla rígida.
+### 🫀 R - Reanimación Cardiopulmonar de Alta Calidad
+- Parámetros técnicos: frecuencia (100-120), profundidad, reexpansión.
 - Manejo de pausas y reinicio inmediato de compresiones tras la desfibrilación.
-- Manejo de vía aérea (BVM o Tubo #5.5 con capnografía continua 20-30 vent/min).
+- Manejo de vía aérea (BVM o Tubo con capnografía).
 
-### 🔹 D - Desfibrilación y Manejo del Ritmo
-- Reconocimiento de Fibrilación Ventricular (FV) y dosificación en Joules (1ra: 40 J, 2da: 80 J, 3ra: 80-100 J).
+### ⚡ D - Desfibrilación y Manejo del Ritmo
+- Reconocimiento de Fibrilación Ventricular (FV) y dosificación en Joules.
 - Ritmo de salida: transición a Ritmo Sinusal organizado y confirmación de pulso central.
 
-### 🔹 E - Empleo de Fármacos y Causas Reversibles (Hs y Ts)
-- Estandarización de Adrenalina: preparación 1:10.000 (1 ampolla en 10 mL) y dosis de 0.1 mL/kg (2.0 mL para 20 kg).
-- Manejo de Hipercalemia: Gluconato de Calcio 10% (estabilizador de membrana) y Bicarbonato de Sodio.
+### 💉 E - Empleo de Fármacos y Causas Reversibles (Hs y Ts)
+- Estandarización de Adrenalina: dosis correcta.
+- Manejo de Hipercalemia: Gluconato de Calcio y Bicarbonato.
 - Manejo de arritmia refractaria (Amiodarona o Lidocaína).
 
-### 🔹 N - Neuroprotección y Cuidados Posparo
-- Metas hemodinámicas: PAS y PAM ≥ percentil 10 para la edad.
-- Metas de oxigenación/ventilación: SatO2 94-99% (evitar hiperoxia 100%), normocapnia (PaCO2 35-45).
-- TTM y monitoreo EEG para crisis subclínicas.
-- Retroalimentación sobre distractores (si solicitó RM inmediata o 100% de oxígeno continuo, explicar por qué no es adecuado).
+### 🧠 N - Neuroprotección y Cuidados Posparo
+- Metas hemodinámicas, de oxigenación/ventilación.
+- Retroalimentación sobre distractores en los cuidados posparo.
 
 ---
 
 ### 💡 3 Perlas Clínicas / Compromisos para la Práctica Futura
-(Tres lecciones clave accionables y directas).
-;
+(Tres lecciones clave accionables y directas).`;
 
-    const userPrompt = A continuación se presentan las métricas exactas y el log de eventos registrado durante la simulación de este participante:
+    const userPrompt = `A continuación se presentan las métricas exactas y el log de eventos registrado durante la simulación de este participante:
 
-- Tiempo total de reanimación: 
-- Roles asignados: 
-- Consultó ayudas cognitivas: 
-- Tubo endotraqueal y capnografía: 
-- Dosis de adrenalina administrada: 
-- Calcio y Bicarbonato para Hipercalemia: 
-- Amiodarona tras 3ra descarga: 
-- Intervenciones de rescate requeridas por dudas/omisiones: 
-- Cuidados Posparo Indicados (Adecuados): 
-- Errores/Distractores seleccionados en Posparo: 
-- Historial completo de intervenciones en la simulación:
+- Tiempo total de reanimación: ${simulationData.tiempoTotal || 'N/A'}
+- Roles asignados: ${simulationData.rolesAsignados ? 'Sí' : 'No'}
+- Consultó ayudas cognitivas: ${simulationData.consultoAyudasCognitivas ? 'Sí' : 'No'}
+- Tubo endotraqueal y capnografía: ${simulationData.tuboColocado ? 'Sí' : 'No'}
+- Dosis de adrenalina administrada: ${simulationData.adrenalinaDada ? 'Sí' : 'No'}
+- Calcio y Bicarbonato para Hipercalemia: ${simulationData.calcioDado ? 'Sí' : 'No'}
+- Amiodarona tras 3ra descarga: ${simulationData.amiodaronaDada ? 'Sí' : 'No'}
+- Descargas dadas: ${simulationData.descargasDadas || 0}
+- Cuidados Posparo Indicados (Adecuados): ${(simulationData.posparoAdecuados || []).join(', ')}
+- Errores/Distractores seleccionados en Posparo: ${(simulationData.posparoErrores || []).join(', ')}
 
+Historial completo de intervenciones en la simulación:
+${(simulationData.logDeAcciones || []).join('\n')}
 
-Por favor genera el debriefing completo con el modelo ORDEN.;
+Por favor genera el debriefing completo con el modelo ORDEN.`;
 
-    const apiUrl = https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
     const response = await fetch(apiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [
-          { role: 'user', parts: [{ text: ${systemPrompt}\
-\
- }] }
+          { role: 'user', parts: [{ text: systemPrompt + "\n\n" + userPrompt }] }
         ],
         generationConfig: {
           temperature: 0.3,
@@ -136,12 +125,32 @@ Por favor genera el debriefing completo con el modelo ORDEN.;
     if (!response.ok) {
       const errText = await response.text();
       return res.status(response.status).json({
-        error: Error en la API de Gemini (): 
+        error: `Error en la API de Gemini (${response.status}): ${errText}`
       });
     }
 
     const data = await response.json();
     const feedbackText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No se pudo generar el texto de debriefing.';
+
+    // Opcional: Integración con Webhook (Zapier/Make) para enviar a correo y drive
+    const webhookUrl = process.env.WEBHOOK_URL;
+    if (webhookUrl && simulationData.participante?.email) {
+      try {
+        await fetch(webhookUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            nombre: simulationData.participante.nombre || 'Participante',
+            email: simulationData.participante.email,
+            debriefing: feedbackText,
+            fecha: new Date().toISOString()
+          })
+        });
+      } catch (e) {
+        console.error("Error enviando al webhook:", e);
+        // Continuar sin fallar la petición principal
+      }
+    }
 
     return res.status(200).json({ feedback: feedbackText });
   } catch (error) {
