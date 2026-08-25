@@ -53,6 +53,23 @@
             0%, 100% { transform: scale(1); box-shadow: 0 0 8px rgba(245, 158, 11, 0.6); }
             50% { transform: scale(1.03); box-shadow: 0 0 16px rgba(245, 158, 11, 0.9); }
         }
+
+        .shock-glow-fast {
+            animation: shock-flash 0.4s infinite alternate;
+        }
+        @keyframes shock-flash {
+            0% { box-shadow: 0 0 5px #ef4444; transform: scale(1); }
+            100% { box-shadow: 0 0 25px #f97316, 0 0 40px #ef4444; transform: scale(1.05); }
+        }
+
+        .dial-ring {
+            background: conic-gradient(
+                #10b981 0deg 30deg,
+                #059669 30deg 210deg,
+                #047857 210deg 330deg,
+                #e5e7eb 330deg 360deg
+            );
+        }
     </style>
 </head>
 <body class="bg-gray-200 p-2 md:p-6 font-sans">
@@ -442,32 +459,93 @@
         </div>
     </div>
 
-    <!-- MODAL: DESFIBRILADOR -->
-    <div id="modal-desfibrilador" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex justify-center items-center">
-        <div class="bg-gray-800 border-2 border-gray-600 p-6 rounded-xl shadow-2xl w-96 text-white">
-            <h3 class="font-bold text-xl mb-6 text-center text-yellow-400 border-b border-gray-600 pb-2"><i class="fas fa-heartbeat mr-2"></i>Desfibrilador Manual</h3>
+    <!-- MODAL: DESFIBRILADOR (ZOLL / CORPULS CIRCULAR DIAL) -->
+    <div id="modal-desfibrilador" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex justify-center items-center p-2">
+        <div class="bg-gray-900 border-4 border-gray-700 p-5 rounded-2xl shadow-2xl w-full max-w-sm text-white flex flex-col items-center">
             
-            <div class="mb-8 text-center">
-                <label class="block text-sm font-bold text-gray-300 mb-4 uppercase tracking-wider">Perilla de Energía</label>
-                <div class="flex items-center justify-center gap-4 bg-gray-900 p-4 rounded-lg border border-gray-700 shadow-inner">
-                    <input type="range" id="energy-dial" min="5" max="200" step="5" value="40" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-yellow-400" oninput="document.getElementById('energy-val').innerText = this.value + ' J'">
-                    <span id="energy-val" class="font-mono text-3xl font-bold text-yellow-400 w-20 text-right">40 J</span>
+            <!-- Header Monitor -->
+            <div class="w-full flex justify-between items-center border-b border-gray-700 pb-2 mb-3">
+                <div class="flex items-center space-x-2">
+                    <span class="bg-yellow-400 text-black text-[10px] font-black px-1.5 py-0.5 rounded">PEDIÁTRICO</span>
+                    <h3 class="font-bold text-sm text-gray-200 tracking-wide">ZOLL X SERIES / CORPULS</h3>
                 </div>
-                <p class="text-xs text-gray-500 mt-2">Dosis pediátrica: 1ra 2 J/kg, 2da 4 J/kg, 3ra ≥4 J/kg</p>
+                <button onclick="closeModal('modal-desfibrilador')" class="text-gray-400 hover:text-white text-lg font-bold">&times;</button>
             </div>
 
-            <div class="grid grid-cols-2 gap-4">
-                <button onclick="cargarDefibrilador(); closeModal('modal-desfibrilador');" class="bg-yellow-500 hover:bg-yellow-400 text-black py-4 rounded-lg text-lg font-bold shadow-lg transition-transform transform active:scale-95">
-                    <i class="fas fa-battery-half mr-2"></i> 2. Cargar
+            <!-- Display Digital de Energía -->
+            <div class="w-full bg-black border-2 border-green-700 rounded-lg p-2.5 mb-3 text-center shadow-inner">
+                <div class="text-[10px] text-green-500 font-mono tracking-wider uppercase font-bold">ENERGÍA SELECCIONADA</div>
+                <div id="defib-energy-display" class="font-mono text-4xl font-extrabold text-green-400 tracking-tight my-0.5">40 J</div>
+                <div id="defib-energy-calc" class="text-xs text-green-300 font-medium">2 J/kg (Dosis 1ra descarga para 20 kg)</div>
+            </div>
+
+            <!-- PASO 1: PERILLA CIRCULAR ROTATORIA (ESTILO ZOLL) -->
+            <div class="relative w-full flex flex-col items-center my-1">
+                <div class="flex items-center justify-between w-full mb-1">
+                    <span class="text-xs font-black text-green-400 bg-gray-800 px-2 py-0.5 rounded border border-green-600">1. SELECCIONAR ENERGÍA</span>
+                    <span class="text-[11px] text-gray-400">Gira o usa los botones</span>
+                </div>
+
+                <!-- Contenedor Perilla Circular -->
+                <div class="relative w-44 h-44 rounded-full dial-ring p-3 flex items-center justify-center shadow-xl border-4 border-gray-800">
+                    <!-- Marcas de energía alrededor -->
+                    <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <span class="absolute top-1 text-[10px] font-bold text-gray-900 bg-white px-1 rounded">OFF</span>
+                        <span class="absolute right-2 top-8 text-[10px] font-bold text-white">20J</span>
+                        <span class="absolute right-1 text-[10px] font-bold text-white">40J</span>
+                        <span class="absolute right-2 bottom-8 text-[10px] font-bold text-white">80J</span>
+                        <span class="absolute bottom-1 text-[10px] font-bold text-white">120J</span>
+                        <span class="absolute left-2 bottom-8 text-[10px] font-bold text-white">150J</span>
+                        <span class="absolute left-1 text-[10px] font-bold text-white">200J</span>
+                        <span class="absolute left-2 top-8 text-[10px] font-bold text-white">AED</span>
+                    </div>
+
+                    <!-- Perilla Central Oscura Giratoria -->
+                    <div id="defib-knob-dial" class="relative w-28 h-28 rounded-full bg-gradient-to-b from-gray-700 via-gray-800 to-gray-950 border-4 border-teal-600 shadow-2xl flex items-center justify-center cursor-pointer transition-transform duration-300 transform rotate-45">
+                        <!-- Puntero / Línea indicadora -->
+                        <div class="absolute top-1.5 w-1.5 h-6 bg-yellow-300 rounded-full shadow"></div>
+                        <!-- Centro metálico -->
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-gray-900 via-teal-900 to-gray-700 border border-teal-400 flex items-center justify-center">
+                            <i class="fas fa-redo text-teal-300 text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botones Rápidos de Energía / Ajuste Fino -->
+                <div class="flex items-center gap-1.5 mt-2 w-full justify-center">
+                    <button onclick="cambiarEnergiaManual(-10)" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded text-xs font-bold text-gray-300">-10 J</button>
+                    <button onclick="fijarEnergia(40)" class="px-2.5 py-1 bg-teal-900 hover:bg-teal-800 border border-teal-500 rounded text-xs font-bold text-teal-200">40 J (2J/kg)</button>
+                    <button onclick="fijarEnergia(80)" class="px-2.5 py-1 bg-teal-900 hover:bg-teal-800 border border-teal-500 rounded text-xs font-bold text-teal-200">80 J (4J/kg)</button>
+                    <button onclick="cambiarEnergiaManual(10)" class="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 border border-gray-600 rounded text-xs font-bold text-gray-300">+10 J</button>
+                </div>
+            </div>
+
+            <!-- Banner Estado de Carga -->
+            <div id="defib-status-msg" class="w-full text-center text-xs py-1.5 px-2 bg-gray-800 rounded border border-gray-700 my-2 font-medium text-gray-300">
+                Selecciona la energía y presiona "2. Cargar"
+            </div>
+
+            <!-- PASO 2 Y 3: BOTÓN DE CARGA Y DESCARGA (ESTILO ZOLL) -->
+            <div class="grid grid-cols-2 gap-3 w-full mt-1">
+                <!-- 2. CARGAR (AMARILLO) -->
+                <button id="btn-defib-charge" onclick="iniciarCargaDefib()" class="bg-yellow-400 hover:bg-yellow-300 text-yellow-950 p-3 rounded-xl font-black text-sm shadow-lg flex flex-col items-center justify-center border-2 border-yellow-200 transition-all transform active:scale-95">
+                    <span class="text-xs font-black uppercase text-yellow-900">PASO 2</span>
+                    <span class="text-base font-extrabold flex items-center mt-0.5"><i class="fas fa-bolt mr-1.5"></i> CARGAR</span>
                 </button>
-                <button onclick="takeAction('descargar'); closeModal('modal-desfibrilador');" class="bg-red-600 hover:bg-red-500 text-white py-4 rounded-lg text-lg font-bold shadow-lg transition-transform transform active:scale-95 animate-pulse">
-                    <i class="fas fa-bolt mr-2"></i> 3. Choque
+
+                <!-- 3. DESCARGAR / SHOCK (ROJO / NARANJA TITILANTE) -->
+                <button id="btn-defib-shock" onclick="ejecutarDescargaDefib()" disabled class="opacity-40 cursor-not-allowed bg-red-600 text-white p-3 rounded-xl font-black text-sm shadow-lg flex flex-col items-center justify-center border-2 border-red-400 transition-all">
+                    <span class="text-xs font-black uppercase text-red-200">PASO 3</span>
+                    <span class="text-base font-extrabold flex items-center mt-0.5"><i class="fas fa-heart-pulse mr-1.5"></i> CHOQUE</span>
                 </button>
             </div>
             
-            <button onclick="closeModal('modal-desfibrilador')" class="mt-6 w-full text-center text-gray-400 hover:text-white text-sm underline">Cancelar</button>
+            <button onclick="closeModal('modal-desfibrilador')" class="mt-3 w-full text-center text-gray-400 hover:text-white text-xs underline">
+                Cerrar sin descargar
+            </button>
         </div>
     </div>
+
 
     <!-- MODAL: NOTA RCP -->
     <div id="modal-nota-rcp" class="fixed inset-0 bg-black bg-opacity-70 hidden z-50 flex justify-center items-center overflow-y-auto">
@@ -525,7 +603,7 @@
             </div>
             
             <div class="flex items-center space-x-3">
-                <button onclick="consultarAyudaCognitiva()" class="bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-blue-950 font-extrabold px-3.5 py-1.5 rounded-lg shadow-lg text-xs flex items-center btn-ayuda-glow border-2 border-yellow-200 transition-all cursor-pointer">
+                <button id="btn-ayudas" onclick="consultarAyudaCognitiva()" class="bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-blue-950 font-extrabold px-3.5 py-1.5 rounded-lg shadow-lg text-xs flex items-center btn-ayuda-glow border-2 border-yellow-200 transition-all cursor-pointer">
                     <i class="fas fa-book-medical mr-2 text-base text-blue-950"></i> 
                     <span class="tracking-wide uppercase">Ayudas Cognitivas (HPTU)</span>
                 </button>
@@ -575,75 +653,124 @@
             <div class="w-full md:w-3/5 p-4 bg-gray-50 border-r log-container" id="chat-box"></div>
 
             <!-- Controls Panel -->
-            <div class="w-full md:w-2/5 p-4 bg-gray-100 overflow-y-auto border-l border-gray-300 shadow-inner" id="controls-panel">
-                <div class="flex justify-between items-center border-b pb-2 mb-3">
-                    <h2 class="font-bold text-gray-700"><i class="fas fa-clipboard-list mr-2"></i> Órdenes Clínicas</h2>
-                    <button onclick="consultarAyudaCognitiva()" class="text-xs text-amber-700 font-bold hover:underline flex items-center">
-                        <i class="fas fa-book-open mr-1"></i> Abrir Ayudas
+            <div class="w-full md:w-2/5 p-4 bg-gray-100 overflow-y-auto border-l border-gray-300 shadow-inner space-y-3" id="controls-panel">
+                <div class="flex justify-between items-center border-b pb-2 mb-1">
+                    <h2 class="font-bold text-gray-800 text-sm"><i class="fas fa-clipboard-list text-blue-600 mr-1.5"></i> Menú de Órdenes Clínicas</h2>
+                    <button onclick="consultarAyudaCognitiva()" class="text-xs text-amber-700 font-bold hover:underline flex items-center bg-amber-100 px-2 py-0.5 rounded border border-amber-300">
+                        <i class="fas fa-book-open mr-1"></i> Ayudas
                     </button>
                 </div>
                 
-                <div class="mb-4">
-                    <h3 class="text-xs font-bold text-gray-500 uppercase mb-2">Evaluación y Equipo</h3>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="takeAction('verificar_pulso')" class="btn-cat-eval"><i class="fas fa-hand-holding-medical mr-1"></i> Comprobar Pulso y Respiración</button>
-                        <button onclick="takeAction('codigo_azul')" class="btn-cat-eval font-bold border-blue-500"><i class="fas fa-bullhorn mr-1"></i> Activar Código Azul (#90)</button>
-                        <button onclick="takeAction('tranquilizar_madre')" class="btn-cat-eval"><i class="fas fa-heart mr-1"></i> Tranquilizar a la Madre</button>
-                        <button onclick="openModal('modal-roles')" class="btn-cat-eval font-bold border-blue-500"><i class="fas fa-users-cog mr-1"></i> Asignar Roles de Equipo...</button>
+                <!-- SECCIÓN 1: EVALUACIÓN Y EQUIPO (AZUL) -->
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-2.5 shadow-sm">
+                    <div class="flex items-center text-blue-900 font-extrabold text-xs uppercase tracking-wider mb-2">
+                        <i class="fas fa-users text-blue-600 mr-1.5"></i> Evaluación y Equipo
+                    </div>
+                    <div class="grid grid-cols-2 gap-1.5">
+                        <button onclick="takeAction('verificar_pulso')" class="bg-white hover:bg-blue-100 text-blue-950 border border-blue-300 py-2 px-2.5 rounded-lg text-xs font-semibold shadow-xs text-left flex items-center transition-colors">
+                            <i class="fas fa-hand-holding-medical text-blue-600 mr-1.5"></i> Comprobar Pulso/Resp
+                        </button>
+                        <button onclick="takeAction('codigo_azul')" class="bg-white hover:bg-blue-100 text-blue-950 border-2 border-blue-500 py-2 px-2.5 rounded-lg text-xs font-bold shadow-xs text-left flex items-center transition-colors">
+                            <i class="fas fa-bullhorn text-red-600 mr-1.5"></i> Activar Código Azul (#90)
+                        </button>
+                        <button onclick="takeAction('tranquilizar_madre')" class="bg-white hover:bg-blue-100 text-blue-950 border border-blue-300 py-2 px-2.5 rounded-lg text-xs font-semibold shadow-xs text-left flex items-center transition-colors">
+                            <i class="fas fa-heart text-pink-500 mr-1.5"></i> Tranquilizar a la Madre
+                        </button>
+                        <button onclick="openModal('modal-roles')" class="bg-white hover:bg-blue-100 text-blue-950 border-2 border-blue-500 py-2 px-2.5 rounded-lg text-xs font-bold shadow-xs text-left flex items-center transition-colors">
+                            <i class="fas fa-users-cog text-blue-700 mr-1.5"></i> Asignar Roles de Equipo...
+                        </button>
                     </div>
                 </div>
 
-                <div class="mb-4">
-                    <h3 class="text-xs font-bold text-gray-500 uppercase mb-2">Vía Aérea y Oxigenación</h3>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="takeAction('oxigeno_mascara')" class="btn-cat-eval"><i class="fas fa-mask mr-1"></i> Máscara No Reinhalación</button>
-                        <button onclick="takeAction('oxigeno_venturi')" class="btn-cat-eval"><i class="fas fa-wind mr-1"></i> Sistema Venturi</button>
-                        <button onclick="takeAction('bvm')" class="btn-cat-rcp"><i class="fas fa-lungs mr-1"></i> Ventilar BVM (15:2 con O2)</button>
-                        <button onclick="openModal('modal-via-aerea')" class="btn-cat-rcp"><i class="fas fa-tube mr-1"></i> Intubación Orotraqueal...</button>
+                <!-- SECCIÓN 2: VÍA AÉREA Y OXIGENACIÓN (TURQUESA / CYAN) -->
+                <div class="bg-cyan-50 border border-cyan-200 rounded-xl p-2.5 shadow-sm">
+                    <div class="flex items-center text-cyan-900 font-extrabold text-xs uppercase tracking-wider mb-2">
+                        <i class="fas fa-lungs text-cyan-700 mr-1.5"></i> Vía Aérea y Oxigenación
+                    </div>
+                    <div class="grid grid-cols-2 gap-1.5">
+                        <button onclick="takeAction('oxigeno_mascara')" class="bg-white hover:bg-cyan-100 text-cyan-950 border border-cyan-300 py-2 px-2.5 rounded-lg text-xs font-semibold shadow-xs text-left flex items-center transition-colors">
+                            <i class="fas fa-mask text-cyan-600 mr-1.5"></i> Máscara No Reinhalación
+                        </button>
+                        <button onclick="takeAction('oxigeno_venturi')" class="bg-white hover:bg-cyan-100 text-cyan-950 border border-cyan-300 py-2 px-2.5 rounded-lg text-xs font-semibold shadow-xs text-left flex items-center transition-colors">
+                            <i class="fas fa-wind text-cyan-600 mr-1.5"></i> Sistema Venturi
+                        </button>
+                        <button onclick="takeAction('bvm')" class="bg-white hover:bg-cyan-100 text-cyan-950 border-2 border-cyan-500 py-2 px-2.5 rounded-lg text-xs font-bold shadow-xs text-left flex items-center transition-colors">
+                            <i class="fas fa-lungs text-cyan-700 mr-1.5"></i> Ventilar BVM (15:2 con O2)
+                        </button>
+                        <button onclick="openModal('modal-via-aerea')" class="bg-white hover:bg-cyan-100 text-cyan-950 border border-cyan-300 py-2 px-2.5 rounded-lg text-xs font-semibold shadow-xs text-left flex items-center transition-colors">
+                            <i class="fas fa-tube text-cyan-700 mr-1.5"></i> Intubación Orotraqueal...
+                        </button>
                     </div>
                 </div>
 
-                <div class="mb-4">
-                    <h3 class="text-xs font-bold text-gray-500 uppercase mb-2">Compresiones Torácicas</h3>
-                    <div class="grid grid-cols-1 gap-2">
-                        <button onclick="openModal('modal-rcp')" class="btn-cat-rcp font-bold border-red-500"><i class="fas fa-hands-bubbles mr-1"></i> Iniciar / Reanudar Compresiones...</button>
-                        <button onclick="takeAction('esperar_2_minutos')" class="btn-cat-rcp font-bold text-red-900 border-red-400 bg-red-100 hover:bg-red-200"><i class="fas fa-hourglass-half mr-1 text-red-700"></i> Esperar a cumplir los 2 minutos del ciclo</button>
+                <!-- SECCIÓN 3: COMPRESIONES TORÁCICAS (ROJO / ROSA) -->
+                <div class="bg-rose-50 border border-rose-200 rounded-xl p-2.5 shadow-sm">
+                    <div class="flex items-center text-rose-900 font-extrabold text-xs uppercase tracking-wider mb-2">
+                        <i class="fas fa-heartbeat text-rose-600 mr-1.5"></i> Compresiones Torácicas
+                    </div>
+                    <div class="grid grid-cols-1 gap-1.5">
+                        <button onclick="openModal('modal-rcp')" class="bg-white hover:bg-rose-100 text-rose-950 border-2 border-rose-500 py-2 px-3 rounded-lg text-xs font-bold shadow-xs text-left flex items-center transition-colors">
+                            <i class="fas fa-hands-bubbles text-rose-600 mr-2 text-sm"></i> Iniciar / Reanudar Compresiones...
+                        </button>
+                        <button onclick="takeAction('esperar_2_minutos')" class="bg-rose-100 hover:bg-rose-200 text-rose-950 border border-rose-400 py-2 px-3 rounded-lg text-xs font-bold shadow-xs text-left flex items-center transition-colors">
+                            <i class="fas fa-hourglass-half text-rose-700 mr-2 text-sm"></i> Esperar a cumplir los 2 minutos del ciclo
+                        </button>
                     </div>
                 </div>
 
-                <div class="mb-4">
-                    <h3 class="text-xs font-bold text-gray-500 uppercase mb-2">Monitor / Desfibrilador</h3>
-                    <div class="grid grid-cols-2 gap-2 mb-2">
-                        <button onclick="takeAction('conectar_monitor')" class="btn-cat-defib font-bold"><i class="fas fa-plug mr-1"></i> Conectar Palas / Parches</button>
-                        <button onclick="openModal('modal-ritmo')" class="btn-cat-defib font-bold border-yellow-500"><i class="fas fa-heartbeat mr-1"></i> Identificar Ritmo de Paro...</button>
+                <!-- SECCIÓN 4: MONITOR / DESFIBRILADOR (ÁMBAR / AMARILLO) -->
+                <div class="bg-amber-50 border border-amber-300 rounded-xl p-2.5 shadow-sm">
+                    <div class="flex items-center text-amber-900 font-extrabold text-xs uppercase tracking-wider mb-2">
+                        <i class="fas fa-bolt text-amber-600 mr-1.5"></i> Monitor / Desfibrilación
                     </div>
+                    <div class="grid grid-cols-2 gap-1.5 mb-2">
+                        <button onclick="takeAction('conectar_monitor')" class="bg-white hover:bg-amber-100 text-amber-950 border border-amber-300 py-2 px-2.5 rounded-lg text-xs font-bold shadow-xs text-left flex items-center transition-colors">
+                            <i class="fas fa-plug text-amber-600 mr-1.5"></i> Conectar Parches
+                        </button>
+                        <button onclick="openModal('modal-ritmo')" class="bg-white hover:bg-amber-100 text-amber-950 border-2 border-amber-500 py-2 px-2.5 rounded-lg text-xs font-bold shadow-xs text-left flex items-center transition-colors">
+                            <i class="fas fa-heart-pulse text-amber-600 mr-1.5"></i> Identificar Ritmo...
+                        </button>
                     </div>
-                    
-                    <button onclick="openModal('modal-desfibrilador')" class="w-full bg-red-100 border-2 border-red-500 text-red-900 hover:bg-red-200 transition-colors py-3 px-3 rounded-lg text-sm text-center shadow font-bold mt-3">
-                        <i class="fas fa-bolt text-lg mr-2"></i> Preparar Desfibrilación...
+                    <button onclick="openModal('modal-desfibrilador')" class="w-full bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 text-white font-extrabold py-2.5 px-3 rounded-lg text-xs text-center shadow-md flex items-center justify-center transition-all transform active:scale-98">
+                        <i class="fas fa-bolt text-base mr-2"></i> DESFIBRILAR MANUALMENTE (ZOLL / CORPULS)
                     </button>
                 </div>
 
-
-                <!-- Medicamentos: Estandarización Adrenalina HPTU -->
-                <div class="mb-4 mt-4">
-                    <h3 class="text-xs font-bold text-gray-500 uppercase mb-2">Medicamentos</h3>
-                    <div class="grid grid-cols-1 gap-2">
-                        <button onclick="takeAction('adrenalina_ampolla_directa')" class="btn-cat-meds"><i class="fas fa-syringe mr-1"></i> Administrar 1 ampolla de Adrenalina</button>
-                        <button onclick="openModal('modal-adrenalina')" class="btn-cat-meds"><i class="fas fa-vial mr-1"></i> Administrar dilución de adrenalina...</button>
-                        <button onclick="takeAction('amiodarona')" class="btn-cat-meds"><i class="fas fa-vial mr-1"></i> Amiodarona: 100 mg (5 mg/kg)</button>
-                        <button onclick="takeAction('lidocaina')" class="btn-cat-meds"><i class="fas fa-vial mr-1"></i> Lidocaína: 20 mg (1 mg/kg)</button>
-                        <button onclick="takeAction('calcio_bicarbonato')" class="btn-cat-meds"><i class="fas fa-flask mr-1"></i> Gluconato de Calcio + Bicarbonato</button>
+                <!-- SECCIÓN 5: MEDICAMENTOS (PÚRPURA / VIOLETA) -->
+                <div class="bg-purple-50 border border-purple-200 rounded-xl p-2.5 shadow-sm">
+                    <div class="flex items-center text-purple-900 font-extrabold text-xs uppercase tracking-wider mb-2">
+                        <i class="fas fa-syringe text-purple-600 mr-1.5"></i> Medicamentos y Accesos
+                    </div>
+                    <div class="grid grid-cols-1 gap-1.5">
+                        <button onclick="takeAction('adrenalina_ampolla_directa')" class="bg-white hover:bg-purple-100 text-purple-950 border border-purple-300 py-1.5 px-2.5 rounded-lg text-xs font-medium shadow-xs text-left flex items-center transition-colors">
+                            <i class="fas fa-syringe text-purple-500 mr-2"></i> Administrar 1 ampolla de Adrenalina (1 mg)
+                        </button>
+                        <button onclick="openModal('modal-adrenalina')" class="bg-white hover:bg-purple-100 text-purple-950 border-2 border-purple-500 py-2 px-2.5 rounded-lg text-xs font-bold shadow-xs text-left flex items-center transition-colors">
+                            <i class="fas fa-vial text-purple-600 mr-2"></i> Administrar dilución de adrenalina...
+                        </button>
+                        <button onclick="takeAction('amiodarona')" class="bg-white hover:bg-purple-100 text-purple-950 border border-purple-300 py-1.5 px-2.5 rounded-lg text-xs font-semibold shadow-xs text-left flex items-center transition-colors">
+                            <i class="fas fa-vial text-purple-600 mr-2"></i> Amiodarona: 100 mg (5 mg/kg)
+                        </button>
+                        <button onclick="takeAction('lidocaina')" class="bg-white hover:bg-purple-100 text-purple-950 border border-purple-300 py-1.5 px-2.5 rounded-lg text-xs font-semibold shadow-xs text-left flex items-center transition-colors">
+                            <i class="fas fa-vial text-purple-600 mr-2"></i> Lidocaína: 20 mg (1 mg/kg)
+                        </button>
+                        <button onclick="takeAction('calcio_bicarbonato')" class="bg-white hover:bg-purple-100 text-purple-950 border-2 border-purple-600 py-2 px-2.5 rounded-lg text-xs font-bold shadow-xs text-left flex items-center transition-colors">
+                            <i class="fas fa-flask text-purple-700 mr-2"></i> Gluconato de Calcio + Bicarbonato
+                        </button>
                     </div>
                 </div>
 
-                <div class="mb-4 hidden" id="posparo-container">
-                    <h3 class="text-xs font-bold text-green-600 uppercase mb-2">Cuidados Posparo</h3>
-                    <button onclick="openModal('modal-posparo')" class="w-full bg-green-100 hover:bg-green-200 border-2 border-green-500 text-green-900 font-bold py-2 px-3 rounded text-sm text-left shadow-sm animate-pulse">
-                        <i class="fas fa-heartbeat mr-1"></i> Iniciar Cuidados Post Reanimación...
+                <!-- SECCIÓN 6: CUIDADOS POSPARO (VERDE / ESMERALDA) -->
+                <div class="bg-emerald-50 border-2 border-emerald-400 rounded-xl p-2.5 shadow-sm hidden" id="posparo-container">
+                    <div class="flex items-center text-emerald-900 font-extrabold text-xs uppercase tracking-wider mb-2">
+                        <i class="fas fa-heart text-emerald-600 mr-1.5"></i> Cuidados Post-Reanimación
+                    </div>
+                    <button onclick="openModal('modal-posparo')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-3 rounded-lg text-xs text-center shadow-md flex items-center justify-center transition-all animate-pulse">
+                        <i class="fas fa-clipboard-check text-sm mr-1.5"></i> Iniciar Lista de Chequeo Post-Paro
                     </button>
                 </div>
             </div>
+
             
             <!-- Contenedor Final de Debriefing -->
             <div class="w-full md:w-2/5 p-4 bg-gray-100 overflow-y-auto border-l border-gray-300 shadow-inner hidden" id="debriefing-panel">
@@ -969,9 +1096,111 @@
             else document.getElementById('val-rhythm').classList.remove('alarm-blink', 'text-yellow-400');
         }
 
-        function cargarDefibrilador() {
-            const energy = parseInt(document.getElementById('energy-dial').value);
-            takeAction('cargar_energia', energy);
+        // --- CONTROL DESFIBRILADOR ZOLL / CORPULS ---
+        let selectedDefibEnergy = 40;
+        let defibEstaCargado = false;
+
+        function fijarEnergia(joules) {
+            selectedDefibEnergy = Math.max(5, Math.min(200, joules));
+            
+            // Actualizar display
+            const display = document.getElementById('defib-energy-display');
+            if (display) display.innerText = `${selectedDefibEnergy} J`;
+            
+            const calc = document.getElementById('defib-energy-calc');
+            if (calc) {
+                const jkg = (selectedDefibEnergy / 20).toFixed(1);
+                calc.innerText = `${jkg} J/kg para 20 kg ${selectedDefibEnergy === 40 ? '(1ra Descarga Recomendada)' : (selectedDefibEnergy === 80 ? '(2da Descarga Recomendada)' : '')}`;
+            }
+
+            // Calcular rotación perilla (grados según energía de 5J a 200J)
+            const knob = document.getElementById('defib-knob-dial');
+            if (knob) {
+                // Map 5J -> 30deg, 40J -> 90deg, 80J -> 150deg, 120J -> 210deg, 200J -> 300deg
+                const angle = 20 + ((selectedDefibEnergy - 5) / 195) * 280;
+                knob.style.transform = `rotate(${angle}deg)`;
+            }
+
+            // Si se cambia la energía después de cargar, se descarga por seguridad
+            if (defibEstaCargado) {
+                defibEstaCargado = false;
+                const shockBtn = document.getElementById('btn-defib-shock');
+                if (shockBtn) {
+                    shockBtn.disabled = true;
+                    shockBtn.classList.add('opacity-40', 'cursor-not-allowed');
+                    shockBtn.classList.remove('shock-glow-fast', 'animate-pulse');
+                }
+                const msg = document.getElementById('defib-status-msg');
+                if (msg) msg.innerText = `Energía modificada a ${selectedDefibEnergy} J. Presiona "2. Cargar".`;
+            }
+        }
+
+        function cambiarEnergiaManual(delta) {
+            fijarEnergia(selectedDefibEnergy + delta);
+        }
+
+        function iniciarCargaDefib() {
+            const chargeBtn = document.getElementById('btn-defib-charge');
+            const shockBtn = document.getElementById('btn-defib-shock');
+            const statusMsg = document.getElementById('defib-status-msg');
+
+            if (chargeBtn) {
+                chargeBtn.disabled = true;
+                chargeBtn.classList.add('opacity-50');
+            }
+
+            if (statusMsg) {
+                statusMsg.className = "w-full text-center text-xs py-2 px-2 bg-yellow-900 border border-yellow-500 rounded my-2 font-bold text-yellow-200 animate-pulse";
+                statusMsg.innerHTML = `<i class="fas fa-spinner fa-spin mr-1.5"></i> CARGANDO CONDENSADORES A ${selectedDefibEnergy} J... (Tono continuo)`;
+            }
+
+            // Simular tiempo de carga del desfibrilador (1.2 segundos)
+            setTimeout(() => {
+                defibEstaCargado = true;
+                if (chargeBtn) {
+                    chargeBtn.disabled = false;
+                    chargeBtn.classList.remove('opacity-50');
+                }
+                if (statusMsg) {
+                    statusMsg.className = "w-full text-center text-xs py-2 px-2 bg-green-900 border border-green-400 rounded my-2 font-black text-green-200";
+                    statusMsg.innerHTML = `<i class="fas fa-check-circle mr-1.5"></i> ¡CARGADO A ${selectedDefibEnergy} J! LISTO PARA DISPARAR`;
+                }
+
+                // Enviar la acción de carga a la lógica de simulación
+                takeAction('cargar_energia', selectedDefibEnergy);
+
+                // Activar botón de descarga con luz titilante de alta intensidad
+                if (shockBtn) {
+                    shockBtn.disabled = false;
+                    shockBtn.classList.remove('opacity-40', 'cursor-not-allowed');
+                    shockBtn.classList.add('shock-glow-fast', 'animate-pulse');
+                }
+            }, 1200);
+        }
+
+        function ejecutarDescargaDefib() {
+            if (!defibEstaCargado) return;
+
+            // Resetear estado del desfibrilador
+            defibEstaCargado = false;
+            const shockBtn = document.getElementById('btn-defib-shock');
+            if (shockBtn) {
+                shockBtn.disabled = true;
+                shockBtn.classList.add('opacity-40', 'cursor-not-allowed');
+                shockBtn.classList.remove('shock-glow-fast', 'animate-pulse');
+            }
+
+            const statusMsg = document.getElementById('defib-status-msg');
+            if (statusMsg) {
+                statusMsg.className = "w-full text-center text-xs py-1.5 px-2 bg-gray-800 rounded border border-gray-700 my-2 font-medium text-gray-300";
+                statusMsg.innerText = "Selecciona la energía y presiona '2. Cargar'";
+            }
+
+            // Cerrar el modal y volver a la pantalla principal
+            closeModal('modal-desfibrilador');
+
+            // Ejecutar la descarga en el estado del simulador
+            takeAction('descargar');
         }
         
         function finalizarSimulacion() {
