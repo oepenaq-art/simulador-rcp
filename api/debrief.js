@@ -106,28 +106,68 @@ ${(simulationData.logDeAcciones || []).join('\n')}
 
 Por favor genera el debriefing completo con el modelo ORDEN.`;
 
-    const modelsToTry = [
+        let feedbackText = '';
+    let lastError = null;
+
+    // 1. Intentar descubrir dinámicamente los modelos disponibles para esta API Key
+    let availableModelName = null;
+    try {
+      const listResp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+      if (listResp.ok) {
+        const listData = await listResp.json();
+        const validModels = (listData.models || []).filter(m => 
+          m.supportedGenerationMethods && m.supportedGenerationMethods.includes('generateContent')
+        );
+        
+        // Buscar preferiblemente un modelo flash o el primero disponible
+        const preferred = validModels.find(m => m.name.includes('flash')) || validModels.find(m => m.name.includes('gemini')) || validModels[0];
+        if (preferred) {
+          availableModelName = preferred.name; // e.g. 'models/gemini-1.5-flash' o 'models/gemini-2.0-flash'
+        }
+      } else {
+        lastError = await listResp.text();
+      }
+    } catch (e) {
+      console.warn("No se pudo listar modelos:", e);
+    }
+
+    const candidateUrls = [];
+    if (availableModelName) {
+      candidateUrls.push(`https://generativelanguage.googleapis.com/v1beta/${availableModelName}:generateContent?key=${apiKey}`);
+      candidateUrls.push(`https://generativelanguage.googleapis.com/v1/${availableModelName}:generateContent?key=${apiKey}`);
+    }
+
+    // Modelos de respaldo comunes
+    const fallbackList = [
+      'models/gemini-2.0-flash',
+      'models/gemini-1.5-flash',
+      'models/gemini-1.5-flash-latest',
+      'models/gemini-1.5-pro',
+      'models/gemini-1.0-pro',
       'gemini-2.0-flash',
-      'gemini-1.5-flash-latest',
-      'gemini-2.5-flash',
       'gemini-1.5-flash',
-      'gemini-1.5-pro-latest',
-      'gemini-1.5-pro',
       'gemini-pro'
     ];
 
-    let feedbackText = '';
-    let lastError = null;
+    for (const fb of fallbackList) {
+      candidateUrls.push(`https://generativelanguage.googleapis.com/v1beta/${fb}:generateContent?key=${apiKey}`);
+      candidateUrls.push(`https://generativelanguage.googleapis.com/v1/${fb}:generateContent?key=${apiKey}`);
+    }
 
-    for (const model of modelsToTry) {
+    // Probar las URLs candidatas
+    for (const url of candidateUrls) {
       try {
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-        const response = await fetch(apiUrl, {
+        const response = await fetch(url, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 
+            'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey
+          },
           body: JSON.stringify({
             contents: [
-              { role: 'user', parts: [{ text: systemPrompt + "\n\n" + userPrompt }] }
+              { role: 'user', parts: [{ text: systemPrompt + "
+
+" + userPrompt }] }
             ],
             generationConfig: {
               temperature: 0.3,
@@ -150,28 +190,8 @@ Por favor genera el debriefing completo con el modelo ORDEN.`;
 
     if (!feedbackText) {
       return res.status(500).json({
-        error: `Error conectando con Gemini: ${lastError || 'No se obtuvo respuesta del modelo.'}`
+        error: `Error conectando con Gemini: ${lastError || 'No se obtuvo respuesta de ningún modelo disponible.'}`
       });
-    }
-
-    // Opcional: Integración con Webhook (Zapier/Make) para enviar a correo y drive
-    const webhookUrl = process.env.WEBHOOK_URL;
-    if (webhookUrl && simulationData.participante?.email) {
-      try {
-        await fetch(webhookUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            nombre: simulationData.participante.nombre || 'Participante',
-            email: simulationData.participante.email,
-            debriefing: feedbackText,
-            fecha: new Date().toISOString()
-          })
-        });
-      } catch (e) {
-        console.error("Error enviando al webhook:", e);
-        // Continuar sin fallar la petición principal
-      }
     }
 
     return res.status(200).json({ feedback: feedbackText });
