@@ -554,12 +554,110 @@
         <div class="bg-white p-6 rounded-lg shadow-xl w-11/12 max-w-5xl my-8">
             <div class="flex justify-between items-center mb-4 border-b pb-2">
                 <h3 class="font-bold text-xl text-gray-800"><i class="fas fa-file-medical-alt mr-2"></i>Registro Clínico de Reanimación Cardiopulmonar</h3>
+                <p class="text-sm text-blue-800 font-semibold mt-1">Guárdalo para llevarlo el día del curso.</p>
                 <button onclick="closeModal('modal-nota-rcp')" class="text-gray-500 hover:text-red-500"><i class="fas fa-times text-2xl"></i></button>
             </div>
             
             <div id="nota-rcp-content" class="text-xs border border-gray-300 rounded print-container" style="font-family: Arial, sans-serif;">
-                <!-- El contenido se generará dinámicamente en mostrarNotaRCP() -->
-            </div>
+<table class="w-full border-collapse border border-gray-300 text-left">
+    <tbody>
+        <tr>
+            <th class="border p-2 bg-gray-100" style="width: 30%">Fecha y hora de activación de código azul:</th>
+            <td class="border p-1" style="width: 40%"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white" placeholder="DD/MM/YYYY HH:MM"></td>
+            <th class="border p-2 bg-gray-100">Peso (Kg)</th>
+            <td class="border p-1 text-center"><input type="text" class="w-full h-full border-0 p-1 text-center bg-blue-50 focus:bg-white" placeholder="20"></td>
+        </tr>
+        <tr>
+            <th class="border p-2 bg-gray-100">Lugar de ocurrencia del evento:</th>
+            <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white" placeholder="A-08-UCE PEDIATRIA"></td>
+            <th class="border p-2 bg-gray-100">Evento inicial:</th>
+            <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white" placeholder="Taquicardia ventricular sin pulso"></td>
+        </tr>
+        <tr>
+            <th class="border p-2 bg-gray-100">¿Se realizan maniobras de reanimación cardiopulmonar?</th>
+            <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white" placeholder="Si / No"></td>
+            <td colspan="2" class="border p-0">
+                <table class="w-full border-collapse">
+                    <tr>
+                        <td class="border-b p-2 text-xs" style="width:65%">Fecha y hora de inicio de reanimación cardiopulmonar básica (RCP):</td>
+                        <td class="border-b border-l p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white" placeholder="DD/MM/YYYY HH:MM"></td>
+                    </tr>
+                    <tr>
+                        <td class="p-2 text-xs">Fecha y hora de inicio de reanimación cardiopulmonar avanzada (RCP):</td>
+                        <td class="border-l p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white" placeholder="DD/MM/YYYY HH:MM"></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <th class="border p-2 bg-gray-100">Causas de no reanimación:</th>
+            <td colspan="3" class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td>
+        </tr>
+        <tr>
+            <th colspan="4" class="border p-2 bg-gray-200">^ Maniobras de reanimación cardiopulmonar básica:</th>
+        </tr>
+        <tr>
+            <td colspan="2" class="border p-2"><span class="font-bold">Compresiones torácicas:</span> <input type="text" class="w-24 ml-2 border-b border-gray-400 bg-blue-50 focus:bg-white" placeholder="Si/No"></td>
+            <td colspan="2" class="border p-2"><span class="font-bold">Ventilación con presión positiva:</span> <input type="text" class="w-24 ml-2 border-b border-gray-400 bg-blue-50 focus:bg-white" placeholder="Si/No"></td>
+        </tr>
+        <tr>
+            <th colspan="4" class="border p-2 bg-gray-200">^ Maniobras de reanimación avanzada:</th>
+        </tr>
+        <tr>
+            <td colspan="2" class="border p-2"><span class="font-bold">Tipo de acceso circulatorio:</span> <input type="text" class="w-32 ml-2 border-b border-gray-400 bg-blue-50 focus:bg-white"></td>
+            <td colspan="2" class="border p-2"><span class="font-bold">Tipo de acceso ventilatorio:</span> <input type="text" class="w-32 ml-2 border-b border-gray-400 bg-blue-50 focus:bg-white"></td>
+        </tr>
+        <tr>
+            <th class="border p-2 bg-gray-100">Recibió terapia eléctrica:</th>
+            <td colspan="3" class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white" placeholder="Si / No (Jules...)"></td>
+        </tr>
+        <tr>
+            <th colspan="2" class="border p-2 bg-gray-100 text-center">Medicamentos:</th>
+            <td colspan="2" class="border p-0">
+                <table class="w-full border-collapse h-full">
+                    <tr><th class="border-b p-2 bg-gray-100" style="width:65%">Retorno a la circulación espontánea:</th><td class="border-b border-l p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white" placeholder="Si / No"></td></tr>
+                    <tr><th class="border-b p-2 bg-gray-100">Tiempo total de reanimación cardiopulmonar (minutos):</th><td class="border-b border-l p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td></tr>
+                    <tr><th class="p-2 bg-gray-100" valign="top">Observaciones:</th><td class="border-l p-1" valign="top"><textarea class="w-full h-12 border-0 p-1 resize-none bg-blue-50 focus:bg-white"></textarea></td></tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4" class="border p-0">
+                <table class="w-full border-collapse text-center">
+                    <tr class="bg-gray-100">
+                        <th class="border p-2">Nombre del medicamento</th>
+                        <th class="border p-2">Vía de administración</th>
+                        <th class="border p-2">Hora inicio (Relativo)</th>
+                        <th class="border p-2">Observaciones (dosis, frecuencia...)</th>
+                    </tr>
+                    <tr>
+                        <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td>
+                        <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td>
+                        <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td>
+                        <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td>
+                    </tr>
+                    <tr>
+                        <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td>
+                        <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td>
+                        <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td>
+                        <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td>
+                    </tr>
+                    <tr>
+                        <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td>
+                        <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td>
+                        <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td>
+                        <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" class="border p-2"><span class="font-bold">Número de reanimadores:</span> <input type="text" class="w-32 ml-2 border-b border-gray-400 bg-blue-50 focus:bg-white"></td>
+            <td colspan="2" class="border p-2"><span class="font-bold">Nombre del líder de la reanimación:</span> <input type="text" class="w-64 ml-2 border-b border-gray-400 bg-blue-50 focus:bg-white"></td>
+        </tr>
+    </tbody>
+</table>
+</div>
 
             <div class="flex justify-end gap-2 mt-4 pt-3 border-t print:hidden">
                 <button onclick="window.print()" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded font-bold text-sm"><i class="fas fa-print mr-1"></i> Imprimir</button>
@@ -1092,7 +1190,7 @@
         function printSystem(text) { printMsg('🏥', 'Contexto Clínico / Laboratorio', text, 'msg-sistema'); }
 
         // Mensaje inicial con tiempo 00:00
-        printSystem("Ingresas al cubículo de urgencias. Augusto (7 años, 20 kg) tiene antecedente de Enfermedad Renal Crónica. La madre refiere que la diálisis peritoneal ha estado disfuncional en los últimos días y le acababan de tomar unos exámenes de control. Repentinamente, la madre grita angustiada: '¡Doctor, mi hijo no me responde!'. Ves a Augusto flácido, cianótico y en apnea. ¿Cuál es tu primera acción?");
+        printSystem("Ingresas al cubículo de urgencias. Augusto (7 años, 20 kg) tiene antecedente de Enfermedad Renal Crónica. La madre refiere que la diálisis peritoneal ha estado disfuncional en los últimos días y le acababan de tomar unos exámenes de control. Repentinamente, la madre grita angustiada: '¡Doctor(a), mi hijo no me responde!'. Ves a Augusto flácido, cianótico y en apnea. ¿Cuál es tu primera acción?");
 
         function updateMonitor(params) {
             if(params.rhythm) document.getElementById('val-rhythm').innerText = params.rhythm;
@@ -1207,6 +1305,33 @@
         function finalizarSimulacion() {
             document.getElementById('controls-panel').classList.add('hidden');
             document.getElementById('debriefing-panel').classList.remove('hidden');
+
+            // --- GENERAR RESUMEN DE ACCIONES Y ENVIAR AL CHAT ---
+            let resumenHTML = `<div class="mb-4 text-left">
+                <div class="inline-block p-4 rounded-lg bg-emerald-50 text-emerald-900 border-l-4 border-emerald-600 shadow-md w-full">
+                    <h4 class="font-bold text-lg mb-2"><i class="fas fa-list-check mr-2"></i>Resumen de Acciones (Tiempos Reales)</h4>
+                    <p class="text-xs mb-3 text-emerald-700">Utiliza esta información detallada para diligenciar tu Registro Clínico manualmente.</p>
+                    <ul class="list-disc pl-5 space-y-1 text-sm font-mono">`;
+            resumenHTML += `<li><strong>Min 00:00:</strong> Inicio de Compresiones Torácicas y BVM</li>`;
+            
+            let events = [];
+            state.descargas.forEach((d, i) => { events.push({time: d.time, text: `Descarga ${i+1} administrada (${d.energy} J)`}); });
+            state.meds.forEach(m => { events.push({time: m.time, text: `${m.name} (${m.route}) - ${m.obs}`}); });
+            
+            events.sort((a,b) => a.time.localeCompare(b.time));
+            
+            events.forEach(e => {
+                resumenHTML += `<li><strong>Min ${e.time}:</strong> ${e.text}</li>`;
+            });
+            
+            if (state.tuboColocado) { 
+                resumenHTML += `<li><strong>Min 04:00 (Aprox):</strong> Intubación Orotraqueal exitosa (Tubo 5.5) con Capnografía</li>`; 
+            }
+            resumenHTML += `</ul></div></div>`;
+            const chatBox = document.getElementById('chat-box');
+            chatBox.insertAdjacentHTML('beforeend', resumenHTML);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
             
             let feedbackRoles = '';
             if (state.rolesInnecesarios.length > 0) {
@@ -1323,93 +1448,6 @@
         }
 
         function mostrarNotaRCP() {
-            const tableHTML = `
-                <table class="w-full border-collapse border border-gray-300 text-left">
-                    <tbody>
-                        <tr>
-                            <th class="border p-2 bg-gray-100" style="width: 30%">Fecha y hora de activación de código azul:</th>
-                            <td class="border p-2" style="width: 40%">${state.horaActivacion || 'N/A'}</td>
-                            <th class="border p-2 bg-gray-100">Peso (Kg)</th>
-                            <td class="border p-2 text-center">20</td>
-                        </tr>
-                        <tr>
-                            <th class="border p-2 bg-gray-100">Lugar de ocurrencia del evento:</th>
-                            <td class="border p-2">A-08-UCE PEDIATRIA</td>
-                            <th class="border p-2 bg-gray-100">Evento inicial:</th>
-                            <td class="border p-2">Fibrilación Ventricular (FV) / TVSP</td>
-                        </tr>
-                        <tr>
-                            <th class="border p-2 bg-gray-100">¿Se realizan maniobras de reanimación?</th>
-                            <td class="border p-2">Si</td>
-                            <td colspan="2" class="border p-0">
-                                <table class="w-full border-collapse">
-                                    <tr><td class="border-b p-2" style="width:65%">Fecha y hora de inicio de reanimación cardiopulmonar básica (RCP):</td><td class="border-b border-l p-2">${state.horaInicioRCPBasica || 'N/A'}</td></tr>
-                                    <tr><td class="p-2">Fecha y hora de inicio de reanimación cardiopulmonar avanzada (RCP):</td><td class="border-l p-2">${state.horaInicioRCPAvanzada || 'N/A'}</td></tr>
-                                </table>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th class="border p-2 bg-gray-100">Causas de no reanimación:</th>
-                            <td colspan="3" class="border p-2"></td>
-                        </tr>
-                        <tr>
-                            <th colspan="4" class="border p-2 bg-gray-200">^ Maniobras de reanimación cardiopulmonar básica:</th>
-                        </tr>
-                        <tr>
-                            <td colspan="2" class="border p-2"><span class="font-bold">Compresiones torácicas:</span> Si</td>
-                            <td colspan="2" class="border p-2"><span class="font-bold">Ventilación con presión positiva:</span> Si</td>
-                        </tr>
-                        <tr>
-                            <th colspan="4" class="border p-2 bg-gray-200">^ Maniobras de reanimación avanzada:</th>
-                        </tr>
-                        <tr>
-                            <td colspan="2" class="border p-2"><span class="font-bold">Tipo de acceso circulatorio:</span> IV / IO</td>
-                            <td colspan="2" class="border p-2"><span class="font-bold">Tipo de acceso ventilatorio:</span> ${state.tuboColocado ? 'Intubación Orotraqueal' : 'Bolsa-Válvula-Máscara (BVM)'}</td>
-                        </tr>
-                        <tr>
-                            <th class="border p-2 bg-gray-100">Recibió terapia eléctrica:</th>
-                            <td colspan="3" class="border p-2">${state.descargasDadas > 0 ? 'Si (' + state.descargasDadas + ' descargas dadas)' : 'No'}</td>
-                        </tr>
-                        <tr>
-                            <th colspan="2" class="border p-2 bg-gray-100 text-center">Medicamentos:</th>
-                            <td colspan="2" class="border p-0">
-                                <table class="w-full border-collapse h-full">
-                                    <tr><th class="border-b p-2 bg-gray-100" style="width:65%">Retorno a la circulación espontánea:</th><td class="border-b border-l p-2 font-bold">${state.fase >= 6 ? 'Si' : 'No'}</td></tr>
-                                    <tr><th class="border-b p-2 bg-gray-100">Tiempo total de reanimación cardiopulmonar (minutos):</th><td class="border-b border-l p-2 font-bold">${formatTimer(state.timerSegundos)}</td></tr>
-                                    <tr><th class="p-2 bg-gray-100" valign="top">Observaciones:</th><td class="border-l p-2" valign="top">RCP de alta calidad guiada por metas. ${state.posparoAdecuados ? 'Cuidados posparo iniciados.' : ''}</td></tr>
-                                </table>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="4" class="border p-0">
-                                <table class="w-full border-collapse text-center">
-                                    <tr class="bg-gray-100">
-                                        <th class="border p-2">Nombre del medicamento</th>
-                                        <th class="border p-2">Vía de administración</th>
-                                        <th class="border p-2">Hora inicio (Relativo)</th>
-                                        <th class="border p-2">Observaciones (dosis, frecuencia...)</th>
-                                    </tr>
-                                    ${state.meds.length > 0 ? state.meds.map(m => `
-                                    <tr>
-                                        <td class="border p-2 font-semibold">${m.name}</td>
-                                        <td class="border p-2">${m.route}</td>
-                                        <td class="border p-2">Minuto ${m.time}</td>
-                                        <td class="border p-2">${m.obs}</td>
-                                    </tr>`).join('') : `
-                                    <tr><td colspan="4" class="border p-2 text-center text-gray-500">Ningún medicamento administrado</td></tr>
-                                    `}
-                                </table>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" class="border p-2"><span class="font-bold">Número de reanimadores:</span> ${state.rolesAsignados.length || 6}</td>
-                            <td colspan="2" class="border p-2"><span class="font-bold">Nombre del líder de la reanimación:</span> ${state.participante.nombre || '__________________________'}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            `;
-            
-            document.getElementById('nota-rcp-content').innerHTML = tableHTML;
             openModal('modal-nota-rcp');
         }
 
@@ -1473,15 +1511,15 @@
 
             if (actionId === 'esperar_2_minutos') {
                 if (state.esperandoReanudacionRCP) {
-                    printDesfib("Doctor, acabamos de dar una descarga. Primero debemos indicar reanudar compresiones inmediatamente.");
+                    printDesfib("Doctor(a), acabamos de dar una descarga. Primero debemos indicar reanudar compresiones inmediatamente.");
                     return;
                 }
                 if (state.fase === 0) {
-                    printRegistro("Doctor, aún no se ha confirmado el paro ni iniciado maniobras de reanimación.");
+                    printRegistro("Doctor(a), aún no se ha confirmado el paro ni iniciado maniobras de reanimación.");
                     return;
                 }
                 if (!state.rcpEnCurso && state.fase === 1) {
-                    printRegistro("Doctor, primero debemos iniciar las compresiones torácicas con los parámetros adecuados.");
+                    printRegistro("Doctor(a), primero debemos iniciar las compresiones torácicas con los parámetros adecuados.");
                     return;
                 }
 
@@ -1539,10 +1577,10 @@
                 if (state.descargasDadas >= 3 || state.comprobacionesRitmo >= 4) {
                     if (payload === 'SINUS') {
                         state.ritmoIdentificado = true;
-                        printDesfib("<strong>Confirmado:</strong> El ritmo es organizado (Sinusal). Doctor, por favor verifique si el paciente tiene pulso.");
+                        printDesfib("<strong>Confirmado:</strong> El ritmo es organizado (Sinusal). Doctor(a), por favor verifique si el paciente tiene pulso.");
                         accionEsCorrecta = true;
                     } else {
-                        printDesfib(`Doctor, observe el trazado. Parece ser un ritmo organizado (Ritmo Sinusal). Por favor reevalúe.`);
+                        printDesfib(`Doctor(a), observe el trazado. Parece ser un ritmo organizado (Ritmo Sinusal). Por favor reevalúe.`);
                     }
                 } else {
                     if (payload === 'FV') {
@@ -1555,7 +1593,7 @@
                         printDesfib("<strong>Confirmado:</strong> El ritmo es Fibrilación Ventricular. ¿Cuál es su siguiente orden?");
                         accionEsCorrecta = true;
                     } else {
-                        printDesfib(`Doctor, ese no parece ser el ritmo en el trazado. Por favor reevalúe el osciloscopio.`);
+                        printDesfib(`Doctor(a), ese no parece ser el ritmo en el trazado. Por favor reevalúe el osciloscopio.`);
                     }
                 }
             }
@@ -1565,7 +1603,7 @@
                 state.posparoAdecuados = payload.adecuados;
                 if (payload.distractores.length > 0) {
                      printLeader(`"Iniciemos cuidados posparo guiados por metas e incluyan: ${[...payload.adecuados, ...payload.distractores].join(', ')}."`);
-                     printMeds("Doctor, las guías AHA recomiendan titular el O2 para evitar hiperoxia (SatO2 94-99%) y priorizar la estabilización antes de traslados a Resonancia. Ajustaremos a las metas.");
+                     printMeds("Doctor(a), las guías AHA recomiendan titular el O2 para evitar hiperoxia (SatO2 94-99%) y priorizar la estabilización antes de traslados a Resonancia. Ajustaremos a las metas.");
                 } else {
                      printLeader(`"Iniciemos cuidados posparo guiados por metas: ${payload.adecuados.join(', ')}."`);
                      printMeds("¡Entendido! Ajustando FIO2 para saturación 94-99%, preparando inotrópicos y programando control de temperatura.");
@@ -1597,7 +1635,7 @@
                     state.fase = 6;
                     accionEsCorrecta = true;
                 } else {
-                    printCompresor("Doctor, no se palpa pulso central. ¿Cuál es su siguiente orden?");
+                    printCompresor("Doctor(a), no se palpa pulso central. ¿Cuál es su siguiente orden?");
                 }
                 return;
             }
@@ -1611,13 +1649,13 @@
             }
 
             if (actionId === 'oxigeno_mascara' || actionId === 'oxigeno_venturi') {
-                if(state.fase > 0) printViaAerea("Doctor, el paciente se encuentra en paro cardiorrespiratorio y apnea. Estos dispositivos no brindan ventilación a presión positiva. ¿Cuál es su siguiente orden?");
+                if(state.fase > 0) printViaAerea("Doctor(a), el paciente se encuentra en paro cardiorrespiratorio y apnea. Estos dispositivos no brindan ventilación a presión positiva. ¿Cuál es su siguiente orden?");
                 else printViaAerea("Dispositivo colocado, pero el paciente continúa en apnea y cianótico. ¿Cuál es su siguiente orden?");
                 return;
             }
 
             if (actionId === 'adrenalina_ampolla_directa') {
-                printMeds("Doctor/a, en pediatría 1 ampolla directa (1 mg) es una sobredosis masiva para 20 kg. El protocolo institucional del HPTU exige diluir 1 ampolla en 10 mL (0.1 mL/kg). ¿Cuántos mL de la dilución preparo?");
+                printMeds("Doctor(a), en pediatría 1 ampolla directa (1 mg) es una sobredosis masiva para 20 kg. El protocolo institucional del HPTU exige diluir 1 ampolla en 10 mL (0.1 mL/kg). ¿Cuántos mL de la dilución preparo?");
                 return;
             }
 
@@ -1635,7 +1673,7 @@
                     } else if (state.descargasDadas === 2) {
                         state.fase = 4;
                         setTimeout(() => {
-                            printSystem("📋 Registro / Tiempo: 'Doctor, acaban de llegar del laboratorio los gases tomados previo al evento: pH 7.18, pCO2 75 mmHg, pO2 60 mmHg, Potasio 7.8 mEq/L, Sodio 135 mEq/L, Calcio iónico 0.9 mmol/L'. ¿Cuál es su siguiente orden?");
+                            printSystem("📋 Registro / Tiempo: 'Doctor(a), acaban de llegar del laboratorio los gases tomados previo al evento: pH 7.18, pCO2 75 mmHg, pO2 60 mmHg, Potasio 7.8 mEq/L, Sodio 135 mEq/L, Calcio iónico 0.9 mmol/L'. ¿Cuál es su siguiente orden?");
                         }, 1800);
                     } else if (state.descargasDadas >= 3) {
                         // Aquí no se avanza la fase aún. Se queda en la fase 5 o avanza a la 6 tras los 2 minutos.
@@ -1643,7 +1681,7 @@
                     }
                     return;
                 } else {
-                    printDesfib("Doctor, tras entregar la descarga, ¿cuál es su orden inmediata?");
+                    printDesfib("Doctor(a), tras entregar la descarga, ¿cuál es su orden inmediata?");
                     state.omisiones++;
                     if (state.omisiones >= 2) {
                         printAlert("Descarga entregada. Las guías exigen reanudar inmediatamente las compresiones sin verificar pulso ni ritmo.");
@@ -1673,7 +1711,7 @@
                             state.fase = 2;
                             accionEsCorrecta = true;
                         } else {
-                            printCompresor(`Doctor, ¿me confirma la técnica? ${payload.freq !== '100-120' ? 'Esa frecuencia está fuera de meta (100-120/min).' : ''} ${payload.depth !== '1/3-1/2' ? 'La profundidad o reexpansión no son las indicadas.' : ''} ¿Cuál es su siguiente orden?`);
+                            printCompresor(`Doctor(a), ¿me confirma la técnica? ${payload.freq !== '100-120' ? 'Esa frecuencia está fuera de meta (100-120/min).' : ''} ${payload.depth !== '1/3-1/2' ? 'La profundidad o reexpansión no son las indicadas.' : ''} ¿Cuál es su siguiente orden?`);
                         }
                     }
                     if (actionId === 'bvm') {
@@ -1726,7 +1764,7 @@
                             printMeds("<strong>¡Orden recibida: Adrenalina 2 mL de la dilución 1:10,000!</strong> Administrando 2 mL (0.1 mL/kg = 0.01 mg/kg) en bolo IV rápido y lavado con 5 cc de SSN. ¿Cuál es su siguiente orden?");
                             accionEsCorrecta = true;
                         } else {
-                            printMeds(`Doctor/a, para un paciente de 20 kg de la dilución estándar, el volumen indicado no es ${payload} mL. ¿Me confirma la dosis correcta?`);
+                            printMeds(`Doctor(a), para un paciente de 20 kg de la dilución estándar, el volumen indicado no es ${payload} mL. ¿Me confirma la dosis correcta?`);
                         }
                     }
                     if (actionId === 'bvm' || actionId === 'iniciar_rcp_params') {
@@ -1789,7 +1827,7 @@
                             printViaAerea("<strong>¡Orden recibida!</strong> Intubación orotraqueal exitosa con Tubo # 5.5 con neumotaponador. Capnografía continua conectada marcando ETCO2 en 18 mmHg. Frecuencia ventilatoria ajustada a 1 ventilación cada 2 a 3 segundos (20-30/min) sin pausar compresiones. Han pasado 2 minutos de RCP. ¿Cuál es su siguiente orden?");
                             accionEsCorrecta = true;
                         } else {
-                            printViaAerea(`Doctor: ${payload.size !== '5.5' ? 'El tamaño de tubo seleccionado difiere de la fórmula para 7 años (Edad/4 + 4 = 5.75 / Tubo 5.5).' : ''} ${payload.conf !== 'etco2' ? 'Las guías 2025 exigen capnografía cuantitativa continua para confirmar el tubo.' : ''} ¿Cuál es su siguiente orden?`);
+                            printViaAerea(`Doctor(a): ${payload.size !== '5.5' ? 'El tamaño de tubo seleccionado difiere de la fórmula para 7 años (Edad/4 + 4 = 5.75 / Tubo 5.5).' : ''} ${payload.conf !== 'etco2' ? 'Las guías 2025 exigen capnografía cuantitativa continua para confirmar el tubo.' : ''} ¿Cuál es su siguiente orden?`);
                         }
                     }
                     break;
@@ -1799,8 +1837,8 @@
                 state.omisiones++;
                 if (state.omisiones >= 2) {
                     const rescates = {
-                        0: "Doctor, el niño está muy frío y no parece respirar, ¿verifico el pulso central?",
-                        1: "Doctor, ¿A qué frecuencia (100-120) y profundidad (1/3 a 1/2) comprimo?",
+                        0: "Doctor(a), el niño está muy frío y no parece respirar, ¿verifico el pulso central?",
+                        1: "Doctor(a), ¿A qué frecuencia (100-120) y profundidad (1/3 a 1/2) comprimo?",
                         2: "Descarga entregada, ¿sigo con las compresiones inmediatamente para minimizar la pausa?",
                         3: "Llevamos 2 minutos tras la 1ra descarga y persiste en FV. ¿Descargamos a 4 J/kg (80 J) y preparamos Adrenalina diluida?",
                         4: "Llegaron los gases con Potasio alto y el paciente tiene ERC... Las guías permiten usar Calcio y Bicarbonato en hiperkalemia severa, ¿los administro?",

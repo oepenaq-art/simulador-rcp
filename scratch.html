@@ -1,0 +1,98 @@
+<table class="w-full border-collapse border border-gray-300 text-left">
+    <tbody>
+        <tr>
+            <th class="border p-2 bg-gray-100" style="width: 30%">Fecha y hora de activación de código azul:</th>
+            <td class="border p-1" style="width: 40%"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white" placeholder="DD/MM/YYYY HH:MM"></td>
+            <th class="border p-2 bg-gray-100">Peso (Kg)</th>
+            <td class="border p-1 text-center"><input type="text" class="w-full h-full border-0 p-1 text-center bg-blue-50 focus:bg-white" placeholder="20"></td>
+        </tr>
+        <tr>
+            <th class="border p-2 bg-gray-100">Lugar de ocurrencia del evento:</th>
+            <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white" placeholder="A-08-UCE PEDIATRIA"></td>
+            <th class="border p-2 bg-gray-100">Evento inicial:</th>
+            <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white" placeholder="Ej. Taquicardia ventricular sin pulso"></td>
+        </tr>
+        <tr>
+            <th class="border p-2 bg-gray-100">¿Se realizan maniobras de reanimación cardiopulmonar?</th>
+            <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white" placeholder="Si / No"></td>
+            <td colspan="2" class="border p-0">
+                <table class="w-full border-collapse">
+                    <tr>
+                        <td class="border-b p-2 text-xs" style="width:65%">Fecha y hora de inicio de reanimación cardiopulmonar básica (RCP):</td>
+                        <td class="border-b border-l p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white" placeholder="DD/MM/YYYY HH:MM"></td>
+                    </tr>
+                    <tr>
+                        <td class="p-2 text-xs">Fecha y hora de inicio de reanimación cardiopulmonar avanzada (RCP):</td>
+                        <td class="border-l p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white" placeholder="DD/MM/YYYY HH:MM"></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <th class="border p-2 bg-gray-100">Causas de no reanimación:</th>
+            <td colspan="3" class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td>
+        </tr>
+        <tr>
+            <th colspan="4" class="border p-2 bg-gray-200">^ Maniobras de reanimación cardiopulmonar básica:</th>
+        </tr>
+        <tr>
+            <td colspan="2" class="border p-2"><span class="font-bold">Compresiones torácicas:</span> <input type="text" class="w-24 ml-2 border-b border-gray-400 bg-blue-50 focus:bg-white" placeholder="Si/No"></td>
+            <td colspan="2" class="border p-2"><span class="font-bold">Ventilación con presión positiva:</span> <input type="text" class="w-24 ml-2 border-b border-gray-400 bg-blue-50 focus:bg-white" placeholder="Si/No"></td>
+        </tr>
+        <tr>
+            <th colspan="4" class="border p-2 bg-gray-200">^ Maniobras de reanimación avanzada:</th>
+        </tr>
+        <tr>
+            <td colspan="2" class="border p-2"><span class="font-bold">Tipo de acceso circulatorio:</span> <input type="text" class="w-32 ml-2 border-b border-gray-400 bg-blue-50 focus:bg-white"></td>
+            <td colspan="2" class="border p-2"><span class="font-bold">Tipo de acceso ventilatorio:</span> <input type="text" class="w-32 ml-2 border-b border-gray-400 bg-blue-50 focus:bg-white"></td>
+        </tr>
+        <tr>
+            <th class="border p-2 bg-gray-100">Recibió terapia eléctrica:</th>
+            <td colspan="3" class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white" placeholder="Si / No (Jules...)"></td>
+        </tr>
+        <tr>
+            <th colspan="2" class="border p-2 bg-gray-100 text-center">Medicamentos:</th>
+            <td colspan="2" class="border p-0">
+                <table class="w-full border-collapse h-full">
+                    <tr><th class="border-b p-2 bg-gray-100" style="width:65%">Retorno a la circulación espontánea:</th><td class="border-b border-l p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white" placeholder="Si / No"></td></tr>
+                    <tr><th class="border-b p-2 bg-gray-100">Tiempo total de reanimación cardiopulmonar (minutos):</th><td class="border-b border-l p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td></tr>
+                    <tr><th class="p-2 bg-gray-100" valign="top">Observaciones:</th><td class="border-l p-1" valign="top"><textarea class="w-full h-12 border-0 p-1 resize-none bg-blue-50 focus:bg-white"></textarea></td></tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="4" class="border p-0">
+                <table class="w-full border-collapse text-center">
+                    <tr class="bg-gray-100">
+                        <th class="border p-2">Nombre del medicamento</th>
+                        <th class="border p-2">Vía de administración</th>
+                        <th class="border p-2">Hora inicio (Relativo)</th>
+                        <th class="border p-2">Observaciones (dosis, frecuencia...)</th>
+                    </tr>
+                    <tr>
+                        <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td>
+                        <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td>
+                        <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td>
+                        <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td>
+                    </tr>
+                    <tr>
+                        <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td>
+                        <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td>
+                        <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td>
+                        <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td>
+                    </tr>
+                    <tr>
+                        <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td>
+                        <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td>
+                        <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td>
+                        <td class="border p-1"><input type="text" class="w-full h-full border-0 p-1 bg-blue-50 focus:bg-white"></td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" class="border p-2"><span class="font-bold">Número de reanimadores:</span> <input type="text" class="w-32 ml-2 border-b border-gray-400 bg-blue-50 focus:bg-white"></td>
+            <td colspan="2" class="border p-2"><span class="font-bold">Nombre del líder de la reanimación:</span> <input type="text" class="w-64 ml-2 border-b border-gray-400 bg-blue-50 focus:bg-white"></td>
+        </tr>
+    </tbody>
+</table>
