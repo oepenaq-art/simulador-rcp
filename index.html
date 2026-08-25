@@ -868,18 +868,18 @@
                     </div>
                 </div>
 
-                <!-- SECCIÓN 6: CUIDADOS POSPARO (DESTACADO EN VERDE CLARO CON TEXTO NEGRO) -->
-                <div class="bg-emerald-100 border-4 border-emerald-500 rounded-2xl p-4 shadow-xl text-black my-3 hidden" id="posparo-container">
+                <!-- SECCIÓN 6: CUIDADOS POSPARO (DESTACADO EN VERDE CON TEXTO NEGRO Y BOTÓN NÍTIDO) -->
+                <div id="posparo-container" class="my-3 p-4 rounded-2xl shadow-xl hidden" style="background-color: #dcfce7; border: 4px solid #16a34a;">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="bg-emerald-700 text-white text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider shadow">
-                            <i class="fas fa-star text-yellow-300 mr-1"></i> ¡RCE LOGRADO!
+                        <span class="text-xs font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-sm flex items-center" style="background-color: #15803d; color: #ffffff;">
+                            <i class="fas fa-star text-yellow-300 mr-1.5"></i> ¡RCE LOGRADO!
                         </span>
-                        <i class="fas fa-heartbeat text-2xl text-emerald-700"></i>
+                        <i class="fas fa-heartbeat text-2xl" style="color: #15803d;"></i>
                     </div>
-                    <h3 class="font-black text-base text-black mb-1 tracking-wide uppercase">CUIDADOS POST-REANIMACIÓN</h3>
-                    <p class="text-xs text-black mb-3 font-bold">El paciente ha recuperado el pulso central. Inicia inmediatamente el manejo posparo guiado por metas.</p>
-                    <button onclick="openModal('modal-posparo')" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-black py-3 px-4 rounded-xl text-sm shadow-lg flex items-center justify-center transition-transform transform hover:scale-102 active:scale-95 border-2 border-emerald-950">
-                        <i class="fas fa-clipboard-check text-lg mr-2 text-white"></i> ABRIR LISTA DE CUIDADOS POSPARO
+                    <h3 class="font-black text-base mb-1 tracking-wide uppercase" style="color: #000000;">CUIDADOS POST-REANIMACIÓN</h3>
+                    <p class="text-xs mb-3 font-bold" style="color: #000000;">El paciente ha recuperado el pulso central. Inicia inmediatamente el manejo posparo guiado por metas.</p>
+                    <button onclick="openModal('modal-posparo')" class="w-full font-black py-3.5 px-4 rounded-xl text-sm shadow-lg flex items-center justify-center transition-all transform hover:scale-102 active:scale-95 cursor-pointer" style="background-color: #15803d; color: #ffffff; border: 2px solid #14532d;">
+                        <i class="fas fa-clipboard-check text-lg mr-2" style="color: #ffffff;"></i> <span style="color: #ffffff; font-weight: 900; letter-spacing: 0.5px;">ABRIR LISTA DE CUIDADOS POSPARO</span>
                     </button>
                 </div>
             </div>
