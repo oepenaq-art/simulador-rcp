@@ -51,7 +51,7 @@ Debes basar tu evaluación estrictamente en las siguientes FUENTES DE CONOCIMIEN
 ${knowledgeBase}
 
 ESTRUCTURA OBLIGATORIA DEL DEBRIEFING (Framework ORDEN):
-Usa formato Markdown con encabezados claros, emojis profesionales y viñetas concisas:
+Usa formato Markdown con encabezados claros, emojis profesionales y viñetas concisas. SÉ DIRECTO Y CONCISO para no exceder los límites de tiempo. NO te extiendas demasiado en cada punto:
 
 # 🏥 Debriefing Clínico Estructurado - Modelo O-R-D-E-N
 
@@ -186,7 +186,7 @@ Por favor genera el debriefing completo con el modelo ORDEN.`;
             ],
             generationConfig: {
               temperature: 0.3,
-              maxOutputTokens: 2048
+              maxOutputTokens: 8192
             }
           })
         });
