@@ -10,7 +10,7 @@
     <style type="text/tailwindcss">
         @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
         .monitor-text { font-family: 'Share Tech Mono', monospace; }
-        .log-container { height: 480px; overflow-y: auto; scroll-behavior: smooth; }
+        .log-container { scroll-behavior: smooth; }
         .alarm-blink { animation: blinker 1s linear infinite; }
         @keyframes blinker { 50% { opacity: 0; } }
         
@@ -705,7 +705,7 @@
     </div>
 
     <!-- MAIN APP CONTAINER -->
-    <div class="max-w-6xl mx-auto bg-white shadow-2xl rounded-xl overflow-hidden flex flex-col h-[92vh]">
+    <div class="w-full md:max-w-6xl mx-auto bg-white shadow-2xl md:rounded-xl overflow-hidden flex flex-col h-screen md:h-[92vh]">
         
         <!-- Header con Botón de Ayuda Cognitiva Altamente Visible -->
         <div class="bg-blue-900 text-white p-3 flex justify-between items-center shadow-md z-30 relative">
@@ -729,43 +729,43 @@
         </div>
 
         <!-- Monitor Vital -->
-        <div class="bg-black text-green-400 p-4 flex flex-col md:flex-row justify-between items-center monitor-text border-b-8 border-gray-800 relative z-30 shadow-inner">
-            <div class="absolute top-2 right-3 text-xs text-gray-500">CORPULS 3 / ZOLL X SERIES</div>
+        <div class="bg-black text-green-400 p-2 md:p-4 flex flex-col md:flex-row justify-between items-center monitor-text border-b-4 md:border-b-8 border-gray-800 relative z-30 shadow-inner flex-shrink-0">
+            <div class="absolute top-1 right-2 md:top-2 md:right-3 text-[10px] md:text-xs text-gray-500 hidden md:block">CORPULS 3 / ZOLL X SERIES</div>
             
-            <div class="w-full md:w-1/2 grid grid-cols-2 gap-3 pr-0 md:pr-4">
-                <div class="bg-gray-900 p-2 rounded border border-gray-700">
-                    <div class="text-xs text-gray-400">ESTADO MONITOR</div>
-                    <div class="text-base font-bold truncate text-green-400" id="val-rhythm">No conectado</div>
+            <div class="w-full md:w-1/2 grid grid-cols-4 md:grid-cols-2 gap-1 md:gap-3 pr-0 md:pr-4 mt-2 md:mt-0">
+                <div class="bg-gray-900 p-1 md:p-2 rounded border border-gray-700 flex flex-col justify-center">
+                    <div class="text-[9px] md:text-xs text-gray-400 leading-tight">MONITOR</div>
+                    <div class="text-xs md:text-base font-bold truncate text-green-400" id="val-rhythm">Apagado</div>
                 </div>
-                <div class="bg-gray-900 p-2 rounded border border-gray-700">
-                    <div class="text-xs text-green-500 font-bold">FC (lpm)</div>
-                    <div class="text-3xl font-bold text-green-400" id="val-hr">---</div>
+                <div class="bg-gray-900 p-1 md:p-2 rounded border border-gray-700 flex flex-col justify-center">
+                    <div class="text-[9px] md:text-xs text-green-500 font-bold leading-tight">FC(lpm)</div>
+                    <div class="text-base md:text-3xl font-bold text-green-400" id="val-hr">---</div>
                 </div>
-                <div class="bg-gray-900 p-2 rounded border border-gray-700">
-                    <div class="text-xs text-blue-400 font-bold">SpO2 (%)</div>
-                    <div class="text-3xl font-bold text-blue-400" id="val-spo2">---</div>
+                <div class="bg-gray-900 p-1 md:p-2 rounded border border-gray-700 flex flex-col justify-center">
+                    <div class="text-[9px] md:text-xs text-blue-400 font-bold leading-tight">SpO2(%)</div>
+                    <div class="text-base md:text-3xl font-bold text-blue-400" id="val-spo2">---</div>
                 </div>
-                <div class="bg-gray-900 p-2 rounded border border-gray-700">
-                    <div class="text-xs text-yellow-400 font-bold">EtCO2 (mmHg)</div>
-                    <div class="text-3xl font-bold text-yellow-400" id="val-etco2">---</div>
+                <div class="bg-gray-900 p-1 md:p-2 rounded border border-gray-700 flex flex-col justify-center">
+                    <div class="text-[9px] md:text-xs text-yellow-400 font-bold leading-tight">EtCO2</div>
+                    <div class="text-base md:text-3xl font-bold text-yellow-400" id="val-etco2">---</div>
                 </div>
             </div>
             
             <!-- Osciloscopio ECG en Tiempo Real -->
-            <div class="w-full md:w-1/2 h-28 mt-3 md:mt-0 rounded border-2 border-green-800 relative overflow-hidden ecg-grid">
+            <div class="w-full md:w-1/2 h-14 md:h-28 mt-1 md:mt-0 rounded border border-green-800 relative overflow-hidden ecg-grid">
                 <canvas id="ecg-canvas" class="w-full h-full"></canvas>
-                <div class="absolute top-1 left-2 text-[10px] text-green-600 font-mono tracking-widest" id="lead-label">DERIVACIÓN II (1 mV / 25 mm/s)</div>
+                <div class="absolute top-0.5 left-1 md:top-1 md:left-2 text-[8px] md:text-[10px] text-green-600 font-mono tracking-widest" id="lead-label">DERIVACIÓN II</div>
             </div>
         </div>
 
         <!-- Main Content Area -->
-        <div class="flex flex-col md:flex-row flex-1 overflow-hidden relative z-10">
+        <div class="flex flex-col md:flex-row flex-1 overflow-hidden relative z-10 pb-[60px] md:pb-0">
             
             <!-- Logs / Chat Area con Time Stamps en Cada Mensaje -->
-            <div class="w-full md:w-3/5 p-4 bg-gray-50 border-r log-container" id="chat-box"></div>
+            <div class="w-full md:w-3/5 p-4 bg-gray-50 border-r log-container hidden md:flex flex-col h-full overflow-y-auto" id="chat-box"></div>
 
             <!-- Controls Panel -->
-            <div class="w-full md:w-2/5 p-4 bg-gray-100 overflow-y-auto border-l border-gray-300 shadow-inner space-y-3" id="controls-panel">
+            <div class="w-full md:w-2/5 p-4 bg-gray-100 overflow-y-auto border-l border-gray-300 shadow-inner space-y-3 block h-full" id="controls-panel">
                 <div class="flex justify-between items-center border-b pb-2 mb-1">
                     <h2 class="font-bold text-gray-800 text-sm"><i class="fas fa-clipboard-list text-blue-600 mr-1.5"></i> Menú de Órdenes Clínicas</h2>
                     <button onclick="consultarAyudaCognitiva()" class="text-xs text-amber-700 font-bold hover:underline flex items-center bg-amber-100 px-2 py-0.5 rounded border border-amber-300">
@@ -1187,6 +1187,64 @@
             
             takeAction('cuidados_posparo_submit', { distractores, adecuados });
         }
+
+        // --- MOBILE TABS LOGIC ---
+        let activeMobileTab = 'controls';
+        let unreadMessages = 0;
+        
+        function switchMobileTab(tab) {
+            if (window.innerWidth >= 768) return;
+            
+            activeMobileTab = tab;
+            const chatBox = document.getElementById('chat-box');
+            const controlsPanel = document.getElementById('controls-panel');
+            const btnChat = document.getElementById('tab-btn-chat');
+            const btnControls = document.getElementById('tab-btn-controls');
+            const badge = document.getElementById('chat-badge');
+            
+            if (tab === 'chat') {
+                chatBox.classList.remove('hidden');
+                chatBox.classList.add('flex');
+                controlsPanel.classList.remove('block');
+                controlsPanel.classList.add('hidden');
+                
+                btnChat.classList.replace('opacity-60', 'opacity-100');
+                btnChat.classList.add('text-blue-300', 'font-bold');
+                
+                btnControls.classList.replace('opacity-100', 'opacity-60');
+                btnControls.classList.remove('text-blue-300', 'font-bold');
+                
+                unreadMessages = 0;
+                badge.classList.add('hidden');
+                badge.innerText = '0';
+                
+                chatBox.scrollTop = chatBox.scrollHeight;
+            } else {
+                chatBox.classList.remove('flex');
+                chatBox.classList.add('hidden');
+                controlsPanel.classList.remove('hidden');
+                controlsPanel.classList.add('block');
+                
+                btnControls.classList.replace('opacity-60', 'opacity-100');
+                btnControls.classList.add('text-blue-300', 'font-bold');
+                
+                btnChat.classList.replace('opacity-100', 'opacity-60');
+                btnChat.classList.remove('text-blue-300', 'font-bold');
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            const chatBox = document.getElementById('chat-box');
+            const controlsPanel = document.getElementById('controls-panel');
+            if (window.innerWidth >= 768) {
+                chatBox.classList.remove('hidden');
+                chatBox.classList.add('flex');
+                controlsPanel.classList.remove('hidden');
+                controlsPanel.classList.add('block');
+            } else {
+                switchMobileTab(activeMobileTab);
+            }
+        });
 
         // --- SISTEMA DE MENSAJES CON CRONÓMETRO DIGITAL INCORPORADO ---
         function printMsg(senderIcon, roleName, text, styleClass) {
