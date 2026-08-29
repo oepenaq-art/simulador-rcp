@@ -431,7 +431,7 @@
                     <input type="checkbox" id="pos-hemo" class="mt-1 mr-3 h-4 w-4 text-green-600 rounded">
                     <div>
                         <span class="font-bold text-gray-800">Soporte Hemodinámico</span>
-                        <p class="text-xs text-gray-500">Administrar bolos de líquidos y vasoactivos para mantener PAS ≥ percentil 10 para la edad.</p>
+                        <p class="text-xs text-gray-500">Administrar bolos de líquidos y/o vasoactivos.</p>
                     </div>
                 </label>
                 <label class="flex items-start p-2 border rounded hover:bg-green-50 cursor-pointer">
@@ -841,14 +841,9 @@
                     <div class="flex items-center text-amber-900 font-extrabold text-xs uppercase tracking-wider mb-2">
                         <i class="fas fa-bolt text-amber-600 mr-1.5"></i> Monitor / Desfibrilación
                     </div>
-                    <div class="grid grid-cols-2 gap-1.5 mb-2">
-                        <button onclick="takeAction('conectar_monitor')" class="bg-white hover:bg-amber-100 text-amber-950 border border-amber-300 py-2 px-2.5 rounded-lg text-xs font-bold shadow-xs text-left flex items-center transition-colors">
-                            <i class="fas fa-plug text-amber-600 mr-1.5"></i> Conectar Parches
-                        </button>
-                        <button onclick="takeAction('verificar_ritmo_palas')" class="bg-white hover:bg-amber-100 text-amber-950 border-2 border-amber-500 py-2 px-2.5 rounded-lg text-xs font-bold shadow-xs text-left flex items-center transition-colors">
-                            <i class="fas fa-heart-pulse text-amber-600 mr-1.5"></i> Verificar Ritmo con Palas...
-                        </button>
-                    </div>
+                    <button onclick="takeAction('verificar_ritmo_palas')" class="w-full bg-white hover:bg-amber-100 text-amber-950 border-2 border-amber-500 py-2.5 px-3 rounded-lg text-xs font-bold shadow-xs text-left flex items-center justify-center transition-colors mb-2">
+                        <i class="fas fa-heart-pulse text-amber-600 mr-1.5 text-base"></i> Verificar Ritmo con Palas...
+                    </button>
                     <button onclick="openModal('modal-desfibrilador')" class="w-full bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 text-white font-extrabold py-2.5 px-3 rounded-lg text-xs text-center shadow-md flex items-center justify-center transition-all transform active:scale-98">
                         <i class="fas fa-bolt text-base mr-2"></i> DESFIBRILAR MANUALMENTE
                     </button>
@@ -1542,7 +1537,6 @@
                     'oxigeno_mascara': 'Colocar Máscara de No Reinhalación',
                     'oxigeno_venturi': 'Colocar Sistema Venturi',
                     'bvm': 'Iniciar ventilación bolsa-válvula-máscara (15:2) conectada a O2',
-                    'conectar_monitor': 'Conectar palas/parches del monitor desfibrilador',
                     'descargar': '¡Despejen al paciente! Administrar descarga.',
                     'amiodarona': 'Administrar Amiodarona 100 mg en bolo IV',
                     'lidocaina': 'Administrar Lidocaína 20 mg en bolo IV',
@@ -1596,18 +1590,7 @@
                 return;
             }
 
-            if (actionId === 'conectar_monitor') {
-                state.parchesConectados = true;
-                if (state.descargasDadas >= 3 || state.comprobacionesRitmo >= 4) {
-                    state.ritmoECG = 'SINUS';
-                } else {
-                    state.ritmoECG = 'VF';
-                }
-                updateMonitor({ rhythm: 'Trazado Activo' });
-                printDesfib("<strong>¡Orden recibida!</strong> Parches instalados en posición anterolateral y monitor en modo desfibrilador. Observe el trazado en el osciloscopio...");
-                setTimeout(() => openModal('modal-ritmo'), 4000);
-                return;
-            }
+
 
             if (actionId === 'verificar_ritmo_palas') {
                 const delta = state.timerSegundos - state.ultimoCicloTiempo;
