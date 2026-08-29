@@ -61,7 +61,11 @@ Usa formato Markdown con encabezados claros, emojis profesionales y viñetas con
 ---
 
 ### 🗣️ O - Organización y Liderazgo (Teamwork & CRM)
-- Asignación de los roles clave.
+- Evaluación Inicial Sistemática: Evalúa si siguió el orden protocolario (1. Verificar Respuesta -> 2. Verificar Respiración -> 3. Palpar Pulso Central).
+- Momento de Activación del Código Azul: 
+  * Si el participante activó el Código Azul DESPUÉS de verificar el pulso (TARDÍO), explícale de forma constructiva: "Al confirmar que el paciente no responde y está en apnea (no respira), ya nos encontramos ante un paro respiratorio inminente, por lo que el Código Azul debe activarse INMEDIATAMENTE en ese momento para convocar al equipo y carro de paro sin esperar a palpar el pulso, ganando segundos vitales".
+  * Si lo activó tras ver la apnea (ÓPTIMO), felicítalo por su rapidez de decisión.
+- Asignación de los roles clave (Líder, Compresor, Vía Aérea, Monitor/Desfibrilador, Medicamentos, Registro).
 - Uso y verificación de comunicación de circuito cerrado (closed-loop).
 - Uso de Ayudas Cognitivas (felicitar si las consultó o recordar su importancia si no lo hizo).
 
@@ -94,6 +98,8 @@ Usa formato Markdown con encabezados claros, emojis profesionales y viñetas con
 - Tiempo total de reanimación: ${simulationData.tiempoTotal || 'N/A'}
 - Roles asignados: ${simulationData.rolesAsignados ? 'Sí' : 'No'}
 - Consultó ayudas cognitivas: ${simulationData.consultoAyudasCognitivas ? 'Sí' : 'No'}
+- Secuencia de Evaluación Inicial (1. Respuesta -> 2. Respiración -> 3. Pulso): ${simulationData.ordenEvaluacionCorrecto ? 'Correcta y sistemática' : 'Incompleta o desordenada'}
+- Momento de Activación de Código Azul: ${simulationData.momentoActivacionCodigoAzul === 'tras_apnea' ? 'ÓPTIMO (activado al identificar apnea/paro respiratorio)' : (simulationData.momentoActivacionCodigoAzul === 'tras_pulso' ? 'TARDÍO (esperó hasta palpar el pulso en lugar de activarlo inmediatamente al ver la apnea)' : simulationData.momentoActivacionCodigoAzul)}
 - Tubo endotraqueal y capnografía: ${simulationData.tuboColocado ? 'Sí' : 'No'}
 - Error grave en Adrenalina: ${simulationData.errorAdrenalinaDirecta ? 'Sí (ordenó 1 ampolla de 1 mg directa sin diluir)' : 'No'}
 - Dosis de adrenalina administrada: ${simulationData.adrenalinaDada ? 'Sí' : 'No'}
