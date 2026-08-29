@@ -839,8 +839,8 @@
                         <button onclick="takeAction('conectar_monitor')" class="bg-white hover:bg-amber-100 text-amber-950 border border-amber-300 py-2 px-2.5 rounded-lg text-xs font-bold shadow-xs text-left flex items-center transition-colors">
                             <i class="fas fa-plug text-amber-600 mr-1.5"></i> Conectar Parches
                         </button>
-                        <button onclick="openModal('modal-ritmo')" class="bg-white hover:bg-amber-100 text-amber-950 border-2 border-amber-500 py-2 px-2.5 rounded-lg text-xs font-bold shadow-xs text-left flex items-center transition-colors">
-                            <i class="fas fa-heart-pulse text-amber-600 mr-1.5"></i> Identificar Ritmo...
+                        <button onclick="takeAction('verificar_ritmo_palas')" class="bg-white hover:bg-amber-100 text-amber-950 border-2 border-amber-500 py-2 px-2.5 rounded-lg text-xs font-bold shadow-xs text-left flex items-center transition-colors">
+                            <i class="fas fa-heart-pulse text-amber-600 mr-1.5"></i> Verificar Ritmo con Palas...
                         </button>
                     </div>
                     <button onclick="openModal('modal-desfibrilador')" class="w-full bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 text-white font-extrabold py-2.5 px-3 rounded-lg text-xs text-center shadow-md flex items-center justify-center transition-all transform active:scale-98">
@@ -925,6 +925,9 @@
             energiaCargada: 0,
             ritmoECG: 'OFF',
             ritmoIdentificado: false,
+            ritmoVisible: false,
+            ultimoCicloTiempo: 0,
+            cicloCortoErrores: 0,
             rcpEnCurso: false,
             esperandoReanudacionRCP: false,
             descargasDadas: 0,
@@ -1425,6 +1428,7 @@
                 amiodaronaDada: state.amiodaronaDada,
                 descargasDadas: state.descargasDadas,
                 omisiones: state.omisiones,
+                cicloCortoErrores: state.cicloCortoErrores,
                 posparoAdecuados: state.posparoAdecuados || [],
                 posparoErrores: state.posparoErrores || [],
                 logDeAcciones: state.logDeAcciones
@@ -1587,18 +1591,38 @@
                 return;
             }
 
+            if (actionId === 'verificar_ritmo_palas') {
+                const delta = state.timerSegundos - state.ultimoCicloTiempo;
+                
+                // Si llevan menos de 115 segundos de RCP y piden ritmo
+                if (state.rcpEnCurso && delta > 0 && delta < 115) {
+                    printLeader(`"Paremos masaje para verificar ritmo con palas."`);
+                    printCompresor(`"Doctor(a), apenas llevamos ${delta} segundos de este ciclo. Las guías AHA recomiendan completar los 2 minutos de RCP continuos para minimizar interrupciones. ¿Debo continuar el masaje o verificamos el ritmo ya?"`);
+                    state.cicloCortoErrores++;
+                    state.rcpEnCurso = false; // Se interrumpió
+                    return; 
+                }
+
+                state.rcpEnCurso = false;
+                state.rcpInicioTiempo = null;
+                state.parchesConectados = true;
+                state.ritmoVisible = true;
+                
+                if (state.descargasDadas >= 3 || state.comprobacionesRitmo >= 4) {
+                    state.ritmoECG = 'SINUS';
+                } else {
+                    state.ritmoECG = 'VF';
+                }
+                updateMonitor({ rhythm: 'Trazado Activo' });
+                printDesfib("<strong>Palas sobre el tórax:</strong> Observe el trazado en el monitor y seleccione el ritmo identificado.");
+                setTimeout(() => openModal('modal-ritmo'), 2000);
+                return;
+            }
+
             if (actionId === 'identificar_ritmo_submit') {
                 state.rcpEnCurso = false;
                 state.rcpInicioTiempo = null;
-                if (!state.parchesConectados) {
-                    state.parchesConectados = true;
-                    if (state.descargasDadas >= 3 || state.comprobacionesRitmo >= 4) {
-                        state.ritmoECG = 'SINUS';
-                    } else {
-                        state.ritmoECG = 'VF';
-                    }
-                    updateMonitor({ rhythm: 'Trazado Activo' });
-                }
+                state.parchesConectados = true;
                 
                 if (state.descargasDadas >= 3 || state.comprobacionesRitmo >= 4) {
                     if (payload === 'SINUS') {
@@ -1640,6 +1664,15 @@
             }
 
             if (actionId === 'verificar_pulso') {
+                const delta = state.timerSegundos - state.ultimoCicloTiempo;
+                if (state.rcpEnCurso && delta > 0 && delta < 115) {
+                    printLeader(`"Paremos masaje para verificar pulso."`);
+                    printCompresor(`"Doctor(a), apenas llevamos ${delta} segundos de este ciclo. Las guías AHA recomiendan completar los 2 minutos de RCP. ¿Debo continuar o verificamos el pulso ya?"`);
+                    state.cicloCortoErrores++;
+                    state.rcpEnCurso = false; 
+                    return; 
+                }
+
                 state.rcpEnCurso = false;
                 state.rcpInicioTiempo = null;
                 if (state.fase === 0) {
@@ -1732,6 +1765,10 @@
                             state.horaInicioRCPBasica = state.horaInicioRCPBasica || dateStr;
                             state.rcpEnCurso = true;
                             state.rcpInicioTiempo = state.timerSegundos;
+                            state.ultimoCicloTiempo = state.timerSegundos;
+                            state.ritmoVisible = false;
+                            state.ritmoECG = 'OFF';
+                            updateMonitor({ rhythm: 'ARTEFACTO POR RCP (Oculto)' });
                             printCompresor("<strong>¡Orden recibida!</strong> Iniciando compresiones de alta calidad a 100-120/min, profundidad 1/3 a 1/2 del tórax (~5 cm) con reexpansión completa sobre tabla rígida.");
                             if (!state.parchesConectados) {
                                 printRegistro("Compresiones en curso. Coloque los parches del desfibrilador para monitorizar.");

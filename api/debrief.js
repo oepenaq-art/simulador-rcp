@@ -67,7 +67,8 @@ Usa formato Markdown con encabezados claros, emojis profesionales y viñetas con
 
 ### 🫀 R - Reanimación Cardiopulmonar de Alta Calidad
 - Parámetros técnicos: frecuencia (100-120), profundidad, reexpansión.
-- Manejo de pausas y reinicio inmediato de compresiones tras la desfibrilación.
+- Manejo de pausas y reinicio inmediato de compresiones tras la desfibrilación. 
+- *MUY IMPORTANTE:* Si el participante tiene errores de verificación prematura de ritmo (detener RCP antes de 2 minutos para ver el monitor o palpar pulso), corrígelo enfáticamente: se debe completar el ciclo completo de 2 min tras descargas o adrenalina sin interrupciones.
 - Manejo de vía aérea (BVM o Tubo con capnografía).
 
 ### ⚡ D - Desfibrilación y Manejo del Ritmo
