@@ -1319,10 +1319,10 @@
         function printRegistro(text) { printMsg('📋', 'Registro / Tiempo', text, 'msg-registro'); }
         function printFamilia(text) { printMsg('👨‍👩‍👦', 'Acompañamiento a la Familia', text, 'msg-familia'); }
         function printAlert(text) { printMsg('⚠️', 'Ayuda Cognitiva (Rescate)', text, 'msg-alerta'); }
-        function printSystem(text) { printMsg('🏥', 'Contexto Clínico / Laboratorio', text, 'msg-sistema'); }
+        function printSystem(text) { printMsg('🏥', 'Contexto clínico / Desarrollo del caso', text, 'msg-sistema'); }
 
         // Mensaje inicial con tiempo 00:00
-        printSystem("Ingresas al cubículo de urgencias. Augusto (7 años, 20 kg) tiene antecedente de Enfermedad Renal Crónica. La madre refiere que la diálisis peritoneal ha estado disfuncional en los últimos días y le acababan de tomar unos exámenes de control. Repentinamente, la madre grita angustiada: '¡Doctor(a), mi hijo no me responde!'. Ves a Augusto flácido y cianótico. ¿Cuál es tu primera acción?");
+        printSystem("Ingresas al cubículo de urgencias. Augusto (7 años, 20 kg) tiene antecedente de Enfermedad Renal Crónica. La madre refiere que la diálisis peritoneal ha estado disfuncional en los últimos días y le acababan de tomar unos exámenes de control. Repentinamente, la madre grita angustiada: '¡Doctor(a), mi hijo no me responde!'. Ves a Augusto flácido y cianótico. ¿Cuál es tu primera acción? (tómate un momento para conocer los diferentes botones de las órdenes antes de iniciar el caso).");
 
         function updateMonitor(params) {
             if(params.rhythm) document.getElementById('val-rhythm').innerText = params.rhythm;
