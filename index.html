@@ -912,6 +912,19 @@
                 <div id="ai-debrief-result" class="hidden mt-4 p-4 bg-white border border-gray-200 rounded-lg shadow-sm text-sm text-gray-800 leading-relaxed overflow-x-auto prose prose-sm max-w-none"></div>
             </div>
         </div>
+        
+        <!-- Mobile Bottom Tab Bar -->
+        <div class="md:hidden flex bg-blue-900 text-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-40 fixed bottom-0 left-0 right-0 h-[60px] border-t border-blue-700 justify-around items-center" style="padding-bottom: env(safe-area-inset-bottom);">
+            <button onclick="switchMobileTab('chat')" id="tab-btn-chat" class="flex-1 h-full text-center flex flex-col items-center justify-center text-xs opacity-60 hover:opacity-100 transition-opacity relative">
+                <i class="fas fa-comments text-lg mb-0.5"></i>
+                <span>Bitácora</span>
+                <span id="chat-badge" class="hidden absolute top-1 right-8 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px]">1</span>
+            </button>
+            <button onclick="switchMobileTab('controls')" id="tab-btn-controls" class="flex-1 h-full text-center flex flex-col items-center justify-center text-xs opacity-100 text-blue-300 font-bold transition-opacity">
+                <i class="fas fa-clipboard-list text-lg mb-0.5"></i>
+                <span>Órdenes</span>
+            </button>
+        </div>
     </div>
 
     <script>
