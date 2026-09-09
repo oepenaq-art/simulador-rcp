@@ -1075,6 +1075,10 @@
         function getEcgY(x, type, height) {
             const mid = height / 2;
             if (type === 'OFF') return mid + (Math.random() - 0.5) * 1.5;
+            if (type === 'CPR_ARTIFACT') {
+                const t = x * 0.15;
+                return mid + Math.sin(t) * 35 + (Math.random() - 0.5) * 20; // Ruido de compresiones
+            }
             if (type === 'VF') {
                 const t = x * 0.12;
                 return mid + Math.sin(t) * 22 + Math.sin(t * 2.3 + 1.2) * 14 + Math.sin(t * 4.7) * 8 + (Math.random() - 0.5) * 6;
@@ -1101,7 +1105,24 @@
             ctx.fillRect(scanX, 0, 12, h);
 
             const nextX = scanX + scanSpeed;
-            const curY = getEcgY(scanX, state.ritmoECG, h);
+            
+            let currentRhythm = state.ritmoECG;
+            if (state.rcpEnCurso && currentRhythm !== 'OFF') {
+                currentRhythm = 'CPR_ARTIFACT';
+            }
+            const curY = getEcgY(scanX, currentRhythm, h);
+
+            // Actualizar etiqueta del monitor para compresiones
+            const leadLabel = document.getElementById('lead-label');
+            if (state.rcpEnCurso && state.ritmoECG !== 'OFF') {
+                leadLabel.innerText = "⚠️ COMPRESIONES EN CURSO (ARTEFACTO)";
+                leadLabel.classList.add('text-yellow-400', 'font-bold');
+                leadLabel.classList.remove('text-green-600');
+            } else {
+                leadLabel.innerText = "DERIVACIÓN II";
+                leadLabel.classList.remove('text-yellow-400', 'font-bold');
+                leadLabel.classList.add('text-green-600');
+            }
 
             ctx.beginPath();
             ctx.strokeStyle = '#22c55e';
