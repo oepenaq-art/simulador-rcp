@@ -554,15 +554,17 @@
 
 
     <!-- MODAL: NOTA RCP -->
-    <div id="modal-nota-rcp" class="fixed inset-0 bg-black bg-opacity-70 hidden z-50 flex justify-center items-center overflow-y-auto">
-        <div class="bg-white p-6 rounded-lg shadow-xl w-11/12 max-w-5xl my-8">
-            <div class="flex justify-between items-center mb-4 border-b pb-2">
-                <h3 class="font-bold text-xl text-gray-800"><i class="fas fa-file-medical-alt mr-2"></i>Registro Clínico de Reanimación Cardiopulmonar</h3>
-                <p class="text-sm text-blue-800 font-semibold mt-1">Guárdalo para llevarlo el día del curso.</p>
-                <button onclick="closeModal('modal-nota-rcp')" class="text-gray-500 hover:text-red-500"><i class="fas fa-times text-2xl"></i></button>
+    <div id="modal-nota-rcp" class="fixed inset-0 bg-black bg-opacity-70 hidden z-50 flex justify-center items-center overflow-y-auto px-2">
+        <div class="bg-white p-3 md:p-6 rounded-lg shadow-xl w-full max-w-5xl my-4 md:my-8 flex flex-col max-h-[95vh]">
+            
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 border-b pb-2 relative flex-shrink-0">
+                <h3 class="font-bold text-lg md:text-xl text-gray-800 pr-8"><i class="fas fa-file-medical-alt mr-2"></i>Registro Clínico de RCP</h3>
+                <p class="text-xs md:text-sm text-blue-800 font-semibold mt-1 md:mt-0">Guárdalo para el curso.</p>
+                <button onclick="closeModal('modal-nota-rcp')" class="absolute top-0 right-0 text-gray-500 hover:text-red-500 bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center"><i class="fas fa-times"></i></button>
             </div>
             
-            <div id="nota-rcp-content" class="text-xs border border-gray-300 rounded print-container" style="font-family: Arial, sans-serif;">
+            <div class="overflow-y-auto overflow-x-auto flex-1 w-full border border-gray-200 rounded">
+            <div id="nota-rcp-content" class="text-xs border border-gray-300 rounded print-container min-w-[700px] w-full" style="font-family: Arial, sans-serif;">
 <table class="w-full border-collapse border border-gray-300 text-left">
     <tbody>
         <tr>
@@ -1074,23 +1076,24 @@
 
         function getEcgY(x, type, height) {
             const mid = height / 2;
-            if (type === 'OFF') return mid + (Math.random() - 0.5) * 1.5;
+            const s = height / 100; // factor de escala para que se adapte al contenedor (100px es la base ideal)
+            if (type === 'OFF') return mid + (Math.random() - 0.5) * 1.5 * s;
             if (type === 'CPR_ARTIFACT') {
                 const t = x * 0.15;
-                return mid + Math.sin(t) * 35 + (Math.random() - 0.5) * 20; // Ruido de compresiones
+                return mid + (Math.sin(t) * 35 + (Math.random() - 0.5) * 20) * s; // Ruido de compresiones
             }
             if (type === 'VF') {
                 const t = x * 0.12;
-                return mid + Math.sin(t) * 22 + Math.sin(t * 2.3 + 1.2) * 14 + Math.sin(t * 4.7) * 8 + (Math.random() - 0.5) * 6;
+                return mid + (Math.sin(t) * 22 + Math.sin(t * 2.3 + 1.2) * 14 + Math.sin(t * 4.7) * 8 + (Math.random() - 0.5) * 6) * s;
             }
             if (type === 'SINUS') {
                 const cycle = (x % 90);
-                if (cycle > 10 && cycle < 20) return mid - Math.sin((cycle - 10) * Math.PI / 10) * 6;
-                if (cycle >= 28 && cycle < 32) return mid + 4;
-                if (cycle >= 32 && cycle < 38) return mid - 38;
-                if (cycle >= 38 && cycle < 42) return mid + 10;
-                if (cycle > 50 && cycle < 70) return mid - Math.sin((cycle - 50) * Math.PI / 20) * 10;
-                return mid + (Math.random() - 0.5) * 1.2;
+                if (cycle > 10 && cycle < 20) return mid - (Math.sin((cycle - 10) * Math.PI / 10) * 6) * s;
+                if (cycle >= 28 && cycle < 32) return mid + 4 * s;
+                if (cycle >= 32 && cycle < 38) return mid - 38 * s;
+                if (cycle >= 38 && cycle < 42) return mid + 10 * s;
+                if (cycle > 50 && cycle < 70) return mid - (Math.sin((cycle - 50) * Math.PI / 20) * 10) * s;
+                return mid + (Math.random() - 0.5) * 1.2 * s;
             }
             return mid;
         }
