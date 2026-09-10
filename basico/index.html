@@ -1040,6 +1040,14 @@
             document.getElementById('modal-registro').classList.add('hidden');
             document.getElementById('btn-ayudas').classList.add('animate-pulse');
             setTimeout(() => document.getElementById('btn-ayudas').classList.remove('animate-pulse'), 5000);
+            
+            state.timerActivo = true;
+
+            // Mensaje inicial del caso
+            printSystem(`🚨 CASO CLÍNICO: Augusto, lactante de 7 meses (8 kg) con cuadro de dificultad respiratoria por bronquiolitis grave. Te alertan que Augusto se ha tornado cianótico y no responde. Eres el primer respondedor (Auxiliar de Enfermería).`);
+            setTimeout(() => {
+                printSystem(`Después de indicar cada orden, vuelve a esta bitácora para ver la respuesta.`);
+            }, 500);
         }
 
         
