@@ -1205,6 +1205,41 @@
             deaEncendido: false
         };
 
+        
+        function printMsg(senderIcon, roleName, text, styleClass) {
+            const timeStr = formatTimer(state.timerSegundos);
+            const div = document.createElement('div');
+            div.className = `p-3 my-2.5 shadow-sm text-sm chat-bubble ${styleClass}`;
+            div.innerHTML = `
+                <div class="font-bold flex items-center justify-between mb-1.5 text-xs uppercase tracking-wider border-b border-black border-opacity-10 pb-1">
+                    <div class="flex items-center">
+                        <span class="mr-1.5 text-base">${senderIcon}</span> <span>${roleName}</span>
+                    </div>
+                    <span class="font-mono text-[11px] bg-white bg-opacity-90 px-2 py-0.5 rounded border border-gray-300 text-gray-700 font-bold shadow-xs flex items-center">
+                        <i class="fas fa-stopwatch mr-1 text-yellow-600"></i> ${timeStr}
+                    </span>
+                </div>
+                <div class="text-gray-800 leading-relaxed">${text}</div>
+            `;
+            chatBox.appendChild(div);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            state.logDeAcciones.push({ roleName, text, time: timeStr });
+        }
+
+        function printLeader(text) { printMsg('🩺', 'Tú (Líder del Código)', text, 'msg-lider'); }
+        function printCompresor(text) { printMsg('🫀', 'Compresor', text, 'msg-compresor'); }
+        function printViaAerea(text) { printMsg('🫁', 'Vía Aérea', text, 'msg-viaaerea'); }
+        function printDesfib(text) { printMsg('🖥️', 'Monitor / Desfibrilador', text, 'msg-desfib'); }
+        function printMeds(text) { printMsg('💉', 'Medicamentos', text, 'msg-meds'); }
+        function printRegistro(text) { printMsg('📋', 'Registro / Tiempo', text, 'msg-registro'); }
+        function printFamilia(text) { printMsg('👨‍👩‍👦', 'Acompañamiento a la Familia', text, 'msg-familia'); }
+        function printAlert(text) { printMsg('⚠️', 'Ayuda Cognitiva (Rescate)', text, 'msg-alerta'); }
+        function printSystem(text) { printMsg('🏥', 'Contexto clínico / Desarrollo del caso', text, 'msg-sistema'); }
+
+        // Mensaje inicial con tiempo 00:00
+        printSystem("Ingresas al cubículo de urgencias. Augusto (7 años, 20 kg) tiene antecedente de Enfermedad Renal Crónica. La madre refiere que la diálisis peritoneal ha estado disfuncional en los últimos días y le acababan de tomar unos exámenes de control. Repentinamente, la madre grita angustiada: '¡Doctor(a), mi hijo no me responde!'. Ves a Augusto flácido y cianótico. ¿Cuál es tu primera acción? (Tómate un momento para conocer los botones de las órdenes. Después de indicar cada orden, recuerda volver a esta pantalla de la Bitácora para ver la respuesta del equipo).");
+
+        
         function iniciarSimulador() {
             const nombre = document.getElementById('participante-nombre').value.trim();
             const email = document.getElementById('participante-email').value.trim();
