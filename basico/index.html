@@ -1161,19 +1161,47 @@
     <script>
         // --- ESTADO GLOBAL ---
         let state = {
+            fase: 0,
+            codigoAzulActivado: false,
+            pulsoVerificado: false,
+            participante: { nombre: '', email: '' },
+            omisiones: 0,
+            parchesConectados: false,
+            energiaCargada: 0,
+            ritmoECG: 'OFF',
+            ritmoIdentificado: false,
+            ritmoVisible: false,
+            ultimoCicloTiempo: 0,
+            cicloCortoErrores: 0,
+            respuestaVerificada: false,
+            respiracionVerificada: false,
+            pulsoVerificado: false,
+            ordenEvaluacionCorrecto: true,
+            momentoActivacionCodigoAzul: null,
+            rcpEnCurso: false,
+            esperandoReanudacionRCP: false,
+            descargasDadas: 0,
+            comprobacionesRitmo: 0,
+            adrenalinaDada: false,
+            errorAdrenalinaDirecta: false,
+            calcioDado: false,
+            amiodaronaDada: false,
+            tuboColocado: false,
+            rolesAsignados: [],
+            rolesInnecesarios: [],
+            consultoAyudasCognitivas: false,
+            logDeAcciones: [],
             timerSegundos: 0,
             timerActivo: false,
-            rcpEnCurso: false,
             rcpInicioTiempo: null,
-            ritmoECG: 'FV', // o 'ASISTOLIA', 'SINUS'
-            drogasAdministradas: [],
-            descargasDadas: 0,
-            logDeAcciones: [],
-            rolesAsignados: [],
-            codigoAzulActivado: false,
-            tuboColocado: false,
-            ciclosCompletados: 0,
-            parchesConectados: false,
+            adrenalinaTiempo: null,
+            // Variables para la nota de RCP:
+            horaActivacion: null,
+            horaInicioRCPBasica: null,
+            horaInicioRCPAvanzada: null,
+            meds: [], // Array to store medication logs: { name, route, time, obs }
+            descargas: [] // Array to store shock logs
+        ,
             deaEncendido: false
         };
 
