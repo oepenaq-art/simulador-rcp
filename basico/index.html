@@ -77,6 +77,8 @@
     <!-- MODAL: AYUDAS COGNITIVAS (HPTU) -->
     
     <!-- MODAL: AYUDAS COGNITIVAS -->
+    
+    <!-- MODAL: AYUDAS COGNITIVAS -->
     <div id="modal-ayudas" onclick="if(event.target === this) closeModal('modal-ayudas')" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex justify-center items-center p-2 md:p-4 backdrop-blur-xs">
         <div class="bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden relative">
             <div class="bg-amber-100 p-2 border-b border-amber-200 flex justify-between items-center sticky top-0 z-10 shrink-0">
@@ -311,7 +313,390 @@
         </div>
     </div>
 
+<script>
+        // --- ESTADO GLOBAL ---
+        let state = {
+            timerSegundos: 0,
+            timerActivo: false,
+            rcpEnCurso: false,
+            rcpInicioTiempo: null,
+            ritmoECG: 'FV', // o 'ASISTOLIA', 'SINUS'
+            drogasAdministradas: [],
+            descargasDadas: 0,
+            logDeAcciones: [],
+            rolesAsignados: [],
+            codigoAzulActivado: false,
+            tuboColocado: false,
+            ciclosCompletados: 0,
+            parchesConectados: false,
+            deaEncendido: false
+        };
 
+        function iniciarSimulador() {
+            const nombre = document.getElementById('participante-nombre').value.trim();
+            const email = document.getElementById('participante-email').value.trim();
+            if(!nombre || !email) {
+                alert("Por favor ingresa tu nombre y correo para continuar.");
+                return;
+            }
+            state.participante.nombre = nombre;
+            state.participante.email = email;
+            document.getElementById('modal-registro').classList.add('hidden');
+            document.getElementById('btn-ayudas').classList.add('animate-pulse');
+            setTimeout(() => document.getElementById('btn-ayudas').classList.remove('animate-pulse'), 5000);
+        }
+
+        const chatBox = document.getElementById('chat-box');
+
+        function formatTimer(s) {
+            const min = Math.floor(s / 60).toString().padStart(2, '0');
+            const sec = (s % 60).toString().padStart(2, '0');
+            return `${min}:${sec}`;
+        }
+
+        setInterval(() => {
+            if (state.timerActivo) {
+                state.timerSegundos++;
+                document.getElementById('timer-display').innerText = formatTimer(state.timerSegundos);
+
+                // Notificaciones de RCP
+                if (state.rcpEnCurso && state.rcpInicioTiempo !== null) {
+                    let transcurridoRCP = state.timerSegundos - state.rcpInicioTiempo;
+                    if (transcurridoRCP === 60) {
+                        printRegistro('Va 1 minuto de este ciclo de las compresiones.');
+                    } else if (transcurridoRCP === 110) {
+                        printRegistro('Faltan 10 segundos para acabar este ciclo.');
+                    } else if (transcurridoRCP === 120) {
+                        printRegistro('Tiempo cumplido: 2 minutos de este ciclo de RCP. Sugiero reevaluar el ritmo.');
+                        state.rcpEnCurso = false; // Se suspende el conteo automático de RCP para que el líder decida
+                        state.rcpInicioTiempo = null;
+                        if (state.descargasDadas >= 3) {
+                            state.ritmoECG = 'SINUS';
+                            updateMonitor({ rhythm: 'Trazado Activo' });
+                        }
+                    }
+                }
+
+                // Notificaciones de Adrenalina
+                if (state.adrenalinaTiempo !== null) {
+                    let transcurridoAdr = state.timerSegundos - state.adrenalinaTiempo;
+                    if (transcurridoAdr === 150) {
+                        printRegistro('Faltan 30 segundos para cumplir los 3 minutos de la ultima dosis de adrenalina.');
+                    } else if (transcurridoAdr === 180) {
+                        printRegistro('Ya pasaron 3 minutos desde la ultima dosis de adrenalina. ¿Ordena nueva dosis?');
+                        state.adrenalinaTiempo = null; // Reiniciar el aviso de adrenalina para este ciclo
+                    }
+                }
+            }
+        }, 1000);
+
+        function iniciarTimer() {
+            if (!state.timerActivo) state.timerActivo = true;
+        }
+
+        function consultarAyudaCognitiva() {
+            state.consultoAyudasCognitivas = true;
+            openModal('modal-ayudas');
+        }
+
+        function switchAyudaTab(tab) {
+            const btnAlg = document.getElementById('tab-btn-algoritmo');
+            const btnCau = document.getElementById('tab-btn-causas');
+            const conAlg = document.getElementById('tab-content-algoritmo');
+            const conCau = document.getElementById('tab-content-causas');
+
+            if (tab === 'algoritmo') {
+                btnAlg.className = "py-2.5 px-5 bg-white border-t-2 border-blue-600 text-blue-900 rounded-t shadow-sm font-bold";
+                btnCau.className = "py-2.5 px-5 bg-gray-200 text-gray-600 hover:bg-gray-50 rounded-t font-bold";
+                conAlg.classList.remove('hidden');
+                conCau.classList.add('hidden');
+            } else {
+                btnCau.className = "py-2.5 px-5 bg-white border-t-2 border-blue-600 text-blue-900 rounded-t shadow-sm font-bold";
+                btnAlg.className = "py-2.5 px-5 bg-gray-200 text-gray-600 hover:bg-gray-50 rounded-t font-bold";
+                conCau.classList.remove('hidden');
+                conAlg.classList.add('hidden');
+            }
+        }
+
+        const canvas = document.getElementById('ecg-canvas');
+        const ctx = canvas.getContext('2d');
+        let scanX = 0;
+        const scanSpeed = 2.5;
+
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            ctx.fillStyle = '#050b05';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function getEcgY(x, type, height) {
+            const mid = height / 2;
+            const s = height / 100; // factor de escala para que se adapte al contenedor (100px es la base ideal)
+            if (type === 'OFF') return mid + (Math.random() - 0.5) * 1.5 * s;
+            if (type === 'CPR_ARTIFACT') {
+                const t = x * 0.15;
+                return mid + (Math.sin(t) * 35 + (Math.random() - 0.5) * 20) * s; // Ruido de compresiones
+            }
+            if (type === 'VF') {
+                const t = x * 0.12;
+                return mid + (Math.sin(t) * 22 + Math.sin(t * 2.3 + 1.2) * 14 + Math.sin(t * 4.7) * 8 + (Math.random() - 0.5) * 6) * s;
+            }
+            if (type === 'SINUS') {
+                const cycle = (x % 90);
+                if (cycle > 10 && cycle < 20) return mid - (Math.sin((cycle - 10) * Math.PI / 10) * 6) * s;
+                if (cycle >= 28 && cycle < 32) return mid + 4 * s;
+                if (cycle >= 32 && cycle < 38) return mid - 38 * s;
+                if (cycle >= 38 && cycle < 42) return mid + 10 * s;
+                if (cycle > 50 && cycle < 70) return mid - (Math.sin((cycle - 50) * Math.PI / 20) * 10) * s;
+                return mid + (Math.random() - 0.5) * 1.2 * s;
+            }
+            return mid;
+        }
+
+        let prevY = canvas.height / 2;
+
+        function drawEcg() {
+            const h = canvas.height;
+            const w = canvas.width;
+
+            ctx.fillStyle = 'rgba(5, 11, 5, 0.15)';
+            ctx.fillRect(scanX, 0, 12, h);
+
+            const nextX = scanX + scanSpeed;
+            
+            let currentRhythm = state.ritmoECG;
+            if (state.rcpEnCurso && currentRhythm !== 'OFF') {
+                currentRhythm = 'CPR_ARTIFACT';
+            }
+            const curY = getEcgY(scanX, currentRhythm, h);
+
+            // Actualizar etiqueta del monitor para compresiones
+            const leadLabel = document.getElementById('lead-label');
+            if (state.rcpEnCurso && state.ritmoECG !== 'OFF') {
+                leadLabel.innerText = "⚠️ COMPRESIONES EN CURSO (ARTEFACTO)";
+                leadLabel.classList.add('text-yellow-400', 'font-bold');
+                leadLabel.classList.remove('text-green-600');
+            } else {
+                leadLabel.innerText = "DERIVACIÓN II";
+                leadLabel.classList.remove('text-yellow-400', 'font-bold');
+                leadLabel.classList.add('text-green-600');
+            }
+
+            ctx.beginPath();
+            ctx.strokeStyle = '#22c55e';
+            ctx.lineWidth = 2.2;
+            ctx.shadowBlur = 6;
+            ctx.shadowColor = '#4ade80';
+            ctx.moveTo(scanX, prevY);
+            ctx.lineTo(nextX, curY);
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            prevY = curY;
+            scanX = nextX;
+            if (scanX >= w) scanX = 0;
+
+            requestAnimationFrame(drawEcg);
+        }
+        drawEcg();
+
+        function openModal(id) {
+            if (id === 'modal-roles' && !state.codigoAzulActivado) {
+                printRegistro("Doctor(a), el equipo de reanimación aún no ha llegado al cubículo. Primero debe activar el <strong>Código Azul (#90)</strong> para que acuda el personal con el carro de paro.");
+                return;
+            }
+            document.getElementById(id).classList.remove('hidden');
+        }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function submitRoles() {
+            closeModal('modal-roles');
+            const esenciales = [];
+            const innecesarios = [];
+
+            if (document.getElementById('role-lider').checked) esenciales.push("Líder");
+            if (document.getElementById('role-compresor1').checked) esenciales.push("Compresor 1");
+            if (document.getElementById('role-compresor2').checked) esenciales.push("Compresor 2");
+            if (document.getElementById('role-viaaerea').checked) esenciales.push("Vía Aérea");
+            if (document.getElementById('role-dea').checked) esenciales.push("DEA");
+
+            if (document.getElementById('role-med').checked) innecesarios.push("Medicamentos (Avanzado)");
+            if (document.getElementById('role-registro').checked) innecesarios.push("Registro (Avanzado)");
+
+            takeAction('asignar_roles_custom', { esenciales, innecesarios });
+        }
+
+        function finalizarSimulacion() {
+            simulacionTerminada = true;
+            document.getElementById('controls-panel').classList.add('hidden');
+            document.getElementById('debriefing-panel').classList.remove('hidden');
+            
+            // Actualizar el texto del tab inferior para móviles
+            const btnControls = document.getElementById('tab-btn-controls');
+            if(btnControls) {
+                btnControls.innerHTML = '<i class="fas fa-clipboard-check text-lg mb-0.5"></i><span>Resultados</span>';
+            }
+            if (window.innerWidth < 768) {
+                switchMobileTab('controls'); // Forzar a mostrar la vista de debriefing
+            }
+
+            // --- GENERAR RESUMEN DE ACCIONES Y ENVIAR AL CHAT ---
+            let resumenHTML = `<div class="mb-4 text-left">
+                <div class="inline-block p-4 rounded-lg bg-emerald-50 text-emerald-900 border-l-4 border-emerald-600 shadow-md w-full">
+                    <h4 class="font-bold text-lg mb-2"><i class="fas fa-list-check mr-2"></i>Resumen de Acciones (Tiempos Reales)</h4>
+                    <p class="text-xs mb-3 text-emerald-700">Utiliza esta información detallada para diligenciar tu Registro Clínico manualmente.</p>
+                    <ul class="list-disc pl-5 space-y-1 text-sm font-mono">`;
+            resumenHTML += `<li><strong>Min 00:00:</strong> Inicio de Compresiones Torácicas y BVM</li>`;
+            
+            let events = [];
+            state.descargas.forEach((d, i) => { events.push({time: d.time, text: `Descarga ${i+1} administrada (${d.energy} J)`}); });
+            state.meds.forEach(m => { events.push({time: m.time, text: `${m.name} (${m.route}) - ${m.obs}`}); });
+            
+            events.sort((a,b) => a.time.localeCompare(b.time));
+            
+            events.forEach(e => {
+                resumenHTML += `<li><strong>Min ${e.time}:</strong> ${e.text}</li>`;
+            });
+            
+            if (state.tuboColocado) { 
+                resumenHTML += `<li><strong>Min 04:00 (Aprox):</strong> Intubación Orotraqueal exitosa (Tubo 5.5) con Capnografía</li>`; 
+            }
+            resumenHTML += `</ul></div></div>`;
+            const chatBox = document.getElementById('chat-box');
+            chatBox.insertAdjacentHTML('beforeend', resumenHTML);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            
+            let feedbackRoles = '';
+            if (state.rolesInnecesarios.length > 0) {
+                feedbackRoles = `
+                    <div class="mt-2 p-2 bg-yellow-50 border-l-4 border-yellow-500 text-xs text-yellow-800">
+                        <strong>⚠️ Desviación en Liderazgo y Asignación de Roles:</strong><br/>
+                        Asignaste roles que no se recomiendan o saturan el espacio: <em>${state.rolesInnecesarios.join(', ')}</em>.<br/>
+                        • El carro de paros cuenta con todo lo necesario en la sala, el rol de "patinador" no es necesario de entrada.<br/>
+                        • Las ayudas cognitivas deben ser consultadas y gestionadas directamente por el Líder del código.<br/>
+                        • El chequeo de pulso solo se realiza tras 2 minutos de RCP en la pausa de ritmo, no requiere una persona dedicada en exclusividad. El exceso de personal entorpece la reanimación.
+                    </div>
+                `;
+            } else {
+                feedbackRoles = `
+                    <div class="mt-2 p-2 bg-green-50 border-l-4 border-green-500 text-xs text-green-800">
+                        <strong>✓ Excelente asignación de roles:</strong> Asignaste estrictamente los roles necesarios de alto rendimiento sin sobrecargar el cubículo.
+                    </div>
+                `;
+            }
+
+            const feedbackAyuda = state.consultoAyudasCognitivas ? 
+                `<div class="mt-1 p-2 bg-blue-50 border-l-4 border-blue-500 text-xs text-blue-800"><strong>✓ Uso de Ayudas Cognitivas:</strong> Consultaste proactivamente las guías institucionales del HPTU durante la reanimación (Excelente práctica de CRM).</div>` :
+                `<div class="mt-1 p-2 bg-gray-50 border-l-4 border-gray-400 text-xs text-gray-700"><strong>Información:</strong> No abriste el panel de ayudas cognitivas durante el caso. Recuerda que las guías AHA 2025 promueven su uso rutinario en eventos críticos.</div>`;
+
+            let posparoText = '';
+            if (state.posparoErrores && state.posparoErrores.length > 0) {
+                posparoText = `<li>Errores en cuidados posparo: <span class="text-red-600 font-bold">${state.posparoErrores.join(', ')}</span> (No recomendados)</li>`;
+            } else if (state.posparoAdecuados) {
+                posparoText = `<li>Cuidados posparo indicados: <span class="text-green-600 font-bold">${state.posparoAdecuados.join(', ')}</span></li>`;
+            }
+
+            document.getElementById('debrief-metrics').innerHTML = `
+                <h4 class="font-bold text-gray-700 mb-2">Métricas Capturadas para el Debriefing (Framework ORDEN):</h4>
+                <ul class="list-disc pl-4 text-gray-600 space-y-1">
+                    <li>Tiempo total de reanimación: <strong>${formatTimer(state.timerSegundos)}</strong></li>
+                    <li>Intervenciones totales ordenadas: ${state.logDeAcciones.length}</li>
+                    <li>Roles asignados: ${state.rolesAsignados.join(', ') || 'Ninguno específico'}</li>
+                    <li>Intervenciones de rescate requeridas: ${state.omisiones}</li>
+                    <li>Manejo de vía aérea avanzada: ${state.tuboColocado ? 'IOT correcta #5.5 con ETCO2' : 'BVM'}</li>
+                    <li>Resultado clínico: Retorno a Circulación Espontánea (RCE)</li>
+                    ${posparoText}
+                </ul>
+                ${feedbackRoles}
+                ${feedbackAyuda}
+                <p class="mt-4 text-xs italic text-gray-500">Haz clic abajo para generar el debriefing completo con IA estructurado en las dimensiones O-R-D-E-N.</p>
+            `;
+        }
+
+        async function iniciarDebriefingIA() {
+            const btn = document.getElementById('btn-ia-debrief');
+            const loading = document.getElementById('ai-loading');
+            const resultBox = document.getElementById('ai-debrief-result');
+
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            loading.classList.remove('hidden');
+            resultBox.classList.add('hidden');
+            resultBox.innerHTML = '';
+
+            const simulationData = {
+                participante: state.participante,
+                tiempoTotal: formatTimer(state.timerSegundos),
+                rolesAsignados: state.rolesAsignados,
+                rolesInnecesarios: state.rolesInnecesarios,
+                consultoAyudasCognitivas: state.consultoAyudasCognitivas,
+                tuboColocado: state.tuboColocado,
+                adrenalinaDada: state.adrenalinaDada,
+                errorAdrenalinaDirecta: state.errorAdrenalinaDirecta,
+                calcioDado: state.calcioDado,
+                amiodaronaDada: state.amiodaronaDada,
+                descargasDadas: state.descargasDadas,
+                omisiones: state.omisiones,
+                cicloCortoErrores: state.cicloCortoErrores,
+                respuestaVerificada: state.respuestaVerificada,
+                respiracionVerificada: state.respiracionVerificada,
+                pulsoVerificado: state.pulsoVerificado,
+                ordenEvaluacionCorrecto: Boolean(state.ordenEvaluacionCorrecto && state.respuestaVerificada && state.respiracionVerificada && state.pulsoVerificado),
+                momentoActivacionCodigoAzul: state.momentoActivacionCodigoAzul || (state.codigoAzulActivado ? 'desconocido' : 'no_activado'),
+                posparoAdecuados: state.posparoAdecuados || [],
+                posparoErrores: state.posparoErrores || [],
+                logDeAcciones: state.logDeAcciones
+            };
+
+            try {
+                const response = await fetch('/api/debrief', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({...simulationData, mode: 'BLS'})
+                });
+
+                if (!response.ok) {
+                    const errJson = await response.json().catch(() => ({}));
+                    throw new Error(errJson.error || `Error del servidor: ${response.status}`);
+                }
+
+                const data = await response.json();
+                loading.classList.add('hidden');
+                resultBox.classList.remove('hidden');
+
+                if (window.marked && window.marked.parse) {
+                    resultBox.innerHTML = marked.parse(data.feedback);
+                } else {
+                    resultBox.innerText = data.feedback;
+                }
+            } catch (err) {
+                loading.classList.add('hidden');
+                resultBox.classList.remove('hidden');
+                resultBox.innerHTML = `
+                    <div class="p-3 bg-red-50 border border-red-200 text-red-700 rounded text-xs">
+                        <strong><i class="fas fa-exclamation-triangle mr-1"></i> No se pudo conectar con el servicio de IA:</strong><br>
+                        ${err.message}<br><br>
+                        <span class="text-gray-500">Nota: Al desplegar en Vercel, recuerda agregar la variable de entorno <strong>GEMINI_API_KEY</strong> en la configuración del proyecto.</span>
+                    </div>
+                `;
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function mostrarNotaRCP() {
+            openModal('modal-nota-rcp');
+        }
+
+        
+        
         var recognition = null;
         var finalTranscript = '';
 
@@ -633,4 +1018,24 @@
                     printSystem(`⚠️ ADVERTENCIA: El barrido a ciegas está contraindicado ya que puede empujar el objeto más adentro de la vía aérea.`);
                     break;
             }
-
+if (!accionEsCorrecta) {
+                state.omisiones++;
+                if (state.omisiones >= 2) {
+                    const rescates = {
+                        0: "Doctor(a), el niño está muy frío y no parece respirar, ¿verifico el pulso central?",
+                        1: "Doctor(a), ¿A qué frecuencia (100-120) y profundidad (1/3 a 1/2) comprimo?",
+                        2: "Descarga entregada, ¿sigo con las compresiones inmediatamente para minimizar la pausa?",
+                        3: "Llevamos 2 minutos tras la 1ra descarga y persiste en FV. ¿Descargamos a 4 J/kg (80 J) y preparamos Adrenalina diluida?",
+                        4: "Llegaron los gases con Potasio alto y el paciente tiene ERC... Las guías permiten usar Calcio y Bicarbonato en hiperkalemia severa, ¿los administro?",
+                        5: "Ya van 3 descargas y sigue en FV. ¿Administro Amiodarona (5 mg/kg) y aseguramos vía aérea avanzada con capnografía?"
+                    };
+                    if (rescates[state.fase]) printAlert(rescates[state.fase]);
+                    state.omisiones = 0;
+                }
+            } else {
+                state.omisiones = 0;
+            }
+        }
+    </script>
+</body>
+</html>
