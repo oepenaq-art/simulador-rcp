@@ -753,7 +753,7 @@
         }
 
         function takeAction(actionId, payload = null) {
-            let accionEsCorrecta = true;
+            var accionEsCorrecta = true;
             state.logDeAcciones.push({ time: state.timerSegundos, action: actionId, payload });
 
             switch(actionId) {
@@ -771,13 +771,13 @@
                     openModal('modal-seguridad');
                     break;
                 case 'submit_seguridad':
-                    let t = document.getElementById('epp-tapabocas').checked;
-                    let n95 = document.getElementById('epp-n95').checked;
-                    let b = document.getElementById('epp-bata').checked;
-                    let g = document.getElementById('epp-guantes').checked;
-                    let gf = document.getElementById('epp-gafas').checked;
+                    var t = document.getElementById('epp-tapabocas').checked;
+                    var n95 = document.getElementById('epp-n95').checked;
+                    var b = document.getElementById('epp-bata').checked;
+                    var g = document.getElementById('epp-guantes').checked;
+                    var gf = document.getElementById('epp-gafas').checked;
                     
-                    let eppList = [];
+                    var eppList = [];
                     if(t) eppList.push("Tapabocas");
                     if(n95) eppList.push("N95");
                     if(b) eppList.push("Bata");
@@ -811,11 +811,11 @@
                     break;
                 case 'submit_codigo_azul':
                     closeModal('modal-codigo-azul');
-                    let speech = finalTranscript.toLowerCase();
+                    var speech = finalTranscript.toLowerCase();
                     printLeader(`"Mensaje enviado: ${finalTranscript || '[Sin audio grabado]'}"`);
                     state.codigoAzulActivado = true;
                     
-                    let missing = [];
+                    var missing = [];
                     if(!speech.includes('pediátrico') && !speech.includes('pediatrico')) missing.push('Pediátrico');
                     if(!speech.includes('torre b')) missing.push('Torre B');
                     if(!speech.includes('cafetería') && !speech.includes('cafeteria')) missing.push('Cafetería');
@@ -854,7 +854,7 @@
                     openModal('modal-tecnica-rcp');
                     break;
                 case 'submit_tecnica':
-                    let tech = document.querySelector('input[name="tecnica-rcp"]:checked');
+                    var tech = document.querySelector('input[name="tecnica-rcp"]:checked');
                     if(tech) {
                         closeModal('modal-tecnica-rcp');
                         state.logDeAcciones.push({ time: state.timerSegundos, action: 'tecnica_elegida', payload: tech.value });
@@ -872,9 +872,9 @@
                     openModal('modal-reanudar-rcp');
                     break;
                 case 'submit_reanudar_rcp':
-                    let fq = document.getElementById('rcp-freq').value;
-                    let dp = document.getElementById('rcp-depth').value;
-                    let re = document.getElementById('rcp-recoil').value;
+                    var fq = document.getElementById('rcp-freq').value;
+                    var dp = document.getElementById('rcp-depth').value;
+                    var re = document.getElementById('rcp-recoil').value;
                     if(fq && dp && re) {
                         closeModal('modal-reanudar-rcp');
                         state.logDeAcciones.push({ time: state.timerSegundos, action: 'calidad_rcp', payload: {fq, dp, re} });
@@ -898,7 +898,7 @@
                     break;
                 case 'esperar_2_minutos':
                     if (!state.rcpEnCurso) { printSystem("No hay RCP en curso."); break; }
-                    let tToWait = 120 - (state.timerSegundos % 120);
+                    var tToWait = 120 - (state.timerSegundos % 120);
                     state.timerSegundos += tToWait;
                     state.ciclosCompletados++;
                     updateClock();
@@ -917,7 +917,7 @@
                         document.getElementById('btn-encender-dea').classList.add('bg-orange-600', 'text-white');
                         printSystem(`Se ENCIENDE el DEA.`);
                         if ('speechSynthesis' in window) {
-                            let msg = new SpeechSynthesisUtterance("Retire la ropa del pecho del paciente. Conecte los parches.");
+                            var msg = new SpeechSynthesisUtterance("Retire la ropa del pecho del paciente. Conecte los parches.");
                             msg.lang = 'es-ES';
                             window.speechSynthesis.speak(msg);
                         }
@@ -936,8 +936,8 @@
                     openModal('modal-parches-dea');
                     break;
                 case 'submit_parches_dea':
-                    let size = document.querySelector('input[name="dea-size"]:checked');
-                    let pos = document.querySelector('input[name="dea-pos"]:checked');
+                    var size = document.querySelector('input[name="dea-size"]:checked');
+                    var pos = document.querySelector('input[name="dea-pos"]:checked');
                     if(size && pos) {
                         closeModal('modal-parches-dea');
                         state.logDeAcciones.push({ time: state.timerSegundos, action: 'parches_config', payload: { size: size.value, pos: pos.value } });
@@ -961,13 +961,13 @@
                     state.rcpEnCurso = false; // Pausa
                     printLeader(`"¡Todos fuera! El DEA está analizando."`);
                     if ('speechSynthesis' in window) {
-                        let msg = new SpeechSynthesisUtterance("Analizando el ritmo cardíaco. No toque al paciente.");
+                        var msg = new SpeechSynthesisUtterance("Analizando el ritmo cardíaco. No toque al paciente.");
                         msg.lang = 'es-ES';
                         window.speechSynthesis.speak(msg);
                     }
                     setTimeout(() => {
                         if ('speechSynthesis' in window) {
-                            let msg = new SpeechSynthesisUtterance("Se recomienda dar una descarga. Cargando. Aléjense del paciente. Presione el botón de descarga.");
+                            var msg = new SpeechSynthesisUtterance("Se recomienda dar una descarga. Cargando. Aléjense del paciente. Presione el botón de descarga.");
                             msg.lang = 'es-ES';
                             window.speechSynthesis.speak(msg);
                         }
@@ -990,7 +990,7 @@
 
                     setTimeout(() => {
                         if ('speechSynthesis' in window) {
-                            let msg = new SpeechSynthesisUtterance("Descarga administrada. Inicie la RCP.");
+                            var msg = new SpeechSynthesisUtterance("Descarga administrada. Inicie la RCP.");
                             msg.lang = 'es-ES';
                             window.speechSynthesis.speak(msg);
                         }
