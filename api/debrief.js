@@ -102,26 +102,21 @@ Es fundamental que seas CONCISO. Debes entregar un análisis directo y al grano.
 Evalúa al participante usando la estructura ORDEN:
 
 ### 🏥 O - Organización y Evaluación Inicial
-- Verificación de la seguridad de la escena.
-- Verificación del estado de conciencia y respiración del lactante.
-- Reconocimiento de la necesidad de palpar el pulso y tiempo de comprobación (< 10 segundos).
-- Activación correcta del Código Azul (#90) con los datos completos.
+- **Seguridad de la escena:** El aislamiento era por gotas y contacto. Lo correcto era usar mascarilla quirúrgica (tapabocas), bata, guantes y gafas. Si usaron N95, retroalimenta que no era necesario pero aceptable en ausencia de tapabocas normal.
+- Activación de Código Azul (#90). Si usaron la grabación de voz, el mensaje debía incluir: "Código azul pediátrico, Torre B, cafetería, primer piso".
 
 ### 👥 R - Roles y Comunicación
-- Asignación de roles de RCP Básica (Líder, Compresor 1, Compresor 2, Vía Aérea, DEA).
-- Uso y verificación de comunicación de circuito cerrado (closed-loop).
+- Asignación de roles básicos (Líder, Compresores, Vía Aérea, DEA).
 
 ### 🫀 D - Desempeño en RCP de Alta Calidad
-- Inicio temprano de compresiones.
-- Uso de técnica adecuada en lactantes (1 mano o 2 pulgares).
-- Parámetros técnicos: frecuencia (100-120 lpm), profundidad (al menos 1/3 del tórax), reexpansión completa.
-- Relación de ventilaciones correcta con BVM y técnica C-E (15:2 si hay dos reanimadores, 30:2 si es uno).
-- Relevos oportunos para evitar fatiga.
+- **Técnica en lactante:** 1 mano es adecuada. 2 pulgares es adecuada (recuérdale que se debe asegurar de rodear todo el tórax del paciente, entrelazando los dedos en la espalda). 2 dedos es INCORRECTA (desactualizada). 2 manos es INCORRECTA (posibilidad de daño por el tamaño del paciente).
+- **Parámetros:** Frecuencia correcta es 100-120 lpm. Profundidad al menos 1/3 del tórax. Reexpansión completa.
+- **Relación de ventilaciones:** 15:2 al estar acompañado de otro reanimador.
 
 ### ⚡ E - Empleo del DEA y OVACE
-- Manejo correcto de OVACE en lactante (5 golpes en espalda / 5 compresiones torácicas).
-- Correcta selección del tamaño de parches del DEA (pediátricos) y posición (anteroposterior) para un lactante.
-- Seguridad al dar la descarga ("¡Todos fuera!") y reinicio inmediato de la RCP.
+- **Manejo OVACE:** Si escogieron presiones abdominales (Heimlich) o barrido a ciegas a un lactante, corrígelo enfáticamente (es incorrecto y peligroso). Lo correcto es 5 golpes en la espalda y 5 compresiones torácicas.
+- **Manejo DEA:** Si el estudiante apagó el DEA después de encenderlo, retroalimenta que no es necesario, debe dejarse encendido y el DEA mismo lleva el tiempo. 
+- **Parches DEA:** Sobre la posición de los parches (anterolateral vs anteroposterior), indica que no hay una diferencia significativa entre escoger una u otra, siempre y cuando los parches no se toquen entre sí (aunque en lactantes pequeños se prefiere anteroposterior por espacio).
 
 ### 🎓 N - Notas Finales y Perlas Clínicas
 (Tres lecciones clave accionables y directas para auxiliares de enfermería en BLS).`;
