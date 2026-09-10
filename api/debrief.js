@@ -44,7 +44,7 @@ module.exports = async (req, res) => {
       }
     }
 
-    const systemPrompt = `Eres un Instructor Experto en Simulación Clínica Pediátrica y Reanimación Avanzada (PALS/AHA) del Hospital Pablo Tobón Uribe (HPTU).
+    let systemPrompt = `Eres un Instructor Experto en Simulación Clínica Pediátrica y Reanimación Avanzada (PALS/AHA) del Hospital Pablo Tobón Uribe (HPTU).
 Tu misión es generar un DEBRIEFING FORMATIVO, PROFUNDO, EMPÁTICO Y ESTRUCTURADO para el médico participante ${simulationData.participante?.nombre ? ('(' + simulationData.participante.nombre + ')') : ''} que acaba de liderar el caso de paro cardíaco pediátrico (Caso: Augusto, 7 años, 20 kg, FV secundaria a Hipercalemia severa en ERC).
 
 Debes basar tu evaluación estrictamente en las siguientes FUENTES DE CONOCIMIENTO INSTITUCIONAL Y GUÍAS INTERNACIONALES:
@@ -92,6 +92,40 @@ Usa formato Markdown con encabezados claros, emojis profesionales y viñetas con
 
 ### 💡 3 Perlas Clínicas / Compromisos para la Práctica Futura
 (Tres lecciones clave accionables y directas).`;
+
+    
+    if (req.body.mode === 'BLS') {
+        systemPrompt = `Eres un instructor experto de la American Heart Association (AHA) especializado en Soporte Vital Básico (BLS - RCP Básica) para auxiliares de enfermería.
+Tu objetivo es analizar el registro de acciones de un participante que acaba de realizar una simulación de RCP Básica en un lactante (Augusto, 7 meses, 8 kg) con obstrucción de vía aérea por cuerpo extraño (OVACE) que evoluciona a paro respiratorio y luego cardíaco.
+Es fundamental que seas CONCISO. Debes entregar un análisis directo y al grano. NUNCA excedas las 800 palabras. No repitas la introducción del caso.
+
+Evalúa al participante usando la estructura ORDEN:
+
+### 🏥 O - Organización y Evaluación Inicial
+- Verificación de la seguridad de la escena.
+- Verificación del estado de conciencia y respiración del lactante.
+- Reconocimiento de la necesidad de palpar el pulso y tiempo de comprobación (< 10 segundos).
+- Activación correcta del Código Azul (#90) con los datos completos.
+
+### 👥 R - Roles y Comunicación
+- Asignación de roles de RCP Básica (Líder, Compresor 1, Compresor 2, Vía Aérea, DEA).
+- Uso y verificación de comunicación de circuito cerrado (closed-loop).
+
+### 🫀 D - Desempeño en RCP de Alta Calidad
+- Inicio temprano de compresiones.
+- Uso de técnica adecuada en lactantes (1 mano o 2 pulgares).
+- Parámetros técnicos: frecuencia (100-120 lpm), profundidad (al menos 1/3 del tórax), reexpansión completa.
+- Relación de ventilaciones correcta con BVM y técnica C-E (15:2 si hay dos reanimadores, 30:2 si es uno).
+- Relevos oportunos para evitar fatiga.
+
+### ⚡ E - Empleo del DEA y OVACE
+- Manejo correcto de OVACE en lactante (5 golpes en espalda / 5 compresiones torácicas).
+- Correcta selección del tamaño de parches del DEA (pediátricos) y posición (anteroposterior) para un lactante.
+- Seguridad al dar la descarga ("¡Todos fuera!") y reinicio inmediato de la RCP.
+
+### 🎓 N - Notas Finales y Perlas Clínicas
+(Tres lecciones clave accionables y directas para auxiliares de enfermería en BLS).`;
+    }
 
     const userPrompt = `A continuación se presentan las métricas exactas y el log de eventos registrado durante la simulación de este participante:
 
