@@ -537,48 +537,30 @@
     <script>
         // --- ESTADO GLOBAL ---
         let state = {
-            fase: 0,
+            fase_caso: 'OVACE', // OVACE, INCONSCIENTE, RCP, POST_DESCARGA, RCE
+            tiempoFase: 0,
+            saviorFaseMostrado: false,
             codigoAzulActivado: false,
-            pulsoVerificado: false,
             participante: { nombre: '', email: '' },
             omisiones: 0,
             parchesConectados: false,
-            energiaCargada: 0,
-            ritmoECG: 'OFF',
-            ritmoIdentificado: false,
-            ritmoVisible: false,
-            ultimoCicloTiempo: 0,
-            cicloCortoErrores: 0,
+            deaLlego: false,
+            deaAnalizando: false,
+            ritmoECG: 'FV',
             respuestaVerificada: false,
             respiracionVerificada: false,
             pulsoVerificado: false,
-            ordenEvaluacionCorrecto: true,
-            momentoActivacionCodigoAzul: null,
             rcpEnCurso: false,
-            esperandoReanudacionRCP: false,
+            rcpInicioTiempo: null,
             descargasDadas: 0,
-            comprobacionesRitmo: 0,
-            adrenalinaDada: false,
-            errorAdrenalinaDirecta: false,
-            calcioDado: false,
-            amiodaronaDada: false,
-            tuboColocado: false,
             rolesAsignados: [],
-            rolesInnecesarios: [],
-            consultoAyudasCognitivas: false,
             logDeAcciones: [],
             timerSegundos: 0,
             timerActivo: false,
-            rcpInicioTiempo: null,
-            adrenalinaTiempo: null,
-            // Variables para la nota de RCP:
-            horaActivacion: null,
-            horaInicioRCPBasica: null,
-            horaInicioRCPAvanzada: null,
-            meds: [], // Array to store medication logs: { name, route, time, obs }
-            descargas: [] // Array to store shock logs
-        ,
-            deaEncendido: false
+            deaEncendido: false,
+            
+            // OVACE counters
+            maniobrasOvace: 0,
         };
 
         
@@ -623,7 +605,7 @@
             state.timerActivo = true;
 
             // Mensaje inicial del caso
-            printSystem(`🚨 CASO CLÍNICO: Augusto, lactante de 7 meses (8 kg) con cuadro de dificultad respiratoria por bronquiolitis grave. Te alertan que Augusto se ha tornado cianótico y no responde. Eres el primer respondedor (Auxiliar de Enfermería).`);
+            printSystem(`🚨 CASO CLÍNICO: Pablo, lactante de 8 meses (8 kg). Mientras su madre le daba el desayuno en la cafetería del hospital, notó que dejó de emitir sonidos, no tose, abrió mucho los ojos con angustia y empezó a ponerse cianótico. La madre grita pidiendo ayuda. Eres el primer respondedor (Personal de Salud) que se encontraba casualmente en la cafetería.`);
             setTimeout(() => {
                 printSystem(`Después de indicar cada orden, vuelve a esta bitácora para ver la respuesta.`);
             }, 500);
@@ -653,9 +635,65 @@
         setInterval(() => {
             if (state.timerActivo) {
                 state.timerSegundos++;
+                state.tiempoFase++;
                 document.getElementById('timer-display').innerText = formatTimer(state.timerSegundos);
 
-                // Notificaciones de RCP
+                // ==========================================
+                // LÓGICA DE PROGRESIÓN DEL CASO - PABLO (8 MESES)
+                // ==========================================
+
+                if (state.fase_caso === 'OVACE') {
+                    if (state.tiempoFase === 30 && !state.saviorFaseMostrado && state.maniobrasOvace === 0) {
+                        printAlert("Doctor, el niño se está poniendo muy morado, ¿le damos golpes en la espalda?");
+                        state.saviorFaseMostrado = true;
+                    }
+                    if (state.tiempoFase === 60 || state.maniobrasOvace >= 4) {
+                        state.fase_caso = 'INCONSCIENTE';
+                        state.tiempoFase = 0;
+                        state.saviorFaseMostrado = false;
+                        printSystem("🚨 EVENTO: Tras el esfuerzo, el lactante pierde súbitamente el tono muscular y la conciencia. Queda completamente flácido en la silla.");
+                    }
+                } 
+                else if (state.fase_caso === 'INCONSCIENTE') {
+                    if (state.tiempoFase === 30 && !state.rcpEnCurso && !state.saviorFaseMostrado) {
+                        printAlert("Doctor, el niño quedó flácido e inconsciente, ¿iniciamos masaje cardíaco?");
+                        state.saviorFaseMostrado = true;
+                    }
+                    if (state.rcpEnCurso) {
+                        state.fase_caso = 'RCP';
+                        state.tiempoFase = 0;
+                        state.saviorFaseMostrado = false;
+                    }
+                }
+                else if (state.fase_caso === 'RCP') {
+                    if (state.tiempoFase === 60 && !state.deaLlego) {
+                        state.deaLlego = true;
+                        printSystem("🚨 EVENTO: Llega la Enfermera 2 corriendo con el DEA pediátrico y la bolsa-mascarilla (BVM).");
+                        setTimeout(() => printAlert("Doctor, ¿qué parches le pongo y cómo los ubico en un bebé tan pequeño?"), 3000);
+                    }
+                }
+                else if (state.fase_caso === 'POST_DESCARGA') {
+                    if (state.tiempoFase === 10 && !state.rcpEnCurso && !state.saviorFaseMostrado) {
+                        printAlert("Descarga entregada... ¿sigo con el masaje o le palpamos el pulso?");
+                        state.saviorFaseMostrado = true;
+                    }
+                    if (state.tiempoFase === 120) {
+                        state.fase_caso = 'RCE';
+                        state.tiempoFase = 0;
+                        state.saviorFaseMostrado = false;
+                        printSystem("🚨 EVENTO: El DEA interrumpe e indica: 'Analizando ritmo cardíaco... No se recomienda descarga'.");
+                        setTimeout(() => {
+                            printSystem("🚨 CAMBIO CLÍNICO: El paciente presenta movimientos espontáneos. Palpas pulso braquial fuerte (120 lpm), pero su respiración es jadeante / boqueo (gasping). Está en Paro Respiratorio Aislado.");
+                        }, 2000);
+                        setTimeout(() => {
+                            if (state.rcpEnCurso || document.getElementById('modal-ventilar').classList.contains('hidden')) {
+                                printAlert("Doctor, tiene pulso fuerte a 120, pero solo jadea, ¿le doy ventilaciones de rescate con la bolsa?");
+                            }
+                        }, 8000);
+                    }
+                }
+
+                // Notificaciones de RCP en curso
                 if (state.rcpEnCurso && state.rcpInicioTiempo !== null) {
                     let transcurridoRCP = state.timerSegundos - state.rcpInicioTiempo;
                     if (transcurridoRCP === 60) {
@@ -663,24 +701,8 @@
                     } else if (transcurridoRCP === 110) {
                         printRegistro('Faltan 10 segundos para acabar este ciclo.');
                     } else if (transcurridoRCP === 120) {
-                        printRegistro('Tiempo cumplido: 2 minutos de este ciclo de RCP. Sugiero reevaluar el ritmo.');
-                        state.rcpEnCurso = false; // Se suspende el conteo automático de RCP para que el líder decida
-                        state.rcpInicioTiempo = null;
-                        if (state.descargasDadas >= 3) {
-                            state.ritmoECG = 'SINUS';
-                            updateMonitor({ rhythm: 'Trazado Activo' });
-                        }
-                    }
-                }
-
-                // Notificaciones de Adrenalina
-                if (state.adrenalinaTiempo !== null) {
-                    let transcurridoAdr = state.timerSegundos - state.adrenalinaTiempo;
-                    if (transcurridoAdr === 150) {
-                        printRegistro('Faltan 30 segundos para cumplir los 3 minutos de la ultima dosis de adrenalina.');
-                    } else if (transcurridoAdr === 180) {
-                        printRegistro('Ya pasaron 3 minutos desde la ultima dosis de adrenalina. ¿Ordena nueva dosis?');
-                        state.adrenalinaTiempo = null; // Reiniciar el aviso de adrenalina para este ciclo
+                        printRegistro('Tiempo cumplido: 2 minutos de este ciclo de RCP. Sugiero reevaluar el ritmo o relevar compresor.');
+                        state.rcpInicioTiempo = state.timerSegundos; // reiniciar el contador de RCP
                     }
                 }
             }
@@ -1267,20 +1289,32 @@
                     var pos = document.querySelector('input[name="dea-pos"]:checked');
                     if(size && pos) {
                         closeModal('modal-parches-dea');
-                        state.logDeAcciones.push({ time: state.timerSegundos, action: 'parches_config', payload: { size: size.value, pos: pos.value } });
                         state.parchesConectados = true;
+                        state.logDeAcciones.push({ time: state.timerSegundos, action: 'parches_dea', payload: {size: size.value, pos: pos.value} });
+                        printLeader(`"Conectando parches ${size.value} en posición ${pos.value}."`);
                         
                         if(size.value === 'pediatrico' && pos.value === 'anteroposterior') {
-                            printSystem(`Parches pediátricos colocados en posición anteroposterior. El cable está conectado.`);
-                        } else {
-                            printSystem(`Parches colocados: ${size.value}, en posición ${pos.value}.`);
+                            printSystem(`✅ Excelente colocación de parches pediátricos en posición anteroposterior.`);
+                        } else if (size.value === 'adulto') {
+                            printSystem(`⚠️ ADVERTENCIA: Usaste parches de adulto. Se pueden usar si no hay pediátricos, pero asegurando que no se toquen entre sí (anteroposterior es obligatorio).`);
+                        } else if (pos.value === 'anterolateral') {
+                            printSystem(`⚠️ ADVERTENCIA: En lactantes pequeños, la posición anterolateral puede causar que los parches se toquen y la corriente no atraviese el corazón adecuadamente. Se prefiere anteroposterior.`);
                         }
-                        
-                        // Automáticamente analiza el ritmo al conectar
-                        setTimeout(() => takeAction('analizar_ritmo_dea'), 1500);
 
+                        // DEA auto-analiza el ritmo de inmediato
+                        setTimeout(() => {
+                            printSystem("🔊 DEA: Analizando el ritmo cardíaco... No toque al paciente.");
+                            state.rcpEnCurso = false; // Detienen RCP para análisis
+                            
+                            setTimeout(() => {
+                                printSystem("🚨 EVENTO: El DEA identifica un ritmo desfibrilable (Fibrilación Ventricular).");
+                                printSystem("🔊 DEA: Descarga recomendada. Cargando... Aléjense todos.");
+                                document.getElementById('btn-descarga-dea').classList.remove('hidden', 'opacity-50', 'pointer-events-none');
+                                document.getElementById('btn-descarga-dea').classList.add('animate-pulse');
+                            }, 3000);
+                        }, 2000);
                     } else {
-                        alert("Selecciona el tamaño y posición.");
+                        alert("Selecciona tamaño y posición de los parches.");
                     }
                     break;
                 case 'analizar_ritmo_dea':
@@ -1306,33 +1340,34 @@
                     }, 4000);
                     break;
                 case 'descarga_dea':
-                    printLeader(`"¡Descarga lista! Yo fuera, tú fuera, todos fuera. Administrando descarga."`);
-                    printSystem(`⚡ DESCARGA ADMINISTRADA por el DEA.`);
+                    if(state.ritmoECG !== 'FV' && state.ritmoECG !== 'TVSP') {
+                        printSystem("El DEA no ha recomendado descarga.");
+                        accionEsCorrecta = false;
+                        break;
+                    }
+                    printLeader(`"¡Todos fuera! Descargando."`);
+                    printSystem(`⚡ Administras la descarga eléctrica al lactante.`);
                     state.descargasDadas++;
-                    
-                    document.getElementById('btn-descarga-dea').disabled = true;
-                    document.getElementById('btn-descarga-dea').classList.add('opacity-50', 'cursor-not-allowed', 'bg-red-100', 'text-red-900');
-                    document.getElementById('btn-descarga-dea').classList.remove('bg-red-600', 'text-white', 'animate-pulse');
-                    document.getElementById('btn-descarga-dea').innerHTML = '<i class="fas fa-bolt mr-1.5"></i> Dar Descarga (Bloqueado)';
-
-                    setTimeout(() => {
-                        if ('speechSynthesis' in window) {
-                            var msg4 = new SpeechSynthesisUtterance("Descarga administrada. Inicie la RCP.");
-                            msg4.lang = 'es-ES';
-                            window.speechSynthesis.speak(msg4);
-                        }
-                        printSystem(`El DEA indica: INICIE LA RCP.`);
-                    }, 2000);
+                    state.ritmoECG = 'ASISTOLIA'; // Temporal until they resume CPR
+                    state.fase_caso = 'POST_DESCARGA';
+                    state.tiempoFase = 0;
+                    state.saviorFaseMostrado = false;
+                    state.rcpEnCurso = false; // Forces them to resume CPR
+                    document.getElementById('btn-descarga-dea').classList.add('hidden', 'opacity-50', 'pointer-events-none');
+                    document.getElementById('btn-descarga-dea').classList.remove('animate-pulse');
+                    printSystem("🔊 DEA: Descarga entregada. Inicie compresiones inmediatamente.");
                     break;
 
                 // OVACE
                 case 'ovace_golpes':
                     printLeader(`"Dando 5 golpes secos en la espalda."`);
-                    printSystem(`Sostienes al lactante boca abajo sobre tu antebrazo y das 5 golpes en la espalda entre los omóplatos.`);
+                    state.maniobrasOvace++;
+                    if (state.fase_caso === 'OVACE') printSystem(`Sostienes al lactante boca abajo sobre tu antebrazo y das 5 golpes en la espalda entre los omóplatos. Aún no expulsa el cuerpo extraño.`);
                     break;
                 case 'ovace_compresiones':
                     printLeader(`"Dando 5 compresiones torácicas."`);
-                    printSystem(`Volteas al lactante boca arriba y das 5 compresiones torácicas.`);
+                    state.maniobrasOvace++;
+                    if (state.fase_caso === 'OVACE') printSystem(`Volteas al lactante boca arriba y das 5 compresiones torácicas. Aún no expulsa el cuerpo extraño.`);
                     break;
                 case 'ovace_heimlich':
                     printLeader(`"Aplicando maniobra de Heimlich (presiones abdominales)."`);
