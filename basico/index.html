@@ -73,6 +73,30 @@
     </style>
 </head>
 <body class="bg-gray-200 p-2 md:p-6 font-sans">
+
+    <!-- MODAL INTRODUCTORIO -->
+    <div id="modal-intro" class="fixed inset-0 bg-black bg-opacity-75 z-[60] flex justify-center items-center p-2 md:p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[95vh] flex flex-col overflow-hidden">
+            <div class="bg-blue-600 text-white p-4 flex justify-between items-center">
+                <h2 class="text-xl font-bold flex items-center"><i class="fas fa-stethoscope mr-2"></i> Caso Clínico: OVACE y BLS Pediátrico</h2>
+            </div>
+            <div class="p-6 overflow-y-auto text-gray-800 space-y-4">
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded text-sm mb-4">
+                    <strong>Instrucciones:</strong> Eres el líder de un equipo de 3 personas (tú y dos enfermeras). Evalúa y toma decisiones médicas a través de los botones de la interfaz. La simulación reaccionará a tus acciones.
+                </div>
+                
+                <p>👩‍⚕️ <strong>Estás en la cafetería del primer piso del hospital.</strong> Estás tomando un café junto a dos enfermeras (Enfermera 1 y Enfermera 2). De repente, en la mesa de al lado, una madre grita desesperada.</p>
+                <p>Te acercas y ves a un lactante de 8 meses en su silla. La madre te dice que le estaba dando huevo al desayuno. Notas que el bebé no emite ningún sonido, no tose, tiene los ojos muy abiertos con angustia y sus labios se están poniendo rápidamente cianóticos.</p>
+                <p class="font-bold text-lg text-blue-700 mt-4">¿Cuál es tu primera acción?</p>
+            </div>
+            <div class="bg-gray-100 p-4 border-t border-gray-200 flex justify-end">
+                <button onclick="cerrarIntroYEmpezar()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow flex items-center">
+                    <i class="fas fa-play mr-2"></i> Iniciar Simulación
+                </button>
+            </div>
+        </div>
+    </div>
+
     
     <!-- MODAL: AYUDAS COGNITIVAS -->
     <div id="modal-ayudas" onclick="if(event.target === this) closeModal('modal-ayudas')" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex justify-center items-center p-2 md:p-4 backdrop-blur-xs">
@@ -116,6 +140,16 @@
                     <input type="checkbox" id="role-dea" class="form-checkbox h-5 w-5 text-blue-600 rounded">
                     <span class="ml-3 font-semibold text-gray-800">Manejo del DEA</span>
                 </label>
+            
+                <div>
+                    <label class="font-bold text-sm block mb-1">Relación Compresión-Ventilación (Con 2 o más reanimadores):</label>
+                    <select id="rcp-ratio" class="w-full p-2 border rounded border-gray-300">
+                        <option value="">Selecciona...</option>
+                        <option value="30:2">30 compresiones : 2 ventilaciones</option>
+                        <option value="15:2">15 compresiones : 2 ventilaciones</option>
+                        <option value="continua">Compresiones continuas (solo si vía aérea avanzada)</option>
+                    </select>
+                </div>
             </div>
             
             <div class="flex justify-end gap-2">
@@ -188,7 +222,7 @@
     <div id="modal-tecnica-rcp" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex justify-center items-center p-2 overflow-y-auto">
         <div class="bg-white p-4 md:p-6 rounded-lg shadow-xl w-full max-w-4xl text-center my-4">
             <h3 class="font-bold text-xl mb-4 text-green-700 border-b-2 border-green-500 pb-2"><i class="fas fa-hand-paper mr-2"></i>Técnica de Compresiones</h3>
-            <p class="mb-4 text-sm text-gray-700">Selecciona la técnica correcta para este paciente (Lactante de 7 meses):</p>
+            <p class="mb-4 text-sm text-gray-700">Selecciona la técnica correcta para este paciente (Lactante de 8 meses):</p>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                 <label class="border p-2 rounded cursor-pointer hover:bg-green-50 flex flex-col items-center">
@@ -247,6 +281,16 @@
                         <option value="">Selecciona...</option>
                         <option value="parcial">Permitir re-expansión parcial (apoyarse en el tórax)</option>
                         <option value="completa">Permitir re-expansión completa (sin apoyarse)</option>
+                    </select>
+                </div>
+            
+                <div>
+                    <label class="font-bold text-sm block mb-1">Relación Compresión-Ventilación (Con 2 o más reanimadores):</label>
+                    <select id="rcp-ratio" class="w-full p-2 border rounded border-gray-300">
+                        <option value="">Selecciona...</option>
+                        <option value="30:2">30 compresiones : 2 ventilaciones</option>
+                        <option value="15:2">15 compresiones : 2 ventilaciones</option>
+                        <option value="continua">Compresiones continuas (solo si vía aérea avanzada)</option>
                     </select>
                 </div>
             </div>
@@ -468,7 +512,10 @@
                         <i class="fas fa-exclamation-triangle text-red-600 mr-1.5"></i> Manejo de OVACE
                     </div>
                     <div class="grid grid-cols-2 gap-1.5">
-                        <button onclick="takeAction('ovace_golpes')" class="bg-white hover:bg-red-100 text-red-950 border border-red-300 py-2 px-2 rounded-lg text-xs font-semibold shadow-xs text-center flex items-center justify-center transition-colors">
+                        <button onclick="takeAction('ovace_boca')" class="bg-white hover:bg-red-100 text-red-950 border border-red-300 py-2 px-2 rounded-lg text-xs font-semibold shadow-xs text-center flex items-center justify-center transition-colors col-span-2">
+<i class="fas fa-search mr-1"></i> Revisar la Boca (Sin barrido a ciegas)
+</button>
+<button onclick="takeAction('ovace_golpes')" class="bg-white hover:bg-red-100 text-red-950 border border-red-300 py-2 px-2 rounded-lg text-xs font-semibold shadow-xs text-center flex items-center justify-center transition-colors">
                             5 Golpes Espalda
                         </button>
                         <button onclick="takeAction('ovace_compresiones')" class="bg-white hover:bg-red-100 text-red-950 border border-red-300 py-2 px-2 rounded-lg text-xs font-semibold shadow-xs text-center flex items-center justify-center transition-colors">
@@ -612,15 +659,19 @@
         }
         
         var simuladorIniciado = false;
-        function autoIniciar() {
-            if (simuladorIniciado) return;
-            simuladorIniciado = true;
-            iniciarSimulador();
+        
+        function cerrarIntroYEmpezar() {
+            document.getElementById('modal-intro').classList.add('hidden');
+            if (!simuladorIniciado) {
+                simuladorIniciado = true;
+                iniciarSimulador();
+            }
         }
+
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
             autoIniciar();
         } else {
-            document.addEventListener('DOMContentLoaded', autoIniciar);
+            
             window.addEventListener('load', autoIniciar);
         }
 
@@ -1204,15 +1255,25 @@
                     break;
                 case 'submit_tecnica':
                     var tech = document.querySelector('input[name="tecnica-rcp"]:checked');
-                    if(tech) {
+                    if (tech) {
                         closeModal('modal-tecnica-rcp');
-                        state.logDeAcciones.push({ time: state.timerSegundos, action: 'tecnica_elegida', payload: tech.value });
-                        printLeader(`"Compresiones con técnica: ${tech.value}"`);
-                        if(tech.value === '2dedos' || tech.value === '2manos') {
-                            printSystem(`⚠️ Técnica incorrecta para este caso según guías 2025.`);
-                        } else {
-                            printSystem(`✅ Técnica adecuada.`);
+                        state.logDeAcciones.push({ time: state.timerSegundos, action: 'tecnica_rcp', payload: tech.value });
+                        
+                        let msgTech = "";
+                        if (tech.value === '2pulgares') {
+                            msgTech = "✅ Correcto. Usaste la técnica de 2 pulgares con las manos rodeando el tórax.";
+                        } else if (tech.value === '1mano') {
+                            msgTech = "✅ Correcto. Usaste la técnica del talón de 1 mano.";
+                        } else if (tech.value === '2dedos') {
+                            msgTech = "⚠️ ADVERTENCIA: La técnica de 2 dedos ya NO se recomienda según las Guías 2025 (AHA/ERC), ya que genera menos presión y es más agotadora. Prefiere 2 pulgares o 1 mano.";
+                        } else if (tech.value === '2manos') {
+                            msgTech = "❌ INCORRECTO. La técnica de 2 manos es excesiva para un lactante de 8kg y puede causar trauma torácico grave. Usa 2 pulgares o 1 mano.";
+                            accionEsCorrecta = false;
                         }
+                        
+                        printLeader(`"Iniciando compresiones con técnica: ${document.querySelector('label:has(input:checked) span').innerText}."`);
+                        printSystem(msgTech);
+                        document.getElementById('modal-reanudar-rcp').classList.remove('hidden'); // Ask for frequency/depth
                     } else {
                         alert("Selecciona una técnica.");
                     }
@@ -1224,17 +1285,23 @@
                     var fq = document.getElementById('rcp-freq').value;
                     var dp = document.getElementById('rcp-depth').value;
                     var re = document.getElementById('rcp-recoil').value;
-                    if(fq && dp && re) {
+                    var ratio = document.getElementById('rcp-ratio').value;
+                    if(fq && dp && re && ratio) {
                         closeModal('modal-reanudar-rcp');
-                        state.logDeAcciones.push({ time: state.timerSegundos, action: 'calidad_rcp', payload: {fq, dp, re} });
+                        state.logDeAcciones.push({ time: state.timerSegundos, action: 'calidad_rcp', payload: {fq, dp, re, ratio} });
                         if(!state.timerActivo) startTimer();
                         state.rcpEnCurso = true;
                         printLeader(`"Iniciando/Reanudando compresiones."`);
                         
-                        if(fq === '100-120' && dp === '1/3' && re === 'completa') {
-                            printSystem(`✅ Parámetros de RCP de Alta Calidad correctos.`);
+                        let ratioMsg = "";
+                        if (ratio === '15:2') ratioMsg = "Relación 15:2 correcta (hay 2 o más reanimadores).";
+                        else if (ratio === '30:2') { ratioMsg = "⚠️ Relación 30:2 es para 1 reanimador. En pediatría con 2+ reanimadores usa 15:2."; accionEsCorrecta = false; }
+                        else { ratioMsg = "⚠️ Compresiones continuas son para vía aérea avanzada (tubo endotraqueal), que aquí no tienes aún."; accionEsCorrecta = false; }
+
+                        if(fq === '100-120' && dp === '1/3' && re === 'completa' && ratio === '15:2') {
+                            printSystem(`✅ Parámetros de RCP de Alta Calidad y relación 15:2 correctos.`);
                         } else {
-                            printSystem(`⚠️ Alguno de los parámetros seleccionados (Frecuencia: ${fq}, Profundidad: ${dp}, Re-expansión: ${re}) no es óptimo.`);
+                            printSystem(`⚠️ Alguno de los parámetros seleccionados (Frecuencia: ${fq}, Profundidad: ${dp}, Re-expansión: ${re}) no es óptimo, o la relación seleccionada es incorrecta. ${ratioMsg}`);
                         }
                     } else {
                         alert("Selecciona todos los parámetros.");
@@ -1359,15 +1426,21 @@
                     break;
 
                 // OVACE
+                case 'ovace_boca':
+                    printLeader(`"Revisando la boca en busca del cuerpo extraño."`);
+                    printSystem(`Abres la boca del lactante y observas. NO se ve ningún cuerpo extraño accesible.`);
+                    break;
                 case 'ovace_golpes':
                     printLeader(`"Dando 5 golpes secos en la espalda."`);
                     state.maniobrasOvace++;
-                    if (state.fase_caso === 'OVACE') printSystem(`Sostienes al lactante boca abajo sobre tu antebrazo y das 5 golpes en la espalda entre los omóplatos. Aún no expulsa el cuerpo extraño.`);
+                    state.logDeAcciones.push({ time: state.timerSegundos, action: 'ovace_golpes' });
+                    if (state.fase_caso === 'OVACE') printSystem(`Sostienes al lactante boca abajo sobre tu antebrazo y das 5 golpes en la espalda entre los omóplatos. Aún no expulsa el cuerpo extraño. ¿Qué más realizas?`);
                     break;
                 case 'ovace_compresiones':
                     printLeader(`"Dando 5 compresiones torácicas."`);
                     state.maniobrasOvace++;
-                    if (state.fase_caso === 'OVACE') printSystem(`Volteas al lactante boca arriba y das 5 compresiones torácicas. Aún no expulsa el cuerpo extraño.`);
+                    state.logDeAcciones.push({ time: state.timerSegundos, action: 'ovace_compresiones' });
+                    if (state.fase_caso === 'OVACE') printSystem(`Volteas al lactante boca arriba y das 5 compresiones torácicas. Aún no expulsa el cuerpo extraño. ¿Qué más realizas?`);
                     break;
                 case 'ovace_heimlich':
                     printLeader(`"Aplicando maniobra de Heimlich (presiones abdominales)."`);
@@ -1383,14 +1456,13 @@
                 state.omisiones++;
                 if (state.omisiones >= 2) {
                     const rescates = {
-                        0: "Doctor(a), el niño está muy frío y no parece respirar, ¿verifico el pulso central?",
-                        1: "Doctor(a), ¿A qué frecuencia (100-120) y profundidad (1/3 a 1/2) comprimo?",
-                        2: "Descarga entregada, ¿sigo con las compresiones inmediatamente para minimizar la pausa?",
-                        3: "Llevamos 2 minutos tras la 1ra descarga y persiste en FV. ¿Descargamos a 4 J/kg (80 J) y preparamos Adrenalina diluida?",
-                        4: "Llegaron los gases con Potasio alto y el paciente tiene ERC... Las guías permiten usar Calcio y Bicarbonato en hiperkalemia severa, ¿los administro?",
-                        5: "Ya van 3 descargas y sigue en FV. ¿Administro Amiodarona (5 mg/kg) y aseguramos vía aérea avanzada con capnografía?"
+                        'OVACE': "⚠️ Doctor, el niño se está poniendo muy morado, ¿le damos golpes en la espalda y compresiones?",
+                        'INCONSCIENTE': "💉 Doctor, el niño quedó flácido e inconsciente, ¿lo pongo en el suelo e iniciamos masaje cardíaco?",
+                        'RCP': "💉 Doctor, traje el DEA y la bolsa, ¿qué parches le pongo y cómo los ubico en un bebé tan pequeño?",
+                        'POST_DESCARGA': "💉 Descarga entregada... ¿sigo con el masaje o esperamos?",
+                        'RCE': "💉 Doctor, tiene pulso fuerte a 120, pero solo jadea, ¿le doy ventilaciones de rescate con la bolsa?"
                     };
-                    if (rescates[state.fase]) printAlert(rescates[state.fase]);
+                    if (rescates[state.fase_caso]) printAlert(rescates[state.fase_caso]);
                     state.omisiones = 0;
                 }
             } else {
