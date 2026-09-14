@@ -629,13 +629,15 @@
         }
         
         var simuladorIniciado = false;
-        
-        window.onload = function() {\n            if(!simuladorIniciado) {\n                simuladorIniciado = true;\n                iniciarSimulador();\n            }\n        };\n        }
-
+        function autoIniciar() {
+            if (simuladorIniciado) return;
+            simuladorIniciado = true;
+            iniciarSimulador();
+        }
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
             autoIniciar();
         } else {
-            
+            document.addEventListener('DOMContentLoaded', autoIniciar);
             window.addEventListener('load', autoIniciar);
         }
 
