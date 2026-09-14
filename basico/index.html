@@ -74,28 +74,7 @@
 </head>
 <body class="bg-gray-200 p-2 md:p-6 font-sans">
 
-    <!-- MODAL INTRODUCTORIO -->
-    <div id="modal-intro" class="fixed inset-0 bg-black bg-opacity-75 z-[60] flex justify-center items-center p-2 md:p-4 backdrop-blur-sm">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[95vh] flex flex-col overflow-hidden">
-            <div class="bg-blue-600 text-white p-4 flex justify-between items-center">
-                <h2 class="text-xl font-bold flex items-center"><i class="fas fa-stethoscope mr-2"></i> Caso Clínico: OVACE y BLS Pediátrico</h2>
-            </div>
-            <div class="p-6 overflow-y-auto text-gray-800 space-y-4">
-                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded text-sm mb-4">
-                    <strong>Instrucciones:</strong> Eres el líder de un equipo de 3 personas (tú y dos enfermeras). Evalúa y toma decisiones médicas a través de los botones de la interfaz. La simulación reaccionará a tus acciones.
-                </div>
-                
-                <p>👩‍⚕️ <strong>Estás en la cafetería del primer piso del hospital.</strong> Estás tomando un café junto a dos enfermeras (Enfermera 1 y Enfermera 2). De repente, en la mesa de al lado, una madre grita desesperada.</p>
-                <p>Te acercas y ves a un lactante de 8 meses en su silla. La madre te dice que le estaba dando huevo al desayuno. Notas que el bebé no emite ningún sonido, no tose, tiene los ojos muy abiertos con angustia y sus labios se están poniendo rápidamente cianóticos.</p>
-                <p class="font-bold text-lg text-blue-700 mt-4">¿Cuál es tu primera acción?</p>
-            </div>
-            <div class="bg-gray-100 p-4 border-t border-gray-200 flex justify-end">
-                <button onclick="cerrarIntroYEmpezar()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow flex items-center">
-                    <i class="fas fa-play mr-2"></i> Iniciar Simulación
-                </button>
-            </div>
-        </div>
-    </div>
+    >
 
     
     <!-- MODAL: AYUDAS COGNITIVAS -->
@@ -185,20 +164,19 @@
 
     <!-- MODAL: CÓDIGO AZUL (SIMULADOR TELÉFONO) -->
     <div id="modal-codigo-azul" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex justify-center items-center p-2">
-        <div class="bg-white p-4 md:p-6 rounded-lg shadow-xl w-full max-w-sm text-center">
-            <h3 class="font-bold text-xl mb-4 text-red-600 border-b-2 border-red-500 pb-2"><i class="fas fa-phone-alt mr-2"></i>Parlantear Código Azul</h3>
-            <p class="mb-4 text-sm text-gray-700">El paciente está en la cafetería del primer piso de la Torre B. Presiona el botón del micrófono y dicta el mensaje 2 veces.</p>
-            <p class="mb-4 text-xs text-gray-500 italic">Ejemplo: "Código azul pediátrico, Torre B, cafetería, primer piso. Código azul pediátrico, Torre B, cafetería, primer piso."</p>
+        <div class="bg-white p-4 md:p-6 rounded-lg shadow-xl w-full max-w-md text-center">
+            <h3 class="font-bold text-xl mb-4 text-red-600 border-b-2 border-red-500 pb-2"><i class="fas fa-phone-alt mr-2"></i>Activar Código Azul</h3>
+            <p class="mb-4 text-sm text-gray-700">El paciente está en la habitación 824 de la Torre A. Presiona el botón del micrófono, espera 3 segundos y parlantea el mensaje 2 veces. (Ej: Código azul pediátrico habitación 824 torre A).</p>
             
-            <button id="btn-record" onclick="toggleRecording()" class="w-24 h-24 rounded-full bg-red-100 hover:bg-red-200 border-4 border-red-500 text-red-600 text-3xl mx-auto flex items-center justify-center mb-4 transition-all shadow-lg">
-                <i class="fas fa-microphone"></i>
+            <button id="btn-record" onclick="toggleRecording()" class="w-24 h-24 rounded-full bg-red-100 text-red-600 shadow-inner flex justify-center items-center mx-auto mb-4 hover:bg-red-200 transition-colors">
+                <i class="fas fa-microphone text-4xl"></i>
             </button>
-            <p id="record-status" class="text-xs text-gray-500 mb-2 h-4 font-bold"></p>
-            <p id="record-transcript" class="text-sm font-mono text-gray-800 bg-gray-100 p-2 rounded min-h-[4rem] mb-4 border shadow-inner text-left max-h-32 overflow-y-auto"></p>
+            <div id="record-status" class="text-xs text-gray-500 font-mono mb-2 h-4">Presiona el micrófono para hablar</div>
+            <div id="record-transcript" class="w-full h-20 bg-gray-50 border rounded p-2 text-sm text-gray-800 text-left overflow-y-auto italic mb-4"></div>
 
-            <div class="flex justify-between gap-2">
+            <div class="flex justify-end gap-2">
                 <button onclick="closeModal('modal-codigo-azul')" class="px-4 py-2 bg-gray-200 text-gray-800 rounded font-bold">Cancelar</button>
-                <button onclick="takeAction('submit_codigo_azul')" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-bold shadow">Enviar Mensaje</button>
+                <button onclick="takeAction('submit_codigo_azul')" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-bold shadow">Enviar Activación</button>
             </div>
         </div>
     </div>
@@ -381,7 +359,7 @@
         <div class="bg-black text-green-400 p-2 md:p-4 flex flex-col md:flex-row justify-between items-center monitor-text border-b-4 md:border-b-8 border-gray-800 relative z-30 shadow-inner flex-shrink-0">
             <div class="absolute top-1 right-2 md:top-2 md:right-3 text-[10px] md:text-xs text-gray-500 hidden md:block">CORPULS 3 / ZOLL X SERIES</div>
             
-            <div class="w-full md:w-1/2 grid grid-cols-4 md:grid-cols-2 gap-1 md:gap-3 pr-0 md:pr-4 mt-2 md:mt-0">
+            <div class="w-full grid grid-cols-4 gap-1 md:gap-3 pr-0 md:pr-4 mt-2 md:mt-0">
                 <div class="bg-gray-900 p-1 md:p-2 rounded border border-gray-700 flex flex-col justify-center">
                     <div class="text-[9px] md:text-xs text-gray-400 leading-tight">MONITOR</div>
                     <div class="text-xs md:text-base font-bold truncate text-green-400" id="val-rhythm">Apagado</div>
@@ -395,16 +373,302 @@
                     <div class="text-base md:text-3xl font-bold text-blue-400" id="val-spo2">---</div>
                 </div>
                 <div class="bg-gray-900 p-1 md:p-2 rounded border border-gray-700 flex flex-col justify-center">
-                    <div class="text-[9px] md:text-xs text-yellow-400 font-bold leading-tight">EtCO2</div>
-                    <div class="text-base md:text-3xl font-bold text-yellow-400" id="val-etco2">---</div>
+                    <div class="text-[9px] md:text-xs text-yellow-400 font-bold leading-tight">T. Arterial</div>
+                    <div class="text-base md:text-3xl font-bold text-yellow-400" id="val-ta">---</div>
                 </div>
             </div>
             
-            <!-- Osciloscopio ECG en Tiempo Real -->
-            <div class="w-full md:w-1/2 h-14 md:h-28 mt-1 md:mt-0 rounded border border-green-800 relative overflow-hidden ecg-grid">
-                <canvas id="ecg-canvas" class="w-full h-full"></canvas>
-                <div class="absolute top-0.5 left-1 md:top-1 md:left-2 text-[8px] md:text-[10px] text-green-600 font-mono tracking-widest" id="lead-label">DERIVACIÓN II</div>
+                        </div>
+        </div>
+    </div>
+
+    <!-- MODAL: ROLES BLS -->
+    <div id="modal-roles" class="fixed inset-0 bg-black bg-opacity-60 hidden z-50 flex justify-center items-center p-2">
+        <div class="bg-white p-6 rounded-lg shadow-xl w-11/12 max-w-lg animate-slideUp">
+            <h3 class="font-bold text-xl mb-4 text-blue-900 border-b-2 border-blue-500 pb-2"><i class="fas fa-users mr-2"></i>Asignación de Roles BLS</h3>
+            <p class="mb-4 text-sm text-gray-700">Selecciona los roles presentes para el equipo de respuesta básica:</p>
+            
+            <div class="space-y-3 mb-6">
+                <label class="flex items-center p-2 hover:bg-gray-50 rounded border border-gray-200 cursor-pointer">
+                    <input type="checkbox" id="role-lider" class="form-checkbox h-5 w-5 text-blue-600 rounded">
+                    <span class="ml-3 font-semibold text-gray-800">Líder del Equipo</span>
+                </label>
+                <label class="flex items-center p-2 hover:bg-gray-50 rounded border border-gray-200 cursor-pointer">
+                    <input type="checkbox" id="role-compresor1" class="form-checkbox h-5 w-5 text-blue-600 rounded">
+                    <span class="ml-3 font-semibold text-gray-800">Compresor 1</span>
+                </label>
+                <label class="flex items-center p-2 hover:bg-gray-50 rounded border border-gray-200 cursor-pointer">
+                    <input type="checkbox" id="role-compresor2" class="form-checkbox h-5 w-5 text-blue-600 rounded">
+                    <span class="ml-3 font-semibold text-gray-800">Compresor 2 (Relevo)</span>
+                </label>
+                <label class="flex items-center p-2 hover:bg-gray-50 rounded border border-gray-200 cursor-pointer">
+                    <input type="checkbox" id="role-viaaerea" class="form-checkbox h-5 w-5 text-blue-600 rounded">
+                    <span class="ml-3 font-semibold text-gray-800">Vía Aérea / Ventilaciones</span>
+                </label>
+                <label class="flex items-center p-2 hover:bg-gray-50 rounded border border-gray-200 cursor-pointer">
+                    <input type="checkbox" id="role-dea" class="form-checkbox h-5 w-5 text-blue-600 rounded">
+                    <span class="ml-3 font-semibold text-gray-800">Manejo del DEA</span>
+                </label>
+            
+                <div>
+                    <label class="font-bold text-sm block mb-1">Relación Compresión-Ventilación (Con 2 o más reanimadores):</label>
+                    <select id="rcp-ratio" class="w-full p-2 border rounded border-gray-300">
+                        <option value="">Selecciona...</option>
+                        <option value="30:2">30 compresiones : 2 ventilaciones</option>
+                        <option value="15:2">15 compresiones : 2 ventilaciones</option>
+                        <option value="continua">Compresiones continuas (solo si vía aérea avanzada)</option>
+                    </select>
+                </div>
             </div>
+            
+            <div class="flex justify-end gap-2">
+                <button onclick="takeAction('submit_roles')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold shadow">Confirmar Equipo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: SEGURIDAD DE ESCENA -->
+    <div id="modal-seguridad" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex justify-center items-center p-2">
+        <div class="bg-white p-4 md:p-6 rounded-lg shadow-xl w-full max-w-4xl">
+            <h3 class="font-bold text-xl mb-4 text-blue-900 border-b-2 border-blue-500 pb-2"><i class="fas fa-shield-alt mr-2"></i>Seguridad de la Escena</h3>
+            <div class="flex flex-col md:flex-row gap-4 h-[70vh]">
+                <div class="w-full md:w-1/2 overflow-hidden flex items-center justify-center bg-gray-100 rounded">
+                    <img src="img/aislamiento.jpg" alt="Aislamiento" class="max-h-full max-w-full object-contain">
+                </div>
+                <div class="w-full md:w-1/2 flex flex-col justify-center overflow-y-auto">
+                    <p class="mb-4 text-sm text-gray-700 font-bold">Según la alerta de la puerta, selecciona los Elementos de Protección Personal (EPP) que usarás para ingresar:</p>
+                    <div class="space-y-3 mb-4 text-base">
+                        <label class="flex items-center p-2 border rounded hover:bg-blue-50 cursor-pointer"><input type="checkbox" id="epp-tapabocas" class="mr-3 w-5 h-5"> Mascarilla Quirúrgica (Tapabocas)</label>
+                        <label class="flex items-center p-2 border rounded hover:bg-blue-50 cursor-pointer"><input type="checkbox" id="epp-n95" class="mr-3 w-5 h-5"> Mascarilla N95</label>
+                        <label class="flex items-center p-2 border rounded hover:bg-blue-50 cursor-pointer"><input type="checkbox" id="epp-bata" class="mr-3 w-5 h-5"> Bata protectora</label>
+                        <label class="flex items-center p-2 border rounded hover:bg-blue-50 cursor-pointer"><input type="checkbox" id="epp-guantes" class="mr-3 w-5 h-5"> Guantes</label>
+                        <label class="flex items-center p-2 border rounded hover:bg-blue-50 cursor-pointer"><input type="checkbox" id="epp-gafas" class="mr-3 w-5 h-5"> Gafas de seguridad / Visera</label>
+                    </div>
+                    <div class="flex justify-end mt-2">
+                        <button onclick="takeAction('submit_seguridad')" class="px-6 py-3 bg-blue-600 text-white rounded font-bold shadow-lg">Ingresar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CÓDIGO AZUL (SIMULADOR TELÉFONO) -->
+    <div id="modal-codigo-azul" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex justify-center items-center p-2">
+        <div class="bg-white p-4 md:p-6 rounded-lg shadow-xl w-full max-w-md text-center">
+            <h3 class="font-bold text-xl mb-4 text-red-600 border-b-2 border-red-500 pb-2"><i class="fas fa-phone-alt mr-2"></i>Activar Código Azul</h3>
+            <p class="mb-4 text-sm text-gray-700">El paciente está en la habitación 824 de la Torre A. Presiona el botón del micrófono, espera 3 segundos y parlantea el mensaje 2 veces. (Ej: Código azul pediátrico habitación 824 torre A).</p>
+            
+            <button id="btn-record" onclick="toggleRecording()" class="w-24 h-24 rounded-full bg-red-100 text-red-600 shadow-inner flex justify-center items-center mx-auto mb-4 hover:bg-red-200 transition-colors">
+                <i class="fas fa-microphone text-4xl"></i>
+            </button>
+            <div id="record-status" class="text-xs text-gray-500 font-mono mb-2 h-4">Presiona el micrófono para hablar</div>
+            <div id="record-transcript" class="w-full h-20 bg-gray-50 border rounded p-2 text-sm text-gray-800 text-left overflow-y-auto italic mb-4"></div>
+
+            <div class="flex justify-end gap-2">
+                <button onclick="closeModal('modal-codigo-azul')" class="px-4 py-2 bg-gray-200 text-gray-800 rounded font-bold">Cancelar</button>
+                <button onclick="takeAction('submit_codigo_azul')" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded font-bold shadow">Enviar Activación</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: VENTILAR BVM -->
+    <div id="modal-ventilar" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex justify-center items-center p-2">
+        <div class="bg-white p-4 md:p-6 rounded-lg shadow-xl w-full max-w-sm text-center">
+            <h3 class="font-bold text-xl mb-4 text-cyan-700 border-b-2 border-cyan-500 pb-2"><i class="fas fa-mask mr-2"></i>Ventilar con BVM</h3>
+            <p class="mb-4 text-sm text-gray-700">Estás acompañado en la reanimación básica. Selecciona la relación de compresión/ventilación adecuada:</p>
+            <div class="flex flex-col gap-3 mb-4">
+                <button onclick="takeAction('submit_ventilar', '30:2')" class="px-4 py-3 bg-cyan-50 hover:bg-cyan-100 text-cyan-900 rounded font-bold border border-cyan-300 transition-colors">Relación 30:2</button>
+                <button onclick="takeAction('submit_ventilar', '15:2')" class="px-4 py-3 bg-cyan-50 hover:bg-cyan-100 text-cyan-900 rounded font-bold border border-cyan-300 transition-colors">Relación 15:2</button>
+            </div>
+            <div class="flex justify-end">
+                <button onclick="closeModal('modal-ventilar')" class="px-4 py-2 bg-gray-200 text-gray-800 rounded font-bold">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: TÉCNICA RCP -->
+    <div id="modal-tecnica-rcp" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex justify-center items-center p-2 overflow-y-auto">
+        <div class="bg-white p-4 md:p-6 rounded-lg shadow-xl w-full max-w-4xl text-center my-4">
+            <h3 class="font-bold text-xl mb-4 text-green-700 border-b-2 border-green-500 pb-2"><i class="fas fa-hand-paper mr-2"></i>Técnica de Compresiones</h3>
+            <p class="mb-4 text-sm text-gray-700">Selecciona la técnica correcta para este paciente (Lactante de 8 meses):</p>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <label class="border p-2 rounded cursor-pointer hover:bg-green-50 flex flex-col items-center">
+                    <div class="h-32 mb-2 flex items-center justify-center overflow-hidden w-full"><img src="img/2dedos.png" alt="2 dedos" class="max-h-full max-w-full object-contain"></div>
+                    <div class="flex items-center"><input type="radio" name="tecnica-rcp" value="2dedos" class="mr-2 w-4 h-4"> <span class="font-bold text-sm">2 Dedos</span></div>
+                </label>
+                <label class="border p-2 rounded cursor-pointer hover:bg-green-50 flex flex-col items-center">
+                    <div class="h-32 mb-2 flex items-center justify-center overflow-hidden w-full"><img src="img/2pulgares.png" alt="2 pulgares" class="max-h-full max-w-full object-contain"></div>
+                    <div class="flex items-center"><input type="radio" name="tecnica-rcp" value="2pulgares" class="mr-2 w-4 h-4"> <span class="font-bold text-sm">2 Pulgares</span></div>
+                </label>
+                <label class="border p-2 rounded cursor-pointer hover:bg-green-50 flex flex-col items-center">
+                    <div class="h-32 mb-2 flex items-center justify-center overflow-hidden w-full"><img src="img/1mano.jpg" alt="1 mano" class="max-h-full max-w-full object-contain"></div>
+                    <div class="flex items-center"><input type="radio" name="tecnica-rcp" value="1mano" class="mr-2 w-4 h-4"> <span class="font-bold text-sm">Talón de 1 Mano</span></div>
+                </label>
+                <label class="border p-2 rounded cursor-pointer hover:bg-green-50 flex flex-col items-center">
+                    <div class="h-32 mb-2 flex items-center justify-center overflow-hidden w-full"><img src="img/2manos.png" alt="2 manos" class="max-h-full max-w-full object-contain"></div>
+                    <div class="flex items-center"><input type="radio" name="tecnica-rcp" value="2manos" class="mr-2 w-4 h-4"> <span class="font-bold text-sm">2 Manos</span></div>
+                </label>
+            </div>
+
+            <div class="flex justify-end gap-2 mt-4">
+                <button onclick="closeModal('modal-tecnica-rcp')" class="px-4 py-2 bg-gray-200 text-gray-800 rounded font-bold">Cancelar</button>
+                <button onclick="takeAction('submit_tecnica')" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded font-bold shadow">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: REANUDAR/CALIDAD RCP -->
+    <div id="modal-reanudar-rcp" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex justify-center items-center p-2">
+        <div class="bg-white p-4 md:p-6 rounded-lg shadow-xl w-full max-w-lg text-center">
+            <h3 id="titulo-modal-rcp" class="font-bold text-xl mb-4 text-green-700 border-b-2 border-green-500 pb-2">Iniciar / Reanudar Compresiones</h3>
+            <p id="desc-modal-rcp" class="mb-4 text-sm text-gray-700">Selecciona los parámetros con los que darás las compresiones:</p>
+            
+            <div class="text-left space-y-4 mb-6 bg-green-50 p-4 rounded border border-green-200">
+                <div>
+                    <label class="font-bold text-sm block mb-1">Frecuencia (Velocidad):</label>
+                    <select id="rcp-freq" class="w-full p-2 border rounded border-gray-300">
+                        <option value="">Selecciona...</option>
+                        <option value="80-100">80 a 100 por minuto</option>
+                        <option value="100-120">100 a 120 por minuto</option>
+                        <option value=">120">Más de 120 por minuto</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="font-bold text-sm block mb-1">Profundidad (Lactante):</label>
+                    <select id="rcp-depth" class="w-full p-2 border rounded border-gray-300">
+                        <option value="">Selecciona...</option>
+                        <option value="1/3">Al menos 1/3 del diámetro del tórax (aprox 4 cm)</option>
+                        <option value="1/2">Al menos 1/2 del diámetro del tórax (aprox 6 cm)</option>
+                        <option value="2cm">2 centímetros de profundidad</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="font-bold text-sm block mb-1">Re-expansión del tórax:</label>
+                    <select id="rcp-recoil" class="w-full p-2 border rounded border-gray-300">
+                        <option value="">Selecciona...</option>
+                        <option value="parcial">Permitir re-expansión parcial (apoyarse en el tórax)</option>
+                        <option value="completa">Permitir re-expansión completa (sin apoyarse)</option>
+                    </select>
+                </div>
+            
+                <div>
+                    <label class="font-bold text-sm block mb-1">Relación Compresión-Ventilación (Con 2 o más reanimadores):</label>
+                    <select id="rcp-ratio" class="w-full p-2 border rounded border-gray-300">
+                        <option value="">Selecciona...</option>
+                        <option value="30:2">30 compresiones : 2 ventilaciones</option>
+                        <option value="15:2">15 compresiones : 2 ventilaciones</option>
+                        <option value="continua">Compresiones continuas (solo si vía aérea avanzada)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="flex justify-end gap-2">
+                <button onclick="closeModal('modal-reanudar-rcp')" class="px-4 py-2 bg-gray-200 text-gray-800 rounded font-bold">Cancelar</button>
+                <button onclick="takeAction('submit_reanudar_rcp')" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded font-bold shadow">Confirmar y Comprimir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: COLOCACIÓN DE PARCHES DEA -->
+    <div id="modal-parches-dea" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex justify-center items-center p-2">
+        <div class="bg-white p-4 md:p-6 rounded-lg shadow-xl w-full max-w-2xl text-center">
+            <h3 class="font-bold text-xl mb-4 text-orange-600 border-b-2 border-orange-500 pb-2"><i class="fas fa-sticky-note mr-2"></i>Colocación de Parches DEA</h3>
+            <p class="mb-4 text-sm text-gray-700">El paciente es un lactante (8 kg). Selecciona el tamaño de los parches y la posición correcta en el tórax.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 text-left">
+                <div class="border p-4 rounded bg-orange-50 border-orange-200">
+                    <h4 class="font-bold text-orange-900 mb-3 border-b border-orange-300 pb-1">1. Tamaño de Parches</h4>
+                    <label class="flex items-center mb-3 cursor-pointer"><input type="radio" name="dea-size" value="adulto" class="mr-2 w-4 h-4"> Parches de Adulto</label>
+                    <label class="flex items-center cursor-pointer"><input type="radio" name="dea-size" value="pediatrico" class="mr-2 w-4 h-4"> Parches Pediátricos (o atenuador)</label>
+                </div>
+                <div class="border p-4 rounded bg-orange-50 border-orange-200">
+                    <h4 class="font-bold text-orange-900 mb-3 border-b border-orange-300 pb-1">2. Posición en el Paciente</h4>
+                    <label class="flex items-start mb-3 cursor-pointer">
+                        <input type="radio" name="dea-pos" value="anterolateral" class="mr-2 mt-1 w-4 h-4 shrink-0"> 
+                        <span class="text-sm">Anterolateral (Lado derecho del esternón e izquierdo bajo la axila)</span>
+                    </label>
+                    <label class="flex items-start cursor-pointer">
+                        <input type="radio" name="dea-pos" value="anteroposterior" class="mr-2 mt-1 w-4 h-4 shrink-0"> 
+                        <span class="text-sm">Anteroposterior (Centro del pecho y centro de la espalda)</span>
+                    </label>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button onclick="closeModal('modal-parches-dea')" class="px-4 py-2 bg-gray-200 text-gray-800 rounded font-bold">Cancelar</button>
+                <button onclick="takeAction('submit_parches_dea')" class="px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded font-bold shadow">Colocar Parches</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: NOTA RCP -->
+    <div id="modal-nota-rcp" class="fixed inset-0 bg-black bg-opacity-70 hidden z-50 flex justify-center items-center overflow-y-auto px-2">
+        <div class="bg-white p-3 md:p-6 rounded-lg shadow-xl w-full max-w-5xl my-4 md:my-8 flex flex-col max-h-[95vh]">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 border-b pb-2 relative flex-shrink-0">
+                <h3 class="font-bold text-lg md:text-xl text-gray-800 pr-8"><i class="fas fa-file-medical-alt mr-2"></i>Registro Clínico de RCP</h3>
+                <p class="text-xs md:text-sm text-blue-800 font-semibold mt-1 md:mt-0">Guárdalo para el curso.</p>
+                <button onclick="closeModal('modal-nota-rcp')" class="absolute top-0 right-0 text-gray-500 hover:text-red-500 bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="overflow-y-auto overflow-x-auto flex-1 w-full border border-gray-200 rounded p-4 text-center">
+                <div class="p-4 text-gray-600 font-bold border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 flex flex-col items-center justify-center h-64">
+                    <i class="fas fa-file-medical-alt text-4xl mb-4 text-blue-300"></i>
+                    El reporte interactivo se generará al finalizar la simulación y podrás imprimirlo o descargarlo.
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 mt-4 pt-3 border-t print:hidden flex-shrink-0">
+                <button onclick="closeModal('modal-nota-rcp')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-sm">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div class="w-full md:max-w-6xl mx-auto bg-white shadow-2xl md:rounded-xl overflow-hidden flex flex-col h-screen md:h-[92vh]">
+        
+        <!-- Header con Botón de Ayuda Cognitiva Altamente Visible -->
+        <div class="bg-blue-900 text-white p-3 flex justify-between items-center shadow-md z-30 relative">
+            <div class="flex items-center space-x-3">
+                <h1 class="text-xl font-bold"><i class="fas fa-hospital-user mr-2"></i> Entrenamiento RCP Básico (BLS) - HPTU</h1>
+                <span class="text-xs bg-blue-800 px-3 py-1 rounded hidden md:inline">Augusto | 7 meses | 8 kg</span>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <button id="btn-ayudas" onclick="consultarAyudaCognitiva()" class="bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-blue-950 font-extrabold px-3.5 py-1.5 rounded-lg shadow-lg text-xs flex items-center btn-ayuda-glow border-2 border-yellow-200 transition-all cursor-pointer">
+                    <i class="fas fa-book-medical mr-2 text-base text-blue-950"></i> 
+                    <span class="tracking-wide uppercase">Ayudas Cognitivas (HPTU)</span>
+                </button>
+
+                <div class="bg-black bg-opacity-40 px-3 py-1 rounded border border-blue-400 flex items-center">
+                    <i class="fas fa-stopwatch text-yellow-400 mr-2 text-base animate-pulse"></i>
+                    <span class="text-xs text-gray-300 mr-2">TIEMPO:</span>
+                    <span class="font-mono text-base font-bold text-yellow-300" id="timer-display">00:00</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monitor Vital -->
+        <div class="bg-black text-green-400 p-2 md:p-4 flex flex-col md:flex-row justify-between items-center monitor-text border-b-4 md:border-b-8 border-gray-800 relative z-30 shadow-inner flex-shrink-0">
+            <div class="absolute top-1 right-2 md:top-2 md:right-3 text-[10px] md:text-xs text-gray-500 hidden md:block">CORPULS 3 / ZOLL X SERIES</div>
+            
+            <div class="w-full grid grid-cols-4 gap-1 md:gap-3 pr-0 md:pr-4 mt-2 md:mt-0">
+                <div class="bg-gray-900 p-1 md:p-2 rounded border border-gray-700 flex flex-col justify-center">
+                    <div class="text-[9px] md:text-xs text-gray-400 leading-tight">MONITOR</div>
+                    <div class="text-xs md:text-base font-bold truncate text-green-400" id="val-rhythm">Apagado</div>
+                </div>
+                <div class="bg-gray-900 p-1 md:p-2 rounded border border-gray-700 flex flex-col justify-center">
+                    <div class="text-[9px] md:text-xs text-green-500 font-bold leading-tight">FC(lpm)</div>
+                    <div class="text-base md:text-3xl font-bold text-green-400" id="val-hr">---</div>
+                </div>
+                <div class="bg-gray-900 p-1 md:p-2 rounded border border-gray-700 flex flex-col justify-center">
+                    <div class="text-[9px] md:text-xs text-blue-400 font-bold leading-tight">SpO2(%)</div>
+                    <div class="text-base md:text-3xl font-bold text-blue-400" id="val-spo2">---</div>
+                </div>
+                <div class="bg-gray-900 p-1 md:p-2 rounded border border-gray-700 flex flex-col justify-center">
+                    <div class="text-[9px] md:text-xs text-yellow-400 font-bold leading-tight">T. Arterial</div>
+                    <div class="text-base md:text-3xl font-bold text-yellow-400" id="val-ta">---</div>
+                </div>
+            </div>
+            
+            
         </div>
 
         <!-- Main Content Area -->
@@ -652,21 +916,18 @@
             state.timerActivo = true;
 
             // Mensaje inicial del caso
-            printSystem(`🚨 CASO CLÍNICO: Pablo, lactante de 8 meses (8 kg). Mientras su madre le daba el desayuno en la cafetería del hospital, notó que dejó de emitir sonidos, no tose, abrió mucho los ojos con angustia y empezó a ponerse cianótico. La madre grita pidiendo ayuda. Eres el primer respondedor (Personal de Salud) que se encontraba casualmente en la cafetería.`);
-            setTimeout(() => {
-                printSystem(`Después de indicar cada orden, vuelve a esta bitácora para ver la respuesta.`);
-            }, 500);
+            printSystem(`👩‍⚕️ **Contexto Clínico:** Estás en el octavo piso del hospital. Acompañado de dos enfermeras (Enfermera 1 y Enfermera 2). De repente, de una habitación, una madre grita desesperada. Te acercas y ves a un lactante de 8 meses en la cama. La madre te dice que le estaba dando huevo al desayuno. Notas que el bebé se está moviendo agitado, no emite ningún sonido, no tose, tiene los ojos muy abiertos con angustia y sus labios se están poniendo rápidamente cianóticos. ¿Cuál es tu primera acción?`);
+            
         }
         
         var simuladorIniciado = false;
         
-        function cerrarIntroYEmpezar() {
-            document.getElementById('modal-intro').classList.add('hidden');
-            if (!simuladorIniciado) {
-                simuladorIniciado = true;
-                iniciarSimulador();
-            }
-        }
+        window.onload = function() { 
+            if(!simuladorIniciado) { 
+                simuladorIniciado = true; 
+                iniciarSimulador(); 
+            } 
+        };
 
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
             autoIniciar();
@@ -1184,27 +1445,66 @@
                     if(g) eppList.push("Guantes");
                     if(gf) eppList.push("Gafas");
 
-                    if(n95) {
-                        alert("El aislamiento es por gotas y contacto. La mascarilla N95 es para aerosoles y no es estrictamente necesaria aquí, pero si no se dispone de tapabocas simple, se podría usar. Lo correcto es tapabocas simple.");
-                    }
-                    if(!t || !b || !g || !gf) {
-                        alert("Faltan Elementos de Protección Personal vitales para precauciones de gotas y contacto.");
-                    }
+                    state.logDeAcciones.push({ time: state.timerSegundos, action: 'seguridad_escena', payload: eppList });
+
                     closeModal('modal-seguridad');
-                    printLeader(`"Ingresando con EPP: ${eppList.join(', ') || 'Ninguno'}"`);
-                    printSystem(`La escena es segura para intervenir.`);
+                    printLeader(`"Asegurando escena con: ${eppList.join(', ') || 'Ninguno'}"`);
+                    printSystem(`Escena asegurada, sin importar lo que hayas escogido se hará la retroalimentación después.`);
                     break;
                 case 'verificar_respuesta':
-                    printLeader(`"¡Augusto, Augusto! ¿Me escuchas?"`);
-                    printSystem(`Estimulas al lactante golpeando suavemente la planta del pie. No hay respuesta, está flácido.`);
+                    printLeader(`"¡Bebé! ¿Estás bien?"`);
+                    if (state.fase_caso === 'OVACE') {
+                        printSystem(`El paciente está agitado, moviendo las 4 extremidades.`);
+                    } else if (state.fase_caso === 'INCONSCIENTE' || state.fase_caso === 'POST_DESCARGA' || state.fase_caso === 'RCP') {
+                        printSystem(`Estimulas al lactante golpeando suavemente la planta del pie. No hay respuesta, está flácido.`);
+                    } else if (state.fase_caso === 'RCE') {
+                        printSystem(`No hay respuesta clara, pero se notan movimientos espontáneos leves.`);
+                    }
                     break;
+                
+                case 'oxigeno_dispositivo':
+                    printLeader(`"Colocando dispositivo de oxígeno (Cánula/Venturi/No reinhalación)."`);
+                    if (state.fase_caso === 'OVACE') {
+                        printSystem(`⚠️ El paciente está muy agitado y casi no se deja el dispositivo. No se ve elevación del pecho.`);
+                        printSystem(`⚠️ RETROALIMENTACIÓN: En este momento el paciente tiene obstrucción de vía aérea. La prioridad es permeabilizar la vía aérea (maniobras de desobstrucción), no dar oxígeno suplementario, ya que no va a entrar.`);
+                        accionEsCorrecta = false;
+                    } else {
+                        printSystem(`Dispositivo colocado. Saturación puede demorar en mejorar.`);
+                    }
+                    break;
+                case 'ventilar_bvm':
+                    printLeader(`"Intentando ventilar con BVM."`);
+                    if (state.fase_caso === 'OVACE') {
+                        printSystem(`⚠️ El paciente está muy agitado y no permite el uso de BVM.`);
+                        printSystem(`⚠️ RETROALIMENTACIÓN: La prioridad es permeabilizar la vía aérea.`);
+                        accionEsCorrecta = false;
+                    } else if (state.fase_caso === 'RCE') {
+                        printSystem(`✅ Das ventilaciones de rescate (1 cada 2 a 3 segundos). El pecho se eleva adecuadamente.`);
+                    } else {
+                        printSystem(`Ventilando con BVM (15:2).`);
+                    }
+                    break;
+
                 case 'verificar_respiracion':
                     printLeader(`"Verificando respiración..."`);
-                    printSystem(`Observas el tórax. El paciente no respira o presenta respiración agónica (jadeos/boqueos).`);
+                    if (state.fase_caso === 'OVACE') {
+                        printSystem(`El paciente está agitado pero no se logra ver que eleve el tórax, no emite ningún sonido o tos.`);
+                    } else if (state.fase_caso === 'INCONSCIENTE' || state.fase_caso === 'POST_DESCARGA' || state.fase_caso === 'RCP') {
+                        printSystem(`Observas el tórax. El paciente no respira o presenta respiración agónica (jadeos/boqueos).`);
+                    } else if (state.fase_caso === 'RCE') {
+                        printSystem(`Presenta respiración agónica / boqueo (gasping).`);
+                    }
                     break;
                 case 'palpar_pulso':
                     printLeader(`"Palpando pulso braquial por 10 segundos..."`);
-                    printSystem(`No palpas pulso. (Si no se palpa en 10 seg, asumes que no hay pulso y debes iniciar compresiones).`);
+                    if (state.fase_caso === 'OVACE') {
+                        printSystem(`Tiene 150 por minuto y se siente fuerte.`);
+                        printSystem(`⚠️ RETROALIMENTACIÓN: El paciente tiene movimientos y está agitado, el tomar el pulso hace que perdamos 10 segundos de ayuda prioritaria en un paciente con apnea por obstrucción.`);
+                    } else if (state.fase_caso === 'INCONSCIENTE' || state.fase_caso === 'POST_DESCARGA' || state.fase_caso === 'RCP') {
+                        printSystem(`No palpas pulso. (Si no se palpa en 10 seg, asumes que no hay pulso y debes iniciar compresiones).`);
+                    } else if (state.fase_caso === 'RCE') {
+                        printSystem(`Palpas pulso braquial fuerte, frecuencia 120 lpm.`);
+                    }
                     break;
                 case 'abrir_codigo_azul':
                     openModal('modal-codigo-azul');
@@ -1217,17 +1517,16 @@
                     
                     var missing = [];
                     if(!speech.includes('pediátrico') && !speech.includes('pediatrico')) missing.push('Pediátrico');
-                    if(!speech.includes('torre b')) missing.push('Torre B');
-                    if(!speech.includes('cafetería') && !speech.includes('cafeteria')) missing.push('Cafetería');
-                    if(!speech.includes('primer')) missing.push('Primer piso');
-
+                    if(!speech.includes('torre a')) missing.push('Torre A');
+                    if(!speech.includes('824')) missing.push('Habitación 824');
+                    
                     if(missing.length > 0 && finalTranscript.trim() !== '') {
-                        printSystem(`⚠️ Al código azul le faltaron componentes clave: ${missing.join(', ')}. Recuerda que de esto depende que llegue el equipo correcto al lugar exacto.`);
+                        printSystem(`⚠️ El mensaje fue confuso o incompleto. Faltó mencionar: ${missing.join(', ')}. Esto retrasa al equipo de respuesta.`);
                     } else if (finalTranscript.trim() !== '') {
-                        printSystem(`✅ Código Azul transmitido correctamente.`);
+                        printSystem(`✅ Excelente activación. El equipo de reanimación va en camino a la habitación 824 de la Torre A.`);
+                    } else {
+                        printSystem(`⚠️ Activaste la alarma pero no diste un mensaje claro por altavoz.`);
                     }
-
-                    setTimeout(() => openModal('modal-roles'), 1500);
                     break;
 
                 // VÍA AÉREA
