@@ -117,15 +117,7 @@
                     <span class="ml-3 font-semibold text-gray-800">Manejo del DEA</span>
                 </label>
             
-                <div>
-                    <label class="font-bold text-sm block mb-1">Relación Compresión-Ventilación (Con 2 o más reanimadores):</label>
-                    <select id="rcp-ratio" class="w-full p-2 border rounded border-gray-300">
-                        <option value="">Selecciona...</option>
-                        <option value="30:2">30 compresiones : 2 ventilaciones</option>
-                        <option value="15:2">15 compresiones : 2 ventilaciones</option>
-                        <option value="continua">Compresiones continuas (solo si vía aérea avanzada)</option>
-                    </select>
-                </div>
+                
             </div>
             
             <div class="flex justify-end gap-2">
@@ -1149,7 +1141,7 @@
 
                     closeModal('modal-seguridad');
                     printLeader(`"Asegurando escena con: ${eppList.join(', ') || 'Ninguno'}"`);
-                    printSystem(`Escena asegurada, sin importar lo que hayas escogido se hará la retroalimentación después.`);
+                    printSystem(`Escena asegurada.`);
                     break;
                 case 'verificar_respuesta':
                     printLeader(`"¡Bebé! ¿Estás bien?"`);
@@ -1295,9 +1287,9 @@
                         let ratioMsg = "";
                         if (ratio === '15:2') ratioMsg = "Relación 15:2 correcta (hay 2 o más reanimadores).";
                         else if (ratio === '30:2') { ratioMsg = "⚠️ Relación 30:2 es para 1 reanimador. En pediatría con 2+ reanimadores usa 15:2."; accionEsCorrecta = false; }
-                        else { ratioMsg = "⚠️ Compresiones continuas son para vía aérea avanzada (tubo endotraqueal), que aquí no tienes aún."; accionEsCorrecta = false; }
+                        else { ratioMsg = "⚠️ Compresiones continuas se indican cuando el paciente ya tiene una vía aérea avanzada asegurada, que no es el caso actual."; accionEsCorrecta = false; }
 
-                        if(fq === '100-120' && dp === '1/3' && re === 'completa' && ratio === '15:2') {
+                        if(fq === '100-120' && dp === '1/3-1/2' && re === 'completa' && ratio === '15:2') {
                             printSystem(`✅ Parámetros de RCP de Alta Calidad y relación 15:2 correctos.`);
                         } else {
                             printSystem(`⚠️ Alguno de los parámetros seleccionados (Frecuencia: ${fq}, Profundidad: ${dp}, Re-expansión: ${re}) no es óptimo, o la relación seleccionada es incorrecta. ${ratioMsg}`);
@@ -1373,7 +1365,7 @@
                             state.rcpEnCurso = false; // Detienen RCP para análisis
                             
                             setTimeout(() => {
-                                printSystem("🚨 EVENTO: El DEA identifica un ritmo desfibrilable (Fibrilación Ventricular).");
+                                printSystem("🚨 EVENTO: El DEA identifica un ritmo desfibrilable.");
                                 printSystem("🔊 DEA: Descarga recomendada. Cargando... Aléjense todos.");
                                 document.getElementById('btn-descarga-dea').classList.remove('hidden', 'opacity-50', 'pointer-events-none');
                                 document.getElementById('btn-descarga-dea').classList.add('animate-pulse');
