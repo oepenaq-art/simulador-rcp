@@ -81,9 +81,21 @@
                 <h3 class="font-bold text-lg text-amber-900 ml-2"><i class="fas fa-book-medical mr-2"></i> Algoritmos y Ayudas Cognitivas</h3>
                 <button onclick="closeModal('modal-ayudas')" class="text-amber-800 hover:text-red-600 bg-white hover:bg-red-50 rounded-full w-8 h-8 flex items-center justify-center transition-colors shadow-sm"><i class="fas fa-times"></i></button>
             </div>
+            
+            <!-- Tabs Header -->
+            <div class="flex border-b border-gray-200 bg-white shrink-0">
+                <button onclick="switchTab('ayuda-ovace')" id="tab-btn-ovace" class="flex-1 py-3 text-center font-bold text-amber-800 border-b-4 border-amber-600 bg-amber-50 transition-colors">Algoritmo OVACE</button>
+                <button onclick="switchTab('ayuda-bls')" id="tab-btn-bls" class="flex-1 py-3 text-center font-bold text-gray-500 border-b-4 border-transparent hover:text-amber-800 hover:bg-gray-50 transition-colors">Reanimación Básica (BLS)</button>
+            </div>
+
             <div class="p-2 md:p-4 overflow-y-auto flex-1 bg-gray-50">
-                <div class="space-y-4">
-                    <img src="../algoritmo_rcp.png" alt="Algoritmo RCP" class="w-full h-auto rounded shadow border border-gray-200">
+                <!-- Tab Content OVACE -->
+                <div id="ayuda-ovace" class="block">
+                    <img src="img/algoritmo_ovace.jpg" alt="Algoritmo OVACE" class="w-full h-auto rounded shadow border border-gray-200">
+                </div>
+                <!-- Tab Content BLS -->
+                <div id="ayuda-bls" class="hidden">
+                    <img src="img/algoritmo_bls.jpg" alt="Algoritmo Reanimación Básica" class="w-full h-auto rounded shadow border border-gray-200">
                 </div>
             </div>
         </div>
@@ -1044,7 +1056,21 @@
         var recognition = null;
         var finalTranscript = '';
 
-        function toggleRecording() {
+        function switchTab(tabId) {
+        if (tabId === "ayuda-ovace") {
+            document.getElementById("ayuda-ovace").className = "block";
+            document.getElementById("ayuda-bls").className = "hidden";
+            document.getElementById("tab-btn-ovace").className = "flex-1 py-3 text-center font-bold text-amber-800 border-b-4 border-amber-600 bg-amber-50 transition-colors";
+            document.getElementById("tab-btn-bls").className = "flex-1 py-3 text-center font-bold text-gray-500 border-b-4 border-transparent hover:text-amber-800 hover:bg-gray-50 transition-colors";
+        } else {
+            document.getElementById("ayuda-ovace").className = "hidden";
+            document.getElementById("ayuda-bls").className = "block";
+            document.getElementById("tab-btn-bls").className = "flex-1 py-3 text-center font-bold text-amber-800 border-b-4 border-amber-600 bg-amber-50 transition-colors";
+            document.getElementById("tab-btn-ovace").className = "flex-1 py-3 text-center font-bold text-gray-500 border-b-4 border-transparent hover:text-amber-800 hover:bg-gray-50 transition-colors";
+        }
+    }
+
+    function toggleRecording() {
             if (!('webkitSpeechRecognition' in window)) {
                 alert("Tu navegador no soporta el reconocimiento de voz. Por favor usa Chrome.");
                 return;
