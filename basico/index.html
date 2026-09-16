@@ -1427,7 +1427,15 @@
                     
                     if (state.fase_caso === 'OVACE') {
                         if (state.ultimaManiobraOvace === 'compresiones') {
-                            printSystem(`Sostienes al lactante boca abajo sobre tu antebrazo y das 5 golpes en la espalda. (Se están intercalando las compresiones torácicas con los golpes de espalda). Aún no expulsa el cuerpo extraño. ¿Qué más realizas?`);
+                            printSystem(`Sostienes al lactante boca abajo sobre tu antebrazo y das 5 golpes en la espalda. (Se están intercalando las compresiones torácicas con los golpes de espalda). Aún no expulsa el cuerpo extraño. Se continuará hasta que tenga signos de desobstrucción o hasta la pérdida de la conciencia.`);
+                            setTimeout(() => {
+                                if (state.fase_caso === 'OVACE') {
+                                    state.fase_caso = 'INCONSCIENTE';
+                                    state.tiempoFase = 0;
+                                    state.saviorFaseMostrado = false;
+                                    printSystem(`🚨 EVENTO CLÍNICO: El paciente pierde la conciencia y se pone flácido y sin respuesta.`);
+                                }
+                            }, 10000);
                         } else {
                             printSystem(`Sostienes al lactante boca abajo sobre tu antebrazo y das 5 golpes en la espalda. Aún no expulsa el cuerpo extraño. ¿Qué más realizas?`);
                         }
@@ -1441,7 +1449,15 @@
                     
                     if (state.fase_caso === 'OVACE') {
                         if (state.ultimaManiobraOvace === 'golpes') {
-                            printSystem(`Volteas al lactante boca arriba y das 5 compresiones torácicas. (Se están intercalando los golpes de espalda con compresiones torácicas). Aún no expulsa el cuerpo extraño. ¿Qué más realizas?`);
+                            printSystem(`Volteas al lactante boca arriba y das 5 compresiones torácicas. (Se están intercalando los golpes de espalda con compresiones torácicas). Aún no expulsa el cuerpo extraño. Se continuará hasta que tenga signos de desobstrucción o hasta la pérdida de la conciencia.`);
+                            setTimeout(() => {
+                                if (state.fase_caso === 'OVACE') {
+                                    state.fase_caso = 'INCONSCIENTE';
+                                    state.tiempoFase = 0;
+                                    state.saviorFaseMostrado = false;
+                                    printSystem(`🚨 EVENTO CLÍNICO: El paciente pierde la conciencia y se pone flácido y sin respuesta.`);
+                                }
+                            }, 10000);
                         } else {
                             printSystem(`Volteas al lactante boca arriba y das 5 compresiones torácicas. Aún no expulsa el cuerpo extraño. ¿Qué más realizas?`);
                         }
