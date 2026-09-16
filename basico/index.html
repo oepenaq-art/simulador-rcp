@@ -1166,13 +1166,14 @@
                     printSystem(`Escena asegurada.`);
                     break;
                 case 'verificar_respuesta':
-                    printLeader(`"¡Bebé! ¿Estás bien?"`);
-                    if (state.fase_caso === 'OVACE') {
-                        printSystem(`El paciente está agitado, moviendo las 4 extremidades.`);
-                    } else if (state.fase_caso === 'INCONSCIENTE' || state.fase_caso === 'POST_DESCARGA' || state.fase_caso === 'RCP') {
-                        printSystem(`Estimulas al lactante golpeando suavemente la planta del pie. No hay respuesta, está flácido.`);
-                    } else if (state.fase_caso === 'RCE') {
-                        printSystem(`No hay respuesta clara, pero se notan movimientos espontáneos leves.`);
+                    printLeader(`"Bebé, bebé, ¿estás bien? (Estimulando planta del pie)"`);
+                    state.logDeAcciones.push({ time: state.timerSegundos, action: 'respuesta' });
+                    if(state.fase_caso === 'OVACE') {
+                        printSystem(`El lactante mueve los ojos angustiado pero no emite sonido.`);
+                    } else if(state.fase_caso === 'ROSC') {
+                        printSystem(`El paciente tiene apertura ocular.`);
+                    } else {
+                        printSystem(`El paciente NO responde. Está flácido.`);
                     }
                     break;
                 
@@ -1200,24 +1201,27 @@
                     break;
 
                 case 'verificar_respiracion':
-                    printLeader(`"Verificando respiración..."`);
-                    if (state.fase_caso === 'OVACE') {
-                        printSystem(`El paciente está agitado pero no se logra ver que eleve el tórax, no emite ningún sonido o tos.`);
-                    } else if (state.fase_caso === 'INCONSCIENTE' || state.fase_caso === 'POST_DESCARGA' || state.fase_caso === 'RCP') {
-                        printSystem(`Observas el tórax. El paciente no respira o presenta respiración agónica (jadeos/boqueos).`);
-                    } else if (state.fase_caso === 'RCE') {
-                        printSystem(`Presenta respiración agónica / boqueo (gasping).`);
+                    printLeader(`"Verificando si el paciente respira."`);
+                    state.logDeAcciones.push({ time: state.timerSegundos, action: 'respiracion' });
+                    if(state.fase_caso === 'OVACE') {
+                        printSystem(`El lactante intenta respirar, pero se ve cianótico y agitado.`);
+                    } else if(state.fase_caso === 'ROSC') {
+                        printSystem(`No está respirando.`);
+                    } else {
+                        printSystem(`El paciente NO respira (o solo jadea/boquea).`);
                     }
                     break;
                 case 'palpar_pulso':
-                    printLeader(`"Palpando pulso braquial por 10 segundos..."`);
-                    if (state.fase_caso === 'OVACE') {
-                        printSystem(`Tiene 150 por minuto y se siente fuerte.`);
-                        printSystem(`⚠️ RETROALIMENTACIÓN: El paciente tiene movimientos y está agitado, el tomar el pulso hace que perdamos 10 segundos de ayuda prioritaria en un paciente con apnea por obstrucción.`);
-                    } else if (state.fase_caso === 'INCONSCIENTE' || state.fase_caso === 'POST_DESCARGA' || state.fase_caso === 'RCP') {
-                        printSystem(`No palpas pulso. (Si no se palpa en 10 seg, asumes que no hay pulso y debes iniciar compresiones).`);
-                    } else if (state.fase_caso === 'RCE') {
-                        printSystem(`Palpas pulso braquial fuerte, frecuencia 120 lpm.`);
+                    printLeader(`"Palpando pulso braquial (menos de 10 segundos)."`);
+                    state.logDeAcciones.push({ time: state.timerSegundos, action: 'pulso' });
+                    if(state.fase_caso === 'OVACE') {
+                        printSystem(`El lactante tiene pulso fuerte.`);
+                    } else if(state.fase_caso === 'ROSC') {
+                        printSystem(`Tiene pulso de 120 lpm.`);
+                        document.getElementById('val-fc').innerText = "120";
+                    } else {
+                        printSystem(`No se palpa pulso. (Paro Cardiorrespiratorio).`);
+                        document.getElementById('val-fc').innerText = "0";
                     }
                     break;
                 case 'abrir_codigo_azul':
@@ -1250,6 +1254,12 @@
                     if(payload === '2-3s') {
                         printLeader(`"Ventilando con bolsa-mascarilla: 1 ventilación cada 2 a 3 segundos."`);
                         printSystem(`Aplicas técnica C-E para sellar la máscara y ventilas 1 vez cada 2 a 3 segundos.`);
+                        if(state.fase_caso === 'ROSC') {
+                            printSystem(`✅ Excelente. Estás proveyendo ventilación de rescate a un paciente con pulso pero sin respiración adecuada.`);
+                            setTimeout(() => {
+                                finalizarSimulacion();
+                            }, 5000);
+                        }
                     } else {
                         printLeader(`"Ventilando con bolsa-mascarilla en relación ${payload}."`);
                         printSystem(`Aplicas técnica C-E para sellar la máscara y das las ventilaciones indicadas.`);
@@ -1324,7 +1334,9 @@
                     printLeader(`"Llevamos 2 minutos. Cambio de compresor."`);
                     state.rcpEnCurso = false; // Pausa para analisis si hay DEA
                     if(state.parchesConectados) {
-                        takeAction('analizar_ritmo_dea');
+                        setTimeout(() => {
+                            takeAction('analizar_ritmo_dea');
+                        }, 3000);
                     }
                     break;
 
@@ -1372,18 +1384,7 @@
 
                         // DEA auto-analiza el ritmo de inmediato
                         setTimeout(() => {
-                            printSystem("🔊 DEA: Analizando el ritmo cardíaco... No toque al paciente.");
-                            state.rcpEnCurso = false; // Detienen RCP para análisis
-                            
-                            setTimeout(() => {
-                                printSystem("🚨 EVENTO: El DEA identifica un ritmo desfibrilable.");
-                                printSystem(`🔊 DEA: Descarga recomendada. Cargando... Aléjense todos.`);
-                                const btnDEA = document.getElementById('btn-descarga-dea');
-                                btnDEA.disabled = false;
-                                btnDEA.classList.remove('hidden', 'opacity-50', 'pointer-events-none', 'cursor-not-allowed', 'bg-red-600', 'bg-red-200');
-                                btnDEA.classList.add('animate-pulse', 'bg-orange-600', 'text-white');
-                                btnDEA.innerHTML = '<i class="fas fa-bolt mr-1"></i> Dar Descarga (Habilitado)';
-                            }, 3000);
+                            takeAction('analizar_ritmo_dea');
                         }, 2000);
                     } else {
                         alert("Selecciona tamaño y posición de los parches.");
@@ -1393,22 +1394,48 @@
                     if(!state.parchesConectados) break;
                     state.rcpEnCurso = false; // Pausa
                     printLeader(`"¡Todos fuera! El DEA está analizando."`);
+                    printSystem("🔊 DEA: Analizando el ritmo cardíaco... No toque al paciente.");
                     if ('speechSynthesis' in window) {
                         var msg2 = new SpeechSynthesisUtterance("Analizando el ritmo cardíaco. No toque al paciente.");
                         msg2.lang = 'es-ES';
                         window.speechSynthesis.speak(msg2);
                     }
+                    
+                    state.analisisDeaCount = (state.analisisDeaCount || 0) + 1;
+                    
                     setTimeout(() => {
-                        if ('speechSynthesis' in window) {
-                            var msg3 = new SpeechSynthesisUtterance("Se recomienda dar una descarga. Cargando. Aléjense del paciente. Presione el botón de descarga.");
-                            msg3.lang = 'es-ES';
-                            window.speechSynthesis.speak(msg3);
+                        if (state.analisisDeaCount === 1) {
+                            if ('speechSynthesis' in window) {
+                                var msg3 = new SpeechSynthesisUtterance("Se recomienda dar una descarga. Cargando. Aléjense del paciente. Presione el botón.");
+                                msg3.lang = 'es-ES';
+                                window.speechSynthesis.speak(msg3);
+                            }
+                            printSystem("🚨 EVENTO: El DEA identifica un ritmo desfibrilable.");
+                            printSystem(`🔊 DEA: Descarga recomendada. Cargando... Aléjense todos.`);
+                            const btnDEA = document.getElementById('btn-descarga-dea');
+                            btnDEA.disabled = false;
+                            btnDEA.classList.remove('hidden', 'opacity-50', 'pointer-events-none', 'cursor-not-allowed', 'bg-red-600', 'bg-red-200');
+                            btnDEA.classList.add('animate-pulse', 'bg-orange-600', 'text-white');
+                            btnDEA.innerHTML = '<i class="fas fa-bolt mr-1"></i> Dar Descarga (Habilitado)';
+                        } else if (state.analisisDeaCount === 2) {
+                            if ('speechSynthesis' in window) {
+                                var msg4 = new SpeechSynthesisUtterance("No se recomienda descarga. Continúe la RCP.");
+                                msg4.lang = 'es-ES';
+                                window.speechSynthesis.speak(msg4);
+                            }
+                            printSystem("🔊 DEA: No se recomienda dar una descarga. Continúe con la RCP.");
+                            printSystem("🩺 EVENTO: El paciente no tiene movimientos.");
+                            state.ritmoECG = 'ASISTOLIA';
+                        } else {
+                            if ('speechSynthesis' in window) {
+                                var msg5 = new SpeechSynthesisUtterance("No se recomienda descarga.");
+                                msg5.lang = 'es-ES';
+                                window.speechSynthesis.speak(msg5);
+                            }
+                            printSystem("🔊 DEA: No se recomienda dar una descarga.");
+                            printSystem("🚨 EVENTO CLÍNICO: El paciente ya tiene apertura ocular.");
+                            state.fase_caso = 'ROSC';
                         }
-                        printSystem(`El DEA indica: SE RECOMIENDA DESCARGA.`);
-                        document.getElementById('btn-descarga-dea').disabled = false;
-                        document.getElementById('btn-descarga-dea').classList.remove('opacity-50', 'cursor-not-allowed', 'bg-red-100', 'text-red-900');
-                        document.getElementById('btn-descarga-dea').classList.add('bg-red-600', 'text-white', 'animate-pulse');
-                        document.getElementById('btn-descarga-dea').innerHTML = '<i class="fas fa-bolt mr-1.5"></i> Dar Descarga (LISTA)';
                     }, 4000);
                     break;
                 case 'descarga_dea':
