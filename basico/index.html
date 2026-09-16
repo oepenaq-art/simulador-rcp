@@ -380,6 +380,9 @@
 
             <!-- Controls Panel -->
             <div class="w-full md:w-2/5 p-4 bg-gray-100 overflow-y-auto border-l border-gray-300 shadow-inner space-y-3 hidden md:block h-full" id="controls-panel">
+                <div class="md:hidden bg-blue-50 text-blue-800 text-xs p-2 rounded border border-blue-200 mb-3 shadow-sm font-semibold flex items-center justify-between">
+                    <span><i class="fas fa-info-circle mr-1"></i>Despu&eacute;s de cada orden, pulsa "Bit&aacute;cora" abajo para ver el efecto.</span>
+                </div>
                 <div class="flex justify-between items-center border-b pb-2 mb-1">
                     <h2 class="font-bold text-gray-800 text-sm"><i class="fas fa-clipboard-list text-blue-600 mr-1.5"></i> Menú de Órdenes (BLS)</h2>
                     <button onclick="consultarAyudaCognitiva()" class="text-xs text-amber-700 font-bold hover:underline flex items-center bg-amber-100 px-2 py-0.5 rounded border border-amber-300">
@@ -548,6 +551,57 @@
 
     <script>
         // --- ESTADO GLOBAL ---
+        
+        let chatBadgeCount = 0;
+        let simulacionTerminada = false;
+
+        function switchMobileTab(tab) {
+            const chatPanel = document.getElementById('chat-box');
+            const controlsPanel = document.getElementById('controls-panel');
+            const debriefPanel = document.getElementById('debriefing-panel');
+            const btnChat = document.getElementById('tab-btn-chat');
+            const btnControls = document.getElementById('tab-btn-controls');
+            const chatBadge = document.getElementById('chat-badge');
+            
+            if (tab === 'chat') {
+                chatPanel.classList.remove('hidden');
+                chatPanel.classList.add('flex');
+                if (!simulacionTerminada) {
+                    controlsPanel.classList.add('hidden');
+                    controlsPanel.classList.remove('block');
+                    debriefPanel.classList.add('hidden');
+                } else {
+                    debriefPanel.classList.add('hidden');
+                }
+                
+                btnChat.classList.add('opacity-100', 'text-yellow-400');
+                btnChat.classList.remove('opacity-60', 'text-white');
+                btnControls.classList.remove('opacity-100', 'text-yellow-400');
+                btnControls.classList.add('opacity-60', 'text-white');
+                
+                if (chatBadge) chatBadge.classList.add('hidden');
+                chatBadgeCount = 0;
+                
+                chatPanel.scrollTop = chatPanel.scrollHeight;
+            } else if (tab === 'controls') {
+                chatPanel.classList.add('hidden');
+                chatPanel.classList.remove('flex');
+                if (!simulacionTerminada) {
+                    controlsPanel.classList.remove('hidden');
+                    controlsPanel.classList.add('block');
+                    debriefPanel.classList.add('hidden');
+                } else {
+                    controlsPanel.classList.add('hidden');
+                    debriefPanel.classList.remove('hidden');
+                }
+                
+                btnControls.classList.add('opacity-100', 'text-yellow-400');
+                btnControls.classList.remove('opacity-60', 'text-white');
+                btnChat.classList.remove('opacity-100', 'text-yellow-400');
+                btnChat.classList.add('opacity-60', 'text-white');
+            }
+        }
+
         let state = {
             fase_caso: 'OVACE', // OVACE, INCONSCIENTE, RCP, POST_DESCARGA, RCE
             tiempoFase: 0,
@@ -595,6 +649,15 @@
             if (chatBoxEl) { chatBoxEl.appendChild(div); }
             if (chatBoxEl) { chatBoxEl.scrollTop = chatBoxEl.scrollHeight; }
             state.logDeAcciones.push({ roleName, text, time: timeStr });
+            
+            // Mobile badge logic
+            const chatPanel = document.getElementById('chat-box');
+            const chatBadge = document.getElementById('chat-badge');
+            if (chatPanel && chatPanel.classList.contains('hidden') && chatBadge) {
+                chatBadgeCount++;
+                chatBadge.innerText = chatBadgeCount;
+                chatBadge.classList.remove('hidden');
+            }
         }
 
         function printLeader(text) { printMsg('🩺', 'Tú (Líder del Código)', text, 'msg-lider'); }
