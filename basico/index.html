@@ -1239,6 +1239,11 @@
                     if(!speech.includes('824')) missing.push('Habitación 824');
                     
                     printSystem(`🔔 Código Azul activado. El equipo de respuesta viene en camino.`);
+                    
+                    setTimeout(() => {
+                        printSystem("🚨 EVENTO: Llega la Enfermera 2 corriendo con el Desfibrilador (DEA) y la bolsa autoinflable (AMBU).");
+                        state.deaLlego = true;
+                    }, 10000);
                     break;
 
                 // VÍA AÉREA
@@ -1328,8 +1333,8 @@
                     if (!state.rcpEnCurso) { printSystem("No hay RCP en curso."); break; }
                     var tToWait = 120 - (state.timerSegundos % 120);
                     state.timerSegundos += tToWait;
-                    state.ciclosCompletados++;
-                    updateClock();
+                    state.ciclosCompletados = (state.ciclosCompletados || 0) + 1;
+                    document.getElementById('timer-display').innerText = formatTimer(state.timerSegundos);
                     printSystem(`⏳ (Simulación acelerada) Se completan 2 minutos de RCP continua.`);
                     printLeader(`"Llevamos 2 minutos. Cambio de compresor."`);
                     state.rcpEnCurso = false; // Pausa para analisis si hay DEA
