@@ -689,23 +689,14 @@
                         printAlert("Descarga entregada... ¿sigo con el masaje o le palpamos el pulso?");
                         state.saviorFaseMostrado = true;
                     }
-                    if (state.tiempoFase === 120) {
-                        state.fase_caso = 'RCE';
-                        state.tiempoFase = 0;
-                        state.saviorFaseMostrado = false;
-                        printSystem("🚨 EVENTO: El DEA interrumpe e indica: 'Analizando ritmo cardíaco... No se recomienda descarga'.");
-                        setTimeout(() => {
-                            printSystem("🚨 CAMBIO CLÍNICO: El paciente presenta movimientos espontáneos. Palpas pulso braquial fuerte (120 lpm), pero su respiración es jadeante / boqueo (gasping). Está en Paro Respiratorio Aislado.");
-                        }, 2000);
-                        setTimeout(() => {
-                            if (state.rcpEnCurso || document.getElementById('modal-ventilar').classList.contains('hidden')) {
-                                printAlert("Doctor, tiene pulso fuerte a 120, pero solo jadea, ¿le doy ventilaciones de rescate con la bolsa?");
-                            }
-                        }, 8000);
+                }
+                else if (state.fase_caso === 'ROSC') {
+                    if (state.tiempoFase === 10 && !state.saviorFaseMostrado) {
+                        printAlert("Doctor, el paciente ya tiene pulso pero veo que no está respirando. ¿Deberíamos darle ventilaciones de rescate?");
+                        state.saviorFaseMostrado = true;
                     }
                 }
 
-                // Notificaciones de RCP en curso
                 if (state.rcpEnCurso && state.rcpInicioTiempo !== null) {
                     let transcurridoRCP = state.timerSegundos - state.rcpInicioTiempo;
                     if (transcurridoRCP === 60) {
@@ -1193,7 +1184,7 @@
                         printSystem(`⚠️ El paciente está muy agitado y no permite el uso de BVM.`);
                         printSystem(`⚠️ RETROALIMENTACIÓN: La prioridad es permeabilizar la vía aérea.`);
                         accionEsCorrecta = false;
-                    } else if (state.fase_caso === 'RCE') {
+                    } else if (state.fase_caso === 'ROSC') {
                         printSystem(`✅ Das ventilaciones de rescate (1 cada 2 a 3 segundos). El pecho se eleva adecuadamente.`);
                     } else {
                         printSystem(`Ventilando con BVM (15:2).`);
@@ -1431,6 +1422,9 @@
                             printSystem("🔊 DEA: No se recomienda dar una descarga. Continúe con la RCP.");
                             printSystem("🩺 EVENTO: El paciente no tiene movimientos.");
                             state.ritmoECG = 'ASISTOLIA';
+                            state.fase_caso = 'RCP';
+                            state.tiempoFase = 0;
+                            state.saviorFaseMostrado = false;
                         } else {
                             if ('speechSynthesis' in window) {
                                 var msg5 = new SpeechSynthesisUtterance("No se recomienda descarga.");
@@ -1440,6 +1434,8 @@
                             printSystem("🔊 DEA: No se recomienda dar una descarga.");
                             printSystem("🚨 EVENTO CLÍNICO: El paciente ya tiene apertura ocular.");
                             state.fase_caso = 'ROSC';
+                            state.tiempoFase = 0;
+                            state.saviorFaseMostrado = false;
                         }
                     }, 4000);
                     break;
@@ -1452,7 +1448,10 @@
                     printLeader(`"¡Todos fuera! Descargando."`);
                     printSystem(`⚡ Administras la descarga eléctrica al lactante.`);
                     state.descargasDadas++;
-                    state.ritmoECG = 'ASISTOLIA'; // Temporal until they resume CPR
+                    state.ritmoECG = 'ASISTOLIA';
+                            state.fase_caso = 'RCP';
+                            state.tiempoFase = 0;
+                            state.saviorFaseMostrado = false; // Temporal until they resume CPR
                     state.fase_caso = 'POST_DESCARGA';
                     state.tiempoFase = 0;
                     state.saviorFaseMostrado = false;
