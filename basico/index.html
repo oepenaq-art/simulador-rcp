@@ -647,18 +647,23 @@
                 // ==========================================
 
                 if (state.fase_caso === 'OVACE') {
-                    if (state.tiempoFase === 30 && !state.saviorFaseMostrado && state.maniobrasOvace === 0) {
-                        printAlert("Doctor, el niño se está poniendo muy morado, ¿le damos golpes en la espalda?");
-                        state.saviorFaseMostrado = true;
-                    }
-                    if (state.tiempoFase === 60 || state.maniobrasOvace >= 4) {
-                        state.fase_caso = 'INCONSCIENTE';
-                        state.tiempoFase = 0;
-                        state.saviorFaseMostrado = false;
-                        printSystem("🚨 EVENTO: Tras el esfuerzo, el lactante pierde súbitamente el tono muscular y la conciencia. Queda completamente flácido en la silla.");
-                    }
-                } 
-                else if (state.fase_caso === 'INCONSCIENTE') {
+                        if (state.tiempoFase === 120 && !state.saviorFaseMostrado && state.maniobrasOvace === 0) {
+                            printAlert("Doctor, el niño se está poniendo cada vez más cianótico y se mueve menos, ¿le damos golpes en la espalda?");
+                            state.saviorFaseMostrado = true;
+                        }
+                        if (state.tiempoFase === 180 && state.maniobrasOvace === 0) {
+                            printAlert("Doctor, el bebé está boqueando y tiene los labios completamente azules, deberíamos intervenir.");
+                        }
+                        if (state.tiempoFase === 240 && state.maniobrasOvace === 0) {
+                            printAlert("Doctor, ya casi no se mueve. ¿Realizamos maniobras de desobstrucción (golpes/compresiones)?");
+                        }
+                        if (state.tiempoFase === 300 && state.maniobrasOvace === 0) {
+                            state.fase_caso = 'INCONSCIENTE';
+                            state.tiempoFase = 0;
+                            state.saviorFaseMostrado = false;
+                            printSystem(`🚨 EVENTO CLÍNICO: Tras 5 minutos sin maniobras, el paciente queda flácido e inconsciente en tus brazos.`);
+                        }
+                    } else if (state.fase_caso === 'INCONSCIENTE') {
                     if (state.tiempoFase === 30 && !state.rcpEnCurso && !state.saviorFaseMostrado) {
                         printAlert("Doctor, el niño quedó flácido e inconsciente, ¿iniciamos masaje cardíaco?");
                         state.saviorFaseMostrado = true;
@@ -1212,13 +1217,7 @@
                     if(!speech.includes('torre a')) missing.push('Torre A');
                     if(!speech.includes('824')) missing.push('Habitación 824');
                     
-                    if(missing.length > 0 && finalTranscript.trim() !== '') {
-                        printSystem(`⚠️ El mensaje fue confuso o incompleto. Faltó mencionar: ${missing.join(', ')}. Esto retrasa al equipo de respuesta.`);
-                    } else if (finalTranscript.trim() !== '') {
-                        printSystem(`✅ Excelente activación. El equipo de reanimación va en camino a la habitación 824 de la Torre A.`);
-                    } else {
-                        printSystem(`⚠️ Activaste la alarma pero no diste un mensaje claro por altavoz.`);
-                    }
+                    printSystem(`🔔 Código Azul activado. El equipo de respuesta viene en camino.`);
                     break;
 
                 // VÍA AÉREA
