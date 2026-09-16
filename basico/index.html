@@ -178,6 +178,7 @@
             <div class="flex flex-col gap-3 mb-4">
                 <button onclick="takeAction('submit_ventilar', '30:2')" class="px-4 py-3 bg-cyan-50 hover:bg-cyan-100 text-cyan-900 rounded font-bold border border-cyan-300 transition-colors">Relación 30:2</button>
                 <button onclick="takeAction('submit_ventilar', '15:2')" class="px-4 py-3 bg-cyan-50 hover:bg-cyan-100 text-cyan-900 rounded font-bold border border-cyan-300 transition-colors">Relación 15:2</button>
+                <button onclick="takeAction('submit_ventilar', '2-3s')" class="px-4 py-3 bg-cyan-50 hover:bg-cyan-100 text-cyan-900 rounded font-bold border border-cyan-300 transition-colors">1 ventilación cada 2 a 3 segundos</button>
             </div>
             <div class="flex justify-end">
                 <button onclick="closeModal('modal-ventilar')" class="px-4 py-2 bg-gray-200 text-gray-800 rounded font-bold">Cancelar</button>
@@ -237,9 +238,9 @@
                     <label class="font-bold text-sm block mb-1">Profundidad (Lactante):</label>
                     <select id="rcp-depth" class="w-full p-2 border rounded border-gray-300">
                         <option value="">Selecciona...</option>
-                        <option value="1/3">Al menos 1/3 del diámetro del tórax (aprox 4 cm)</option>
-                        <option value="1/2">Al menos 1/2 del diámetro del tórax (aprox 6 cm)</option>
-                        <option value="2cm">2 centímetros de profundidad</option>
+                        <option value="<1/3">Menos de 1/3 del diámetro del tórax</option>
+                        <option value="1/3-1/2">Entre 1/3 y 1/2 del diámetro del tórax</option>
+                        <option value=">1/2">Más de 1/2 del diámetro del tórax</option>
                     </select>
                 </div>
                 <div>
@@ -248,16 +249,6 @@
                         <option value="">Selecciona...</option>
                         <option value="parcial">Permitir re-expansión parcial (apoyarse en el tórax)</option>
                         <option value="completa">Permitir re-expansión completa (sin apoyarse)</option>
-                    </select>
-                </div>
-            
-                <div>
-                    <label class="font-bold text-sm block mb-1">Relación Compresión-Ventilación (Con 2 o más reanimadores):</label>
-                    <select id="rcp-ratio" class="w-full p-2 border rounded border-gray-300">
-                        <option value="">Selecciona...</option>
-                        <option value="30:2">30 compresiones : 2 ventilaciones</option>
-                        <option value="15:2">15 compresiones : 2 ventilaciones</option>
-                        <option value="continua">Compresiones continuas (solo si vía aérea avanzada)</option>
                     </select>
                 </div>
             </div>
@@ -1230,13 +1221,14 @@
                     break;
                 case 'submit_ventilar':
                     closeModal('modal-ventilar');
-                    printLeader(`"Ventilando con bolsa-mascarilla en relación ${payload}."`);
-                    if(payload === '30:2') {
-                        printSystem(`⚠️ Elegiste 30:2. Al estar acompañado (2 reanimadores) en pediatría la relación ideal es 15:2.`);
+                    if(payload === '2-3s') {
+                        printLeader(`"Ventilando con bolsa-mascarilla: 1 ventilación cada 2 a 3 segundos."`);
+                        printSystem(`Aplicas técnica C-E para sellar la máscara y ventilas 1 vez cada 2 a 3 segundos.`);
                     } else {
-                        printSystem(`✅ Relación 15:2 correcta para 2 reanimadores.`);
+                        printLeader(`"Ventilando con bolsa-mascarilla en relación ${payload}."`);
+                        printSystem(`Aplicas técnica C-E para sellar la máscara y das las ventilaciones indicadas.`);
                     }
-                    printSystem(`Aplicas técnica C-E para sellar la máscara y das 2 ventilaciones.`);
+                    state.logDeAcciones.push({ time: state.timerSegundos, action: 'ventilar_bvm', payload: payload });
                     break;
 
                 // RCP BÁSICA
@@ -1275,23 +1267,17 @@
                     var fq = document.getElementById('rcp-freq').value;
                     var dp = document.getElementById('rcp-depth').value;
                     var re = document.getElementById('rcp-recoil').value;
-                    var ratio = document.getElementById('rcp-ratio').value;
-                    if(fq && dp && re && ratio) {
+                    if(fq && dp && re) {
                         closeModal('modal-reanudar-rcp');
-                        state.logDeAcciones.push({ time: state.timerSegundos, action: 'calidad_rcp', payload: {fq, dp, re, ratio} });
+                        state.logDeAcciones.push({ time: state.timerSegundos, action: 'calidad_rcp', payload: {fq, dp, re} });
                         if(!state.timerActivo) startTimer();
                         state.rcpEnCurso = true;
                         printLeader(`"Iniciando/Reanudando compresiones."`);
                         
-                        let ratioMsg = "";
-                        if (ratio === '15:2') ratioMsg = "Relación 15:2 correcta (hay 2 o más reanimadores).";
-                        else if (ratio === '30:2') { ratioMsg = "⚠️ Relación 30:2 es para 1 reanimador. En pediatría con 2+ reanimadores usa 15:2."; accionEsCorrecta = false; }
-                        else { ratioMsg = "⚠️ Compresiones continuas se indican cuando el paciente ya tiene una vía aérea avanzada asegurada, que no es el caso actual."; accionEsCorrecta = false; }
-
-                        if(fq === '100-120' && dp === '1/3-1/2' && re === 'completa' && ratio === '15:2') {
-                            printSystem(`✅ Parámetros de RCP de Alta Calidad y relación 15:2 correctos.`);
+                        if(fq === '100-120' && dp === '1/3-1/2' && re === 'completa') {
+                            printSystem(`✅ Parámetros de Compresión de Alta Calidad correctos.`);
                         } else {
-                            printSystem(`⚠️ Alguno de los parámetros seleccionados (Frecuencia: ${fq}, Profundidad: ${dp}, Re-expansión: ${re}) no es óptimo, o la relación seleccionada es incorrecta. ${ratioMsg}`);
+                            printSystem(`⚠️ Alguno de los parámetros seleccionados (Frecuencia: ${fq}, Profundidad: ${dp}, Re-expansión: ${re}) no es óptimo.`);
                         }
                     } else {
                         alert("Selecciona todos los parámetros.");
@@ -1365,9 +1351,12 @@
                             
                             setTimeout(() => {
                                 printSystem("🚨 EVENTO: El DEA identifica un ritmo desfibrilable.");
-                                printSystem("🔊 DEA: Descarga recomendada. Cargando... Aléjense todos.");
-                                document.getElementById('btn-descarga-dea').classList.remove('hidden', 'opacity-50', 'pointer-events-none');
-                                document.getElementById('btn-descarga-dea').classList.add('animate-pulse');
+                                printSystem(`🔊 DEA: Descarga recomendada. Cargando... Aléjense todos.`);
+                                const btnDEA = document.getElementById('btn-descarga-dea');
+                                btnDEA.disabled = false;
+                                btnDEA.classList.remove('hidden', 'opacity-50', 'pointer-events-none', 'cursor-not-allowed', 'bg-red-600', 'bg-red-200');
+                                btnDEA.classList.add('animate-pulse', 'bg-orange-600', 'text-white');
+                                btnDEA.innerHTML = '<i class="fas fa-bolt mr-1"></i> Dar Descarga (Habilitado)';
                             }, 3000);
                         }, 2000);
                     } else {
