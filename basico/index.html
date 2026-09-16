@@ -865,8 +865,14 @@
 
         function finalizarSimulacion() {
             simulacionTerminada = true;
-            document.getElementById('controls-panel').classList.add('hidden');
-            document.getElementById('debriefing-panel').classList.remove('hidden');
+            state.timerActivo = false;
+            
+            // Pausar y ocultar controles, mostrar panel de debriefing
+            const controlsPanel = document.getElementById('controls-panel');
+            if (controlsPanel) controlsPanel.classList.add('hidden');
+            
+            const debriefPanel = document.getElementById('debriefing-panel');
+            if (debriefPanel) debriefPanel.classList.remove('hidden');
             
             // Actualizar el texto del tab inferior para móviles
             const btnControls = document.getElementById('tab-btn-controls');
@@ -880,75 +886,41 @@
             // --- GENERAR RESUMEN DE ACCIONES Y ENVIAR AL CHAT ---
             let resumenHTML = `<div class="mb-4 text-left">
                 <div class="inline-block p-4 rounded-lg bg-emerald-50 text-emerald-900 border-l-4 border-emerald-600 shadow-md w-full">
-                    <h4 class="font-bold text-lg mb-2"><i class="fas fa-list-check mr-2"></i>Resumen de Acciones (Tiempos Reales)</h4>
-                    <p class="text-xs mb-3 text-emerald-700">Utiliza esta información detallada para diligenciar tu Registro Clínico manualmente.</p>
-                    <ul class="list-disc pl-5 space-y-1 text-sm font-mono">`;
-            resumenHTML += `<li><strong>Min 00:00:</strong> Inicio de Compresiones Torácicas y BVM</li>`;
-            
-            let events = [];
-            state.descargas.forEach((d, i) => { events.push({time: d.time, text: `Descarga ${i+1} administrada (${d.energy} J)`}); });
-            state.meds.forEach(m => { events.push({time: m.time, text: `${m.name} (${m.route}) - ${m.obs}`}); });
-            
-            events.sort((a,b) => a.time.localeCompare(b.time));
-            
-            events.forEach(e => {
-                resumenHTML += `<li><strong>Min ${e.time}:</strong> ${e.text}</li>`;
-            });
-            
-            if (state.tuboColocado) { 
-                resumenHTML += `<li><strong>Min 04:00 (Aprox):</strong> Intubación Orotraqueal exitosa (Tubo 5.5) con Capnografía</li>`; 
-            }
-            resumenHTML += `</ul></div></div>`;
+                    <h4 class="font-bold text-lg mb-2"><i class="fas fa-list-check mr-2"></i>Resumen de Acciones y Caso Terminado</h4>
+                    <p class="text-xs mb-3 text-emerald-700">El paciente ha retornado a circulación espontánea y se iniciaron ventilaciones de rescate efectivas.</p>
+                    <ul class="list-disc pl-5 space-y-1 text-sm font-mono">
+                        <li><strong>Escenario:</strong> Lactante de 8 meses (Pablo) con OVACE severo</li>
+                        <li><strong>Desfibrilación:</strong> ${state.descargasDadas > 0 ? state.descargasDadas + ' descarga(s) administrada(s) con DEA' : 'No requirió descargas'}</li>
+                        <li><strong>Ciclos de RCP:</strong> ${state.ciclosCompletados || 2} ciclos de 2 minutos completados</li>
+                        <li><strong>Resultado clínico:</strong> Retorno a Circulación Espontánea (ROSC). FC 120 lpm, ventilación de rescate en curso.</li>
+                    </ul>
+                </div>
+            </div>`;
             const chatBox = document.getElementById('chat-box');
-            chatBox.insertAdjacentHTML('beforeend', resumenHTML);
-            if (chatBoxEl) { chatBoxEl.scrollTop = chatBoxEl.scrollHeight; }
-
-            
-            let feedbackRoles = '';
-            if (state.rolesInnecesarios.length > 0) {
-                feedbackRoles = `
-                    <div class="mt-2 p-2 bg-yellow-50 border-l-4 border-yellow-500 text-xs text-yellow-800">
-                        <strong>⚠️ Desviación en Liderazgo y Asignación de Roles:</strong><br/>
-                        Asignaste roles que no se recomiendan o saturan el espacio: <em>${state.rolesInnecesarios.join(', ')}</em>.<br/>
-                        • El carro de paros cuenta con todo lo necesario en la sala, el rol de "patinador" no es necesario de entrada.<br/>
-                        • Las ayudas cognitivas deben ser consultadas y gestionadas directamente por el Líder del código.<br/>
-                        • El chequeo de pulso solo se realiza tras 2 minutos de RCP en la pausa de ritmo, no requiere una persona dedicada en exclusividad. El exceso de personal entorpece la reanimación.
-                    </div>
-                `;
-            } else {
-                feedbackRoles = `
-                    <div class="mt-2 p-2 bg-green-50 border-l-4 border-green-500 text-xs text-green-800">
-                        <strong>✓ Excelente asignación de roles:</strong> Asignaste estrictamente los roles necesarios de alto rendimiento sin sobrecargar el cubículo.
-                    </div>
-                `;
+            if (chatBox) {
+                chatBox.insertAdjacentHTML('beforeend', resumenHTML);
+                chatBox.scrollTop = chatBox.scrollHeight;
             }
 
             const feedbackAyuda = state.consultoAyudasCognitivas ? 
-                `<div class="mt-1 p-2 bg-blue-50 border-l-4 border-blue-500 text-xs text-blue-800"><strong>✓ Uso de Ayudas Cognitivas:</strong> Consultaste proactivamente las guías institucionales del HPTU durante la reanimación (Excelente práctica de CRM).</div>` :
-                `<div class="mt-1 p-2 bg-gray-50 border-l-4 border-gray-400 text-xs text-gray-700"><strong>Información:</strong> No abriste el panel de ayudas cognitivas durante el caso. Recuerda que las guías AHA 2025 promueven su uso rutinario en eventos críticos.</div>`;
+                `<div class="mt-1 p-2 bg-blue-50 border-l-4 border-blue-500 text-xs text-blue-800"><strong>✓ Uso de Ayudas Cognitivas:</strong> Consultaste proactivamente las guías institucionales (OVACE / BLS) durante la reanimación.</div>` :
+                `<div class="mt-1 p-2 bg-gray-50 border-l-4 border-gray-400 text-xs text-gray-700"><strong>Información:</strong> No abriste el panel de ayudas cognitivas durante el caso. Recuerda consultar los algoritmos en eventos críticos.</div>`;
 
-            let posparoText = '';
-            if (state.posparoErrores && state.posparoErrores.length > 0) {
-                posparoText = `<li>Errores en cuidados posparo: <span class="text-red-600 font-bold">${state.posparoErrores.join(', ')}</span> (No recomendados)</li>`;
-            } else if (state.posparoAdecuados) {
-                posparoText = `<li>Cuidados posparo indicados: <span class="text-green-600 font-bold">${state.posparoAdecuados.join(', ')}</span></li>`;
+            const debriefMetrics = document.getElementById('debrief-metrics');
+            if (debriefMetrics) {
+                debriefMetrics.innerHTML = `
+                    <h4 class="font-bold text-gray-700 mb-2">Métricas del Escenario (BLS Pediátrico):</h4>
+                    <ul class="list-disc pl-4 text-gray-600 space-y-1">
+                        <li>Tiempo total de reanimación: <strong>${formatTimer(state.timerSegundos)}</strong></li>
+                        <li>Intervenciones registradas: ${state.logDeAcciones.length}</li>
+                        <li>Roles asignados: ${state.rolesAsignados.join(', ') || 'Equipo de soporte básico'}</li>
+                        <li>Descargas con DEA: ${state.descargasDadas}</li>
+                        <li>Resultado clínico: <strong>Retorno de la Circulación Espontánea (ROSC)</strong></li>
+                    </ul>
+                    ${feedbackAyuda}
+                    <p class="mt-4 text-xs italic text-gray-500">Ingresa tus datos abajo y haz clic en el botón para generar el informe y retroalimentación completa con Inteligencia Artificial.</p>
+                `;
             }
-
-            document.getElementById('debrief-metrics').innerHTML = `
-                <h4 class="font-bold text-gray-700 mb-2">Métricas Capturadas para el Debriefing (Framework ORDEN):</h4>
-                <ul class="list-disc pl-4 text-gray-600 space-y-1">
-                    <li>Tiempo total de reanimación: <strong>${formatTimer(state.timerSegundos)}</strong></li>
-                    <li>Intervenciones totales ordenadas: ${state.logDeAcciones.length}</li>
-                    <li>Roles asignados: ${state.rolesAsignados.join(', ') || 'Ninguno específico'}</li>
-                    <li>Intervenciones de rescate requeridas: ${state.omisiones}</li>
-                    <li>Manejo de vía aérea avanzada: ${state.tuboColocado ? 'IOT correcta #5.5 con ETCO2' : 'BVM'}</li>
-                    <li>Resultado clínico: Retorno a Circulación Espontánea (RCE)</li>
-                    ${posparoText}
-                </ul>
-                ${feedbackRoles}
-                ${feedbackAyuda}
-                <p class="mt-4 text-xs italic text-gray-500">Haz clic abajo para generar el debriefing completo con IA estructurado en las dimensiones O-R-D-E-N.</p>
-            `;
         }
 
         async function iniciarDebriefingIA() {
