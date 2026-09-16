@@ -596,8 +596,9 @@
                 </div>
                 <div class="text-gray-800 leading-relaxed">${text}</div>
             `;
-            chatBox.appendChild(div);
-            chatBox.scrollTop = chatBox.scrollHeight;
+            const chatBoxEl = document.getElementById('chat-box');
+            if (chatBoxEl) { chatBoxEl.appendChild(div); }
+            if (chatBoxEl) { chatBoxEl.scrollTop = chatBoxEl.scrollHeight; }
             state.logDeAcciones.push({ roleName, text, time: timeStr });
         }
 
@@ -611,9 +612,6 @@
         function printAlert(text) { printMsg('⚠️', 'Ayuda Cognitiva (Rescate)', text, 'msg-alerta'); }
         function printSystem(text) { printMsg('🏥', 'Contexto clínico / Desarrollo del caso', text, 'msg-sistema'); }
 
-        // Mensaje inicial con tiempo 00:00
-        printSystem("Ingresas al cubículo de urgencias. Augusto (7 años, 20 kg) tiene antecedente de Enfermedad Renal Crónica. La madre refiere que la diálisis peritoneal ha estado disfuncional en los últimos días y le acababan de tomar unos exámenes de control. Repentinamente, la madre grita angustiada: '¡Doctor(a), mi hijo no me responde!'. Ves a Augusto flácido y cianótico. ¿Cuál es tu primera acción? (Tómate un momento para conocer los botones de las órdenes. Después de indicar cada orden, recuerda volver a esta pantalla de la Bitácora para ver la respuesta del equipo).");
-
         
         function iniciarSimulador() {
             document.getElementById('btn-ayudas').classList.add('animate-pulse');
@@ -622,10 +620,7 @@
             state.timerActivo = true;
 
             // Mensaje inicial del caso
-            printSystem(`🚨 CASO CLÍNICO: Pablo, lactante de 8 meses (8 kg). Mientras su madre le daba el desayuno en la cafetería del hospital, notó que dejó de emitir sonidos, no tose, abrió mucho los ojos con angustia y empezó a ponerse cianótico. La madre grita pidiendo ayuda. Eres el primer respondedor (Personal de Salud) que se encontraba casualmente en la cafetería.`);
-            setTimeout(() => {
-                printSystem(`Después de indicar cada orden, vuelve a esta bitácora para ver la respuesta.`);
-            }, 500);
+            printSystem(`👩‍⚕️ **Contexto Clínico:** Estás en el octavo piso del hospital. Acompañado de dos enfermeras (Enfermera 1 y Enfermera 2). De repente, de una habitación, una madre grita desesperada. Te acercas y ves a un lactante de 8 meses en la cama. La madre te dice que le estaba dando huevo al desayuno. Notas que el bebé se está moviendo agitado, no emite ningún sonido, no tose, tiene los ojos muy abiertos con angustia y sus labios se están poniendo rápidamente cianóticos. ¿Cuál es tu primera acción?`);
         }
         
         var simuladorIniciado = false;
@@ -915,7 +910,7 @@
             resumenHTML += `</ul></div></div>`;
             const chatBox = document.getElementById('chat-box');
             chatBox.insertAdjacentHTML('beforeend', resumenHTML);
-            chatBox.scrollTop = chatBox.scrollHeight;
+            if (chatBoxEl) { chatBoxEl.scrollTop = chatBoxEl.scrollHeight; }
 
             
             let feedbackRoles = '';
