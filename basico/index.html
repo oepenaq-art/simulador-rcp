@@ -303,26 +303,6 @@
         </div>
     </div>
 
-    <!-- MODAL: NOTA RCP -->
-    <div id="modal-nota-rcp" class="fixed inset-0 bg-black bg-opacity-70 hidden z-50 flex justify-center items-center overflow-y-auto px-2">
-        <div class="bg-white p-3 md:p-6 rounded-lg shadow-xl w-full max-w-5xl my-4 md:my-8 flex flex-col max-h-[95vh]">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 border-b pb-2 relative flex-shrink-0">
-                <h3 class="font-bold text-lg md:text-xl text-gray-800 pr-8"><i class="fas fa-file-medical-alt mr-2"></i>Registro Clínico de RCP</h3>
-                <p class="text-xs md:text-sm text-blue-800 font-semibold mt-1 md:mt-0">Guárdalo para el curso.</p>
-                <button onclick="closeModal('modal-nota-rcp')" class="absolute top-0 right-0 text-gray-500 hover:text-red-500 bg-gray-100 rounded-full w-8 h-8 flex items-center justify-center"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="overflow-y-auto overflow-x-auto flex-1 w-full border border-gray-200 rounded p-4 text-center">
-                <div class="p-4 text-gray-600 font-bold border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 flex flex-col items-center justify-center h-64">
-                    <i class="fas fa-file-medical-alt text-4xl mb-4 text-blue-300"></i>
-                    El reporte interactivo se generará al finalizar la simulación y podrás imprimirlo o descargarlo.
-                </div>
-            </div>
-            <div class="flex justify-end gap-2 mt-4 pt-3 border-t print:hidden flex-shrink-0">
-                <button onclick="closeModal('modal-nota-rcp')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-sm">Cerrar</button>
-            </div>
-        </div>
-    </div>
-
     <!-- MAIN APP CONTAINER -->
     <div class="w-full md:max-w-6xl mx-auto bg-white shadow-2xl md:rounded-xl overflow-hidden flex flex-col h-screen md:h-[92vh]">
         
@@ -502,10 +482,6 @@
 <!-- Contenedor Final de Debriefing -->
             <div class="w-full md:w-2/5 p-4 bg-gray-100 overflow-y-auto border-l border-gray-300 shadow-inner hidden h-full" id="debriefing-panel">
                 <h2 class="font-bold text-2xl text-gray-800 mb-4 border-b-2 border-green-500 pb-2"><i class="fas fa-clipboard-check mr-2"></i> Resumen de Simulación</h2>
-                
-                <button onclick="mostrarNotaRCP()" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 border-2 border-blue-400 text-white py-3.5 rounded-xl font-extrabold shadow-xl text-base flex items-center justify-center mb-4 transition-all transform hover:scale-[1.02]">
-                    <i class="fas fa-file-medical-alt mr-2"></i> Generar Registro Clínico (Nota RCP)
-                </button>
                 
                 <div class="bg-white p-4 rounded shadow-sm mb-4 text-sm" id="debrief-metrics"></div>
                 
@@ -1074,10 +1050,6 @@
             }
         }
 
-        function mostrarNotaRCP() {
-            openModal('modal-nota-rcp');
-        }
-
         
         var recognition = null;
         var finalTranscript = '';
@@ -1125,15 +1097,12 @@
             };
 
             recognition.onresult = function(event) {
-                var interimTranscript = '';
-                for (var i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript + ' ';
-                    } else {
-                        interimTranscript += event.results[i][0].transcript;
-                    }
+                var currentTranscript = '';
+                for (var i = 0; i < event.results.length; ++i) {
+                    currentTranscript += event.results[i][0].transcript;
                 }
-                transcript.innerText = finalTranscript + interimTranscript;
+                finalTranscript = currentTranscript;
+                transcript.innerText = finalTranscript;
             };
 
             recognition.onerror = function(event) {
