@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Simulador Avanzado RCP Pediátrica - HPTU</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
@@ -761,14 +764,17 @@
         </div>
 
         <!-- Main Content Area -->
-        <div class="flex flex-col md:flex-row flex-1 overflow-hidden relative z-10 pb-[60px] md:pb-0">
+        <div class="flex flex-col md:flex-row flex-1 overflow-hidden relative z-10 pb-[70px] md:pb-0 min-h-0">
             
             <!-- Logs / Chat Area con Time Stamps en Cada Mensaje -->
             <div class="w-full md:w-3/5 p-4 bg-gray-50 border-r log-container flex flex-col h-full overflow-y-auto" id="chat-box"></div>
 
             <!-- Controls Panel -->
             <div class="w-full md:w-2/5 p-4 bg-gray-100 overflow-y-auto border-l border-gray-300 shadow-inner space-y-3 hidden md:block h-full" id="controls-panel">
-                <div class="flex justify-between items-center border-b pb-2 mb-1">
+                <div class="md:hidden bg-blue-50 text-blue-800 text-xs p-2 rounded border border-blue-200 mb-3 shadow-sm font-semibold flex items-center justify-between">
+<span><i class="fas fa-info-circle mr-1"></i>Despu&eacute;s de cada orden, pulsa "Bit&aacute;cora" abajo para ver el efecto.</span>
+</div>
+<div class="flex justify-between items-center border-b pb-2 mb-1">
                     <h2 class="font-bold text-gray-800 text-sm"><i class="fas fa-clipboard-list text-blue-600 mr-1.5"></i> Menú de Órdenes Clínicas</h2>
                     <button onclick="consultarAyudaCognitiva()" class="text-xs text-amber-700 font-bold hover:underline flex items-center bg-amber-100 px-2 py-0.5 rounded border border-amber-300">
                         <i class="fas fa-book-open mr-1"></i> Ayudas
@@ -919,7 +925,7 @@
         <div class="md:hidden flex bg-blue-900 text-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-40 fixed bottom-0 left-0 right-0 h-[70px] border-t-2 border-yellow-400 justify-around items-center" style="padding-bottom: env(safe-area-inset-bottom);">
             <button onclick="switchMobileTab('chat')" id="tab-btn-chat" class="flex-1 h-full text-center flex flex-col items-center justify-center text-sm opacity-100 text-yellow-400 font-bold transition-opacity relative">
                 <i class="fas fa-comments text-xl mb-1"></i>
-                <span>Bitácora</span>
+                <span>Bit&aacute;cora</span>
                 <span id="chat-badge" class="hidden absolute top-1 right-8 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px]">1</span>
             </button>
             <button onclick="switchMobileTab('controls')" id="tab-btn-controls" class="flex-1 h-full text-center flex flex-col items-center justify-center text-sm opacity-60 hover:opacity-100 text-white font-medium transition-opacity">
@@ -1333,7 +1339,16 @@
             chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
             state.logDeAcciones.push({ roleName, text, time: timeStr });
-        }
+// Mobile badge logic
+if (typeof activeMobileTab !== 'undefined' && activeMobileTab !== 'chat') {
+    unreadMessages++;
+    const badge = document.getElementById('chat-badge');
+    if (badge) {
+        badge.innerText = unreadMessages;
+        badge.classList.remove('hidden');
+    }
+}
+}
 
         function printLeader(text) { printMsg('🩺', 'Tú (Líder del Código)', text, 'msg-lider'); }
         function printCompresor(text) { printMsg('🫀', 'Compresor', text, 'msg-compresor'); }
@@ -1346,7 +1361,7 @@
         function printSystem(text) { printMsg('🏥', 'Contexto clínico / Desarrollo del caso', text, 'msg-sistema'); }
 
         // Mensaje inicial con tiempo 00:00
-        printSystem("Ingresas al cubículo de urgencias. Augusto (7 años, 20 kg) tiene antecedente de Enfermedad Renal Crónica. La madre refiere que la diálisis peritoneal ha estado disfuncional en los últimos días y le acababan de tomar unos exámenes de control. Repentinamente, la madre grita angustiada: '¡Doctor(a), mi hijo no me responde!'. Ves a Augusto flácido y cianótico. ¿Cuál es tu primera acción? (Tómate un momento para conocer los botones de las órdenes. Después de indicar cada orden, recuerda volver a esta pantalla de la Bitácora para ver la respuesta del equipo).");
+        printSystem("Ingresas al cubículo de urgencias. Augusto (7 años, 20 kg) tiene antecedente de Enfermedad Renal Crónica. La madre refiere que la diálisis peritoneal ha estado disfuncional en los últimos días y le acababan de tomar unos exámenes de control. Repentinamente, la madre grita angustiada: '¡Doctor(a), mi hijo no me responde!'. Ves a Augusto flácido y cianótico. ¿Cuál es tu primera acción? (Tómate un momento para conocer los botones de las órdenes. Despu&eacute;s de indicar cada orden, recuerda volver a esta pantalla de la Bit&aacute;cora para ver la respuesta del equipo).");
 
         function updateMonitor(params) {
             if(params.rhythm) document.getElementById('val-rhythm').innerText = params.rhythm;
