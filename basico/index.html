@@ -2,25 +2,46 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Simulador RCP Básico (BLS) - HPTU</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <style type="text/tailwindcss">
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+    <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root { --app-height: 100vh; }
+        .app-shell {
+            height: var(--app-height, 100vh);
+            height: 100dvh;
+        }
+        @media (min-width: 768px) {
+            .app-shell {
+                height: 92vh;
+                height: 92dvh;
+            }
+        }
+        button, label, select, input { touch-action: manipulation; }
+        @media (max-width: 767px) {
+            input[type="text"], input[type="email"], select, textarea { font-size: 16px !important; }
+        }
         .monitor-text { font-family: 'Share Tech Mono', monospace; }
         .log-container { scroll-behavior: smooth; }
         .alarm-blink { animation: blinker 1s linear infinite; }
         @keyframes blinker { 50% { opacity: 0; } }
         
-        .btn-cat-eval { @apply bg-blue-50 text-blue-900 border border-blue-300 hover:bg-blue-100 transition-colors py-2 px-3 rounded text-sm text-left shadow-sm font-medium; }
-        .btn-cat-rcp { @apply bg-red-50 text-red-900 border border-red-300 hover:bg-red-100 transition-colors py-2 px-3 rounded text-sm text-left shadow-sm font-medium; }
-        .btn-cat-defib { @apply bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100 transition-colors py-2 px-3 rounded text-sm text-left shadow-sm font-medium; }
-        .btn-cat-meds { @apply bg-purple-50 text-purple-900 border border-purple-300 hover:bg-purple-100 transition-colors py-2 px-3 rounded text-sm text-left shadow-sm font-medium; }
+        .btn-cat-eval { background-color: #eff6ff; color: #1e3a8a; border: 1px solid #93c5fd; padding: 0.5rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; text-align: left; font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: background-color 0.15s ease; }
+        .btn-cat-eval:hover { background-color: #dbeafe; }
+        .btn-cat-rcp { background-color: #fef2f2; color: #7f1d1d; border: 1px solid #fca5a5; padding: 0.5rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; text-align: left; font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: background-color 0.15s ease; }
+        .btn-cat-rcp:hover { background-color: #fee2e2; }
+        .btn-cat-defib { background-color: #fffbeb; color: #78350f; border: 1px solid #fcd34d; padding: 0.5rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; text-align: left; font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: background-color 0.15s ease; }
+        .btn-cat-defib:hover { background-color: #fef3c7; }
+        .btn-cat-meds { background-color: #faf5ff; color: #581c87; border: 1px solid #d8b4fe; padding: 0.5rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; text-align: left; font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: background-color 0.15s ease; }
+        .btn-cat-meds:hover { background-color: #f3e8ff; }
         
         .chat-bubble { max-width: 90%; font-size: 0.875rem; border-radius: 0.5rem; }
         
@@ -34,9 +55,11 @@
         .msg-alerta { background-color: #fff1f2; border-left: 4px solid #f43f5e; }
         .msg-sistema { background-color: #f8fafc; border-left: 4px solid #64748b; }
 
-        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%; background: #d97706; cursor: pointer; margin-top: -10px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; height: 24px; width: 24px; border-radius: 50%; background: #d97706; cursor: pointer; margin-top: -10px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: #fde68a; border-radius: 3px; border: 1px solid #d97706; }
+        input[type=range]::-moz-range-thumb { height: 24px; width: 24px; border: none; border-radius: 50%; background: #d97706; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        input[type=range]::-moz-range-track { width: 100%; height: 6px; cursor: pointer; background: #fde68a; border-radius: 3px; border: 1px solid #d97706; }
 
         .ecg-grid {
             background-color: #050b05;
@@ -75,20 +98,20 @@
         }
     </style>
 </head>
-<body class="bg-gray-200 p-2 md:p-6 font-sans">
+<body class="bg-gray-200 p-0 md:p-4 lg:p-6 font-sans overflow-x-hidden">
 
     <!-- MODAL: AYUDAS COGNITIVAS -->
-    <div id="modal-ayudas" onclick="if(event.target === this) closeModal('modal-ayudas')" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex justify-center items-center p-2 md:p-4 backdrop-blur-xs">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[95vh] flex flex-col overflow-hidden relative">
-            <div class="bg-amber-100 p-2 border-b border-amber-200 flex justify-between items-center sticky top-0 z-10 shrink-0">
-                <h3 class="font-bold text-lg text-amber-900 ml-2"><i class="fas fa-book-medical mr-2"></i> Algoritmos y Ayudas Cognitivas</h3>
-                <button onclick="closeModal('modal-ayudas')" class="text-amber-800 hover:text-red-600 bg-white hover:bg-red-50 rounded-full w-8 h-8 flex items-center justify-center transition-colors shadow-sm"><i class="fas fa-times"></i></button>
+    <div id="modal-ayudas" onclick="if(event.target === this) closeModal('modal-ayudas')" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex justify-center items-center p-2 md:p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[92vh] max-h-[92dvh] flex flex-col overflow-hidden relative">
+            <div class="bg-amber-100 p-2 border-b border-amber-200 flex justify-between items-center sticky top-0 z-10 shrink-0 gap-2">
+                <h3 class="font-bold text-sm sm:text-base md:text-lg text-amber-900 ml-1 sm:ml-2 truncate"><i class="fas fa-book-medical mr-1.5"></i> Algoritmos y Ayudas Cognitivas</h3>
+                <button onclick="closeModal('modal-ayudas')" class="shrink-0 text-amber-800 hover:text-red-600 bg-white hover:bg-red-50 rounded-full w-8 h-8 flex items-center justify-center transition-colors shadow-sm cursor-pointer"><i class="fas fa-times"></i></button>
             </div>
             
             <!-- Tabs Header -->
-            <div class="flex border-b border-gray-200 bg-white shrink-0">
-                <button onclick="switchTab('ayuda-ovace')" id="tab-btn-ovace" class="flex-1 py-3 text-center font-bold text-amber-800 border-b-4 border-amber-600 bg-amber-50 transition-colors">Algoritmo OVACE</button>
-                <button onclick="switchTab('ayuda-bls')" id="tab-btn-bls" class="flex-1 py-3 text-center font-bold text-gray-500 border-b-4 border-transparent hover:text-amber-800 hover:bg-gray-50 transition-colors">Reanimación Básica (BLS)</button>
+            <div class="flex border-b border-gray-200 bg-white shrink-0 text-xs sm:text-sm">
+                <button onclick="switchTab('ayuda-ovace')" id="tab-btn-ovace" class="flex-1 py-2.5 px-2 text-center font-bold text-amber-800 border-b-4 border-amber-600 bg-amber-50 transition-colors cursor-pointer">Algoritmo OVACE</button>
+                <button onclick="switchTab('ayuda-bls')" id="tab-btn-bls" class="flex-1 py-2.5 px-2 text-center font-bold text-gray-500 border-b-4 border-transparent hover:text-amber-800 hover:bg-gray-50 transition-colors cursor-pointer">Reanimación Básica (BLS)</button>
             </div>
 
             <div class="p-2 md:p-4 overflow-y-auto flex-1 bg-gray-50">
@@ -143,13 +166,13 @@
 
     <!-- MODAL: SEGURIDAD DE ESCENA -->
     <div id="modal-seguridad" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex justify-center items-center p-2">
-        <div class="bg-white p-4 md:p-6 rounded-lg shadow-xl w-full max-w-4xl">
+        <div class="bg-white p-4 md:p-6 rounded-lg shadow-xl w-full max-w-4xl max-h-[92vh] overflow-y-auto">
             <h3 class="font-bold text-xl mb-4 text-blue-900 border-b-2 border-blue-500 pb-2"><i class="fas fa-shield-alt mr-2"></i>Seguridad de la Escena</h3>
-            <div class="flex flex-col md:flex-row gap-4 h-[70vh]">
-                <div class="w-full md:w-1/2 overflow-hidden flex items-center justify-center bg-gray-100 rounded">
+            <div class="flex flex-col md:flex-row gap-4 max-h-[78vh] md:h-[70vh]">
+                <div class="w-full md:w-1/2 max-h-[26vh] md:max-h-full shrink-0 overflow-hidden flex items-center justify-center bg-gray-100 rounded">
                     <img src="img/aislamiento.jpg" alt="Aislamiento" class="max-h-full max-w-full object-contain">
                 </div>
-                <div class="w-full md:w-1/2 flex flex-col justify-center overflow-y-auto">
+                <div class="w-full md:w-1/2 flex flex-col justify-start md:justify-center overflow-y-auto">
                     <p class="mb-4 text-sm text-gray-700 font-bold">Según la alerta de la puerta, selecciona los Elementos de Protección Personal (EPP) que usarás para ingresar:</p>
                     <div class="space-y-3 mb-4 text-base">
                         <label class="flex items-center p-2 border rounded hover:bg-blue-50 cursor-pointer"><input type="checkbox" id="epp-tapabocas" class="mr-3 w-5 h-5"> Mascarilla Quirúrgica (Tapabocas)</label>
@@ -168,15 +191,15 @@
 
     <!-- MODAL: CÓDIGO AZUL (SIMULADOR TELÉFONO) -->
     <div id="modal-codigo-azul" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex justify-center items-center p-2">
-        <div class="bg-white p-4 md:p-6 rounded-lg shadow-xl w-full max-w-md text-center">
+        <div class="bg-white p-4 md:p-6 rounded-lg shadow-xl w-full max-w-md text-center max-h-[90vh] overflow-y-auto">
             <h3 class="font-bold text-xl mb-4 text-red-600 border-b-2 border-red-500 pb-2"><i class="fas fa-phone-alt mr-2"></i>Activar Código Azul</h3>
             <p class="mb-4 text-sm text-gray-700">El paciente está en la habitación 824 de la Torre A. Presiona el botón del micrófono, espera 3 segundos y parlantea el mensaje 2 veces. (Ej: Código azul pediátrico habitación 824 torre A).</p>
             
             <button id="btn-record" onclick="toggleRecording()" class="w-24 h-24 rounded-full bg-red-100 text-red-600 shadow-inner flex justify-center items-center mx-auto mb-4 hover:bg-red-200 transition-colors">
                 <i class="fas fa-microphone text-4xl"></i>
             </button>
-            <div id="record-status" class="text-xs text-gray-500 font-mono mb-2 h-4">Presiona el micrófono para hablar</div>
-            <div id="record-transcript" class="w-full h-20 bg-gray-50 border rounded p-2 text-sm text-gray-800 text-left overflow-y-auto italic mb-4"></div>
+            <div id="record-status" class="text-xs text-gray-500 font-mono mb-2 min-h-[1rem]">Presiona el micrófono para hablar</div>
+            <textarea id="record-transcript" placeholder="Aquí aparecerá tu voz transcrita (o escribe el anuncio si tu navegador no admite micrófono)..." class="w-full h-20 bg-gray-50 border rounded p-2 text-sm text-gray-800 text-left overflow-y-auto mb-4"></textarea>
 
             <div class="flex justify-end gap-2">
                 <button onclick="closeModal('modal-codigo-azul')" class="px-4 py-2 bg-gray-200 text-gray-800 rounded font-bold">Cancelar</button>
@@ -202,8 +225,8 @@
     </div>
 
     <!-- MODAL: TÉCNICA RCP -->
-    <div id="modal-tecnica-rcp" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex justify-center items-center p-2 overflow-y-auto">
-        <div class="bg-white p-4 md:p-6 rounded-lg shadow-xl w-full max-w-4xl text-center my-4">
+    <div id="modal-tecnica-rcp" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex justify-center items-start md:items-center p-2 overflow-y-auto">
+        <div class="bg-white p-4 md:p-6 rounded-lg shadow-xl w-full max-w-4xl text-center my-4 max-h-[90vh] overflow-y-auto">
             <h3 class="font-bold text-xl mb-4 text-green-700 border-b-2 border-green-500 pb-2"><i class="fas fa-hand-paper mr-2"></i>Técnica de Compresiones</h3>
             <p class="mb-4 text-sm text-gray-700">Selecciona la técnica correcta para este paciente (Lactante de 8 meses):</p>
             
@@ -235,7 +258,7 @@
 
     <!-- MODAL: REANUDAR/CALIDAD RCP -->
     <div id="modal-reanudar-rcp" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex justify-center items-center p-2">
-        <div class="bg-white p-4 md:p-6 rounded-lg shadow-xl w-full max-w-lg text-center">
+        <div class="bg-white p-4 md:p-6 rounded-lg shadow-xl w-full max-w-lg text-center max-h-[90vh] overflow-y-auto">
             <h3 id="titulo-modal-rcp" class="font-bold text-xl mb-4 text-green-700 border-b-2 border-green-500 pb-2">Iniciar / Reanudar Compresiones</h3>
             <p id="desc-modal-rcp" class="mb-4 text-sm text-gray-700">Selecciona los parámetros con los que darás las compresiones:</p>
             
@@ -277,7 +300,7 @@
 
     <!-- MODAL: COLOCACIÓN DE PARCHES DEA -->
     <div id="modal-parches-dea" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex justify-center items-center p-2">
-        <div class="bg-white p-4 md:p-6 rounded-lg shadow-xl w-full max-w-2xl text-center">
+        <div class="bg-white p-4 md:p-6 rounded-lg shadow-xl w-full max-w-2xl text-center max-h-[90vh] overflow-y-auto">
             <h3 class="font-bold text-xl mb-4 text-orange-600 border-b-2 border-orange-500 pb-2"><i class="fas fa-sticky-note mr-2"></i>Colocación de Parches DEA</h3>
             <p class="mb-4 text-sm text-gray-700">El paciente es un lactante (8 kg). Selecciona el tamaño de los parches y la posición correcta en el tórax.</p>
             
@@ -307,25 +330,26 @@
     </div>
 
     <!-- MAIN APP CONTAINER -->
-    <div class="w-full md:max-w-6xl mx-auto bg-white shadow-2xl md:rounded-xl overflow-hidden flex flex-col h-screen md:h-[92vh]">
+    <div class="w-full md:max-w-6xl mx-auto bg-white shadow-2xl md:rounded-xl overflow-hidden flex flex-col app-shell">
         
-        <!-- Header con Botón de Ayuda Cognitiva Altamente Visible -->
-        <div class="bg-blue-900 text-white p-3 flex justify-between items-center shadow-md z-30 relative">
-            <div class="flex items-center space-x-3">
-                <h1 class="text-xl font-bold"><i class="fas fa-hospital-user mr-2"></i> Entrenamiento RCP Básico (BLS) - HPTU</h1>
-                <span class="text-xs bg-blue-800 px-3 py-1 rounded hidden md:inline">Augusto | 7 meses | 8 kg</span>
+        <!-- Header Responsivo (2 filas limpias en móvil, 1 fila en escritorio) -->
+        <div class="bg-blue-900 text-white px-3 py-2 md:p-3 flex flex-col md:flex-row md:justify-between md:items-center gap-2 shadow-md z-30 relative flex-shrink-0">
+            <div class="flex items-center justify-between md:justify-start md:space-x-3 min-w-0">
+                <h1 class="text-sm sm:text-base md:text-xl font-bold truncate"><i class="fas fa-hospital-user mr-1.5 md:mr-2"></i><span class="sm:hidden">RCP B&aacute;sico (BLS) - HPTU</span><span class="hidden sm:inline">Entrenamiento RCP B&aacute;sico (BLS) - HPTU</span></h1>
+                <span class="text-[11px] md:text-xs bg-blue-800 px-2 md:px-3 py-0.5 md:py-1 rounded font-semibold shrink-0 ml-2"><span class="sm:hidden">Augusto | 7m | 8 kg</span><span class="hidden sm:inline">Augusto | 7 meses | 8 kg</span></span>
             </div>
             
-            <div class="flex items-center space-x-3">
-                <button id="btn-ayudas" onclick="consultarAyudaCognitiva()" class="bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-blue-950 font-extrabold px-3.5 py-1.5 rounded-lg shadow-lg text-xs flex items-center btn-ayuda-glow border-2 border-yellow-200 transition-all cursor-pointer">
-                    <i class="fas fa-book-medical mr-2 text-base text-blue-950"></i> 
-                    <span class="tracking-wide uppercase">Ayudas Cognitivas (HPTU)</span>
+            <div class="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto">
+                <button id="btn-ayudas" onclick="consultarAyudaCognitiva()" class="flex-1 md:flex-initial justify-center bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-blue-950 font-extrabold px-2.5 md:px-3.5 py-1.5 rounded-lg shadow-lg text-[11px] sm:text-xs flex items-center btn-ayuda-glow border-2 border-yellow-200 transition-all cursor-pointer whitespace-nowrap">
+                    <i class="fas fa-book-medical mr-1.5 text-sm md:text-base text-blue-950 shrink-0"></i> 
+                    <span class="tracking-wide uppercase">Ayudas Cognitivas</span>
+                    <span class="hidden sm:inline tracking-wide uppercase ml-1">(HPTU)</span>
                 </button>
 
-                <div class="bg-black bg-opacity-40 px-3 py-1 rounded border border-blue-400 flex items-center">
-                    <i id="timer-icon" class="fas fa-stopwatch text-yellow-400 mr-2 text-base"></i>
-                    <span class="text-xs text-gray-300 mr-2">TIEMPO:</span>
-                    <span class="font-mono text-base font-bold text-yellow-300" id="timer-display">00:00</span>
+                <div class="shrink-0 bg-black bg-opacity-40 px-2.5 md:px-3 py-1.5 md:py-1 rounded-lg border border-blue-400 flex items-center whitespace-nowrap">
+                    <i id="timer-icon" class="fas fa-stopwatch text-yellow-400 mr-1.5 text-sm md:text-base"></i>
+                    <span class="text-[11px] md:text-xs text-gray-300 mr-1.5">TIEMPO:</span>
+                    <span class="font-mono text-sm md:text-base font-bold text-yellow-300" id="timer-display">00:00</span>
                 </div>
             </div>
         </div>
@@ -334,7 +358,7 @@
         <div class="bg-black text-green-400 p-2 md:p-4 flex flex-col md:flex-row justify-between items-center monitor-text border-b-4 md:border-b-8 border-gray-800 relative z-30 shadow-inner flex-shrink-0">
             <div class="absolute top-1 right-2 md:top-2 md:right-3 text-[10px] md:text-xs text-gray-500 hidden md:block">CORPULS 3 / ZOLL X SERIES</div>
             
-            <div class="w-full grid grid-cols-4 gap-1 md:gap-3 pr-0 md:pr-4 mt-2 md:mt-0">
+            <div class="w-full grid grid-cols-4 gap-1 md:gap-3 pr-0 md:pr-4 mt-0">
                 <div class="bg-gray-900 p-1 md:p-2 rounded border border-gray-700 flex flex-col justify-center">
                     <div class="text-[9px] md:text-xs text-gray-400 leading-tight">MONITOR</div>
                     <div class="text-xs md:text-base font-bold truncate text-green-400" id="val-rhythm">Apagado</div>
@@ -356,29 +380,29 @@
         </div>
 
         <!-- Main Content Area -->
-        <div class="flex flex-col md:flex-row flex-1 overflow-hidden relative z-10 pb-[70px] md:pb-0 min-h-0">
+        <div class="flex flex-col md:flex-row flex-1 overflow-hidden relative z-10 min-h-0">
             
             <!-- Logs / Chat Area con Time Stamps en Cada Mensaje -->
-            <div class="w-full md:w-3/5 p-4 bg-gray-50 border-r log-container flex flex-col h-full overflow-y-auto" id="chat-box">
-                <div id="start-sim-card" class="m-auto my-8 max-w-md w-full bg-white border-2 border-blue-600 rounded-2xl shadow-xl p-6 text-center">
-                    <div class="w-16 h-16 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
-                        <i class="fas fa-play text-2xl ml-1"></i>
+            <div class="w-full md:w-3/5 p-3 md:p-4 bg-gray-50 border-r log-container flex flex-col flex-1 md:h-full min-h-0 overflow-y-auto" id="chat-box">
+                <div id="start-sim-card" class="mx-auto my-2 md:my-auto max-w-md w-full bg-white border-2 border-blue-600 rounded-2xl shadow-xl p-4 md:p-6 text-center">
+                    <div class="w-11 h-11 md:w-16 md:h-16 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-4 shadow-inner">
+                        <i class="fas fa-play text-lg md:text-2xl ml-0.5"></i>
                     </div>
-                    <h2 class="text-xl font-extrabold text-blue-950 mb-2">Escenario de Simulaci&oacute;n Listo</h2>
-                    <p class="text-sm text-gray-600 mb-5 leading-relaxed">
+                    <h2 class="text-base md:text-xl font-extrabold text-blue-950 mb-1.5 md:mb-2">Escenario de Simulaci&oacute;n Listo</h2>
+                    <p class="text-xs md:text-sm text-gray-600 mb-3.5 md:mb-5 leading-relaxed">
                         El cron&oacute;metro est&aacute; detenido en <strong>00:00</strong>. Puedes observar primero la interfaz y los botones de &oacute;rdenes. Cuando est&eacute;s listo(a), presiona el bot&oacute;n para comenzar el escenario e iniciar el tiempo.
                     </p>
-                    <div id="start-sim-warning" class="hidden mb-4 p-2.5 bg-amber-50 border border-amber-400 text-amber-900 text-xs font-bold rounded-lg">
+                    <div id="start-sim-warning" class="hidden mb-3 p-2 bg-amber-50 border border-amber-400 text-amber-900 text-xs font-bold rounded-lg">
                         <i class="fas fa-exclamation-circle mr-1"></i> Primero presiona &laquo;Iniciar la simulaci&oacute;n&raquo; para habilitar las &oacute;rdenes.
                     </div>
-                    <button id="btn-iniciar-simulacion" onclick="comenzarEscenario()" class="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 active:scale-95 text-white font-extrabold text-base md:text-lg py-4 px-6 rounded-xl shadow-lg transition-all cursor-pointer flex items-center justify-center">
-                        <i class="fas fa-play-circle mr-2 text-xl"></i> Iniciar la simulaci&oacute;n
+                    <button id="btn-iniciar-simulacion" onclick="comenzarEscenario()" class="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 active:scale-95 text-white font-extrabold text-sm md:text-lg py-3 md:py-4 px-5 md:px-6 rounded-xl shadow-lg transition-all cursor-pointer flex items-center justify-center">
+                        <i class="fas fa-play-circle mr-2 text-lg md:text-xl"></i> Iniciar la simulaci&oacute;n
                     </button>
                 </div>
             </div>
 
             <!-- Controls Panel -->
-            <div class="w-full md:w-2/5 p-4 bg-gray-100 overflow-y-auto border-l border-gray-300 shadow-inner space-y-3 hidden md:block h-full" id="controls-panel">
+            <div class="w-full md:w-2/5 p-3 md:p-4 bg-gray-100 overflow-y-auto border-l border-gray-300 shadow-inner space-y-3 hidden md:block flex-1 md:h-full min-h-0" id="controls-panel">
                 <div id="start-sim-controls-banner" class="bg-emerald-50 border-2 border-emerald-500 rounded-xl p-3 mb-3 shadow-sm text-center">
                     <p class="text-xs text-emerald-900 font-bold mb-2">
                         <i class="fas fa-clock mr-1"></i> Tiempo detenido (00:00). Pulsa abajo para comenzar el escenario:
@@ -507,7 +531,7 @@
             </div>
 
 <!-- Contenedor Final de Debriefing -->
-            <div class="w-full md:w-2/5 p-4 bg-gray-100 overflow-y-auto border-l border-gray-300 shadow-inner hidden h-full" id="debriefing-panel">
+            <div class="w-full md:w-2/5 p-3 md:p-4 bg-gray-100 overflow-y-auto border-l border-gray-300 shadow-inner hidden flex-1 md:h-full min-h-0" id="debriefing-panel">
                 <h2 class="font-bold text-2xl text-gray-800 mb-4 border-b-2 border-green-500 pb-2"><i class="fas fa-clipboard-check mr-2"></i> Resumen de Simulación</h2>
                 
                 <div class="bg-white p-4 rounded shadow-sm mb-4 text-sm" id="debrief-metrics"></div>
@@ -539,7 +563,7 @@
         </div>
         
         <!-- Mobile Bottom Tab Bar -->
-        <div class="md:hidden flex bg-blue-900 text-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-40 fixed bottom-0 left-0 right-0 h-[70px] border-t-2 border-yellow-400 justify-around items-center" style="padding-bottom: env(safe-area-inset-bottom);">
+        <div class="md:hidden flex flex-shrink-0 bg-blue-900 text-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-40 border-t-2 border-yellow-400 justify-around items-center" style="min-height: 60px; padding-top: 6px; padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));">
             <button onclick="switchMobileTab('chat')" id="tab-btn-chat" class="flex-1 h-full text-center flex flex-col items-center justify-center text-sm opacity-100 text-yellow-400 font-bold transition-opacity relative">
                 <i class="fas fa-comments text-xl mb-1"></i>
                 <span>Bitácora</span>
@@ -554,11 +578,19 @@
 
     <script>
         // --- ESTADO GLOBAL ---
-        
+        function syncAppHeight() {
+            document.documentElement.style.setProperty('--app-height', window.innerHeight + 'px');
+        }
+        syncAppHeight();
+        window.addEventListener('orientationchange', () => setTimeout(syncAppHeight, 150));
+
+        let activeMobileTab = 'chat';
         let chatBadgeCount = 0;
         let simulacionTerminada = false;
 
         function switchMobileTab(tab) {
+            if (window.innerWidth >= 768) return;
+            activeMobileTab = tab;
             const chatPanel = document.getElementById('chat-box');
             const controlsPanel = document.getElementById('controls-panel');
             const debriefPanel = document.getElementById('debriefing-panel');
@@ -573,8 +605,10 @@
                     controlsPanel.classList.add('hidden');
                     controlsPanel.classList.remove('block');
                     debriefPanel.classList.add('hidden');
+                    debriefPanel.classList.remove('block');
                 } else {
                     debriefPanel.classList.add('hidden');
+                    debriefPanel.classList.remove('block');
                 }
                 
                 btnChat.classList.add('opacity-100', 'text-yellow-400');
@@ -593,9 +627,12 @@
                     controlsPanel.classList.remove('hidden');
                     controlsPanel.classList.add('block');
                     debriefPanel.classList.add('hidden');
+                    debriefPanel.classList.remove('block');
                 } else {
                     controlsPanel.classList.add('hidden');
+                    controlsPanel.classList.remove('block');
                     debriefPanel.classList.remove('hidden');
+                    debriefPanel.classList.add('block');
                 }
                 
                 btnControls.classList.add('opacity-100', 'text-yellow-400');
@@ -604,6 +641,30 @@
                 btnChat.classList.add('opacity-60', 'text-white');
             }
         }
+
+        window.addEventListener('resize', () => {
+            syncAppHeight();
+            const chatPanel = document.getElementById('chat-box');
+            const controlsPanel = document.getElementById('controls-panel');
+            const debriefPanel = document.getElementById('debriefing-panel');
+            if (window.innerWidth >= 768) {
+                chatPanel.classList.remove('hidden');
+                chatPanel.classList.add('flex');
+                if (simulacionTerminada) {
+                    controlsPanel.classList.add('hidden');
+                    controlsPanel.classList.remove('block');
+                    debriefPanel.classList.remove('hidden');
+                    debriefPanel.classList.add('block');
+                } else {
+                    controlsPanel.classList.remove('hidden');
+                    controlsPanel.classList.add('block');
+                    debriefPanel.classList.add('hidden');
+                    debriefPanel.classList.remove('block');
+                }
+            } else {
+                switchMobileTab(activeMobileTab);
+            }
+        });
 
         let state = {
             fase_caso: 'OVACE', // OVACE, INCONSCIENTE, RCP, POST_DESCARGA, RCE
@@ -1131,55 +1192,73 @@
         }
     }
 
+    function hablarDEA(texto) {
+            try {
+                if ('speechSynthesis' in window) {
+                    var utter = new SpeechSynthesisUtterance(texto);
+                    utter.lang = 'es-ES';
+                    window.speechSynthesis.speak(utter);
+                }
+            } catch (e) {}
+        }
+
     function toggleRecording() {
-            if (!('webkitSpeechRecognition' in window)) {
-                alert("Tu navegador no soporta el reconocimiento de voz. Por favor usa Chrome.");
-                return;
-            }
+            const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
             const btn = document.getElementById('btn-record');
             const status = document.getElementById('record-status');
             const transcript = document.getElementById('record-transcript');
+
+            if (!SpeechRecognitionAPI) {
+                if (status) status.innerText = "Reconocimiento de voz no disponible en este navegador. Escribe el mensaje abajo y pulsa Enviar.";
+                if (transcript) transcript.focus();
+                return;
+            }
 
             if (recognition && recognition.recording) {
                 recognition.stop();
                 return;
             }
 
-            recognition = new webkitSpeechRecognition();
-            recognition.lang = 'es-ES';
-            recognition.continuous = false; // Fixes Android Chrome repetition bug
-            recognition.interimResults = false; // Fixes Android Chrome repetition bug
+            try {
+                recognition = new SpeechRecognitionAPI();
+                recognition.lang = 'es-ES';
+                recognition.continuous = false; // Fixes Android Chrome repetition bug
+                recognition.interimResults = false; // Fixes Android Chrome repetition bug
 
-            recognition.onstart = function() {
-                recognition.recording = true;
-                btn.classList.add('bg-red-500', 'text-white', 'animate-pulse');
-                btn.classList.remove('bg-red-100', 'text-red-600');
-                status.innerText = "Grabando... (Habla ahora)";
-                finalTranscript = '';
-                transcript.innerText = '';
-            };
+                recognition.onstart = function() {
+                    recognition.recording = true;
+                    btn.classList.add('bg-red-500', 'text-white', 'animate-pulse');
+                    btn.classList.remove('bg-red-100', 'text-red-600');
+                    status.innerText = "Grabando... (Habla ahora)";
+                    finalTranscript = '';
+                    transcript.value = '';
+                };
 
-            recognition.onresult = function(event) {
-                var currentTranscript = '';
-                for (var i = 0; i < event.results.length; ++i) {
-                    currentTranscript += event.results[i][0].transcript + ' ';
-                }
-                finalTranscript = currentTranscript.trim();
-                transcript.innerText = finalTranscript;
-            };
+                recognition.onresult = function(event) {
+                    var currentTranscript = '';
+                    for (var i = 0; i < event.results.length; ++i) {
+                        currentTranscript += event.results[i][0].transcript + ' ';
+                    }
+                    finalTranscript = currentTranscript.trim();
+                    transcript.value = finalTranscript;
+                };
 
-            recognition.onerror = function(event) {
-                status.innerText = "Error: " + event.error;
-            };
+                recognition.onerror = function(event) {
+                    status.innerText = "Error de micrófono (" + event.error + "). Puedes escribir el mensaje abajo.";
+                };
 
-            recognition.onend = function() {
-                recognition.recording = false;
-                btn.classList.remove('bg-red-500', 'text-white', 'animate-pulse');
-                btn.classList.add('bg-red-100', 'text-red-600');
-                status.innerText = "Grabación finalizada.";
-            };
+                recognition.onend = function() {
+                    recognition.recording = false;
+                    btn.classList.remove('bg-red-500', 'text-white', 'animate-pulse');
+                    btn.classList.add('bg-red-100', 'text-red-600');
+                    status.innerText = "Grabación finalizada.";
+                };
 
-            recognition.start();
+                recognition.start();
+            } catch (e) {
+                if (status) status.innerText = "No se pudo iniciar el micrófono. Escribe el mensaje abajo y pulsa Enviar.";
+                if (transcript) transcript.focus();
+            }
         }
 
         function takeAction(actionId, payload = null) {
@@ -1293,8 +1372,10 @@
                     break;
                 case 'submit_codigo_azul':
                     closeModal('modal-codigo-azul');
-                    var speech = finalTranscript.toLowerCase();
-                    printLeader(`"Mensaje enviado: ${finalTranscript || '[Sin audio grabado]'}"`);
+                    var transcriptInput = document.getElementById('record-transcript');
+                    var rawMsg = ((transcriptInput && transcriptInput.value) || finalTranscript || '').trim();
+                    var speech = rawMsg.toLowerCase();
+                    printLeader(`"Mensaje enviado: ${rawMsg || '[Sin audio grabado]'}"`);
                     state.codigoAzulActivado = true;
                     
                     var missing = [];
@@ -1358,7 +1439,8 @@
                             accionEsCorrecta = false;
                         }
                         
-                        printLeader(`"Iniciando compresiones con técnica: ${document.querySelector('label:has(input:checked) span').innerText}."`);
+                        const techNames = { '2dedos': '2 Dedos', '2pulgares': '2 Pulgares', '1mano': 'Talón de 1 Mano', '2manos': '2 Manos' };
+                        printLeader(`"Iniciando compresiones con técnica: ${techNames[tech.value] || tech.value}."`);
                         printSystem(msgTech);
                         document.getElementById('modal-reanudar-rcp').classList.remove('hidden'); // Ask for frequency/depth
                     } else {
@@ -1415,11 +1497,7 @@
                         state.deaEncendido = true;
                         document.getElementById('btn-encender-dea').classList.add('bg-orange-600', 'text-white');
                         printSystem(`Se ENCIENDE el DEA.`);
-                        if ('speechSynthesis' in window) {
-                            var msg = new SpeechSynthesisUtterance("Retire la ropa del pecho del paciente. Conecte los parches.");
-                            msg.lang = 'es-ES';
-                            window.speechSynthesis.speak(msg);
-                        }
+                        hablarDEA("Retire la ropa del pecho del paciente. Conecte los parches.");
                     } else {
                         state.deaEncendido = false;
                         document.getElementById('btn-encender-dea').classList.remove('bg-orange-600', 'text-white');
@@ -1464,21 +1542,13 @@
                     state.rcpEnCurso = false; // Pausa
                     printLeader(`"¡Todos fuera! El DEA está analizando."`);
                     printSystem("🔊 DEA: Analizando el ritmo cardíaco... No toque al paciente.");
-                    if ('speechSynthesis' in window) {
-                        var msg2 = new SpeechSynthesisUtterance("Analizando el ritmo cardíaco. No toque al paciente.");
-                        msg2.lang = 'es-ES';
-                        window.speechSynthesis.speak(msg2);
-                    }
+                    hablarDEA("Analizando el ritmo cardíaco. No toque al paciente.");
                     
                     state.analisisDeaCount = (state.analisisDeaCount || 0) + 1;
                     
                     setTimeout(() => {
                         if (state.analisisDeaCount === 1) {
-                            if ('speechSynthesis' in window) {
-                                var msg3 = new SpeechSynthesisUtterance("Se recomienda dar una descarga. Cargando. Aléjense del paciente. Presione el botón.");
-                                msg3.lang = 'es-ES';
-                                window.speechSynthesis.speak(msg3);
-                            }
+                            hablarDEA("Se recomienda dar una descarga. Cargando. Aléjense del paciente. Presione el botón.");
                             printSystem("🚨 EVENTO: El DEA identifica un ritmo desfibrilable.");
                             printSystem(`🔊 DEA: Descarga recomendada. Cargando... Aléjense todos.`);
                             const btnDEA = document.getElementById('btn-descarga-dea');
@@ -1487,11 +1557,7 @@
                             btnDEA.classList.add('animate-pulse', 'bg-orange-600', 'text-white');
                             btnDEA.innerHTML = '<i class="fas fa-bolt mr-1"></i> Dar Descarga (Habilitado)';
                         } else if (state.analisisDeaCount === 2) {
-                            if ('speechSynthesis' in window) {
-                                var msg4 = new SpeechSynthesisUtterance("No se recomienda descarga. Continúe la RCP.");
-                                msg4.lang = 'es-ES';
-                                window.speechSynthesis.speak(msg4);
-                            }
+                            hablarDEA("No se recomienda descarga. Continúe la RCP.");
                             printSystem("🔊 DEA: No se recomienda dar una descarga. Continúe con la RCP.");
                             printSystem("🩺 EVENTO: El paciente no tiene movimientos.");
                             state.ritmoECG = 'ASISTOLIA';
@@ -1499,11 +1565,7 @@
                             state.tiempoFase = 0;
                             state.saviorFaseMostrado = false;
                         } else {
-                            if ('speechSynthesis' in window) {
-                                var msg5 = new SpeechSynthesisUtterance("No se recomienda descarga.");
-                                msg5.lang = 'es-ES';
-                                window.speechSynthesis.speak(msg5);
-                            }
+                            hablarDEA("No se recomienda descarga.");
                             printSystem("🔊 DEA: No se recomienda dar una descarga.");
                             printSystem("🚨 EVENTO CLÍNICO: El paciente ya tiene apertura ocular.");
                             state.fase_caso = 'ROSC';

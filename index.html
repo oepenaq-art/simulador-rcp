@@ -2,25 +2,46 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
     <title>Simulador Avanzado RCP Pediátrica - HPTU</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <style type="text/tailwindcss">
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+    <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root { --app-height: 100vh; }
+        .app-shell {
+            height: var(--app-height, 100vh);
+            height: 100dvh;
+        }
+        @media (min-width: 768px) {
+            .app-shell {
+                height: 92vh;
+                height: 92dvh;
+            }
+        }
+        button, label, select, input { touch-action: manipulation; }
+        @media (max-width: 767px) {
+            input[type="text"], input[type="email"], select, textarea { font-size: 16px !important; }
+        }
         .monitor-text { font-family: 'Share Tech Mono', monospace; }
         .log-container { scroll-behavior: smooth; }
         .alarm-blink { animation: blinker 1s linear infinite; }
         @keyframes blinker { 50% { opacity: 0; } }
         
-        .btn-cat-eval { @apply bg-blue-50 text-blue-900 border border-blue-300 hover:bg-blue-100 transition-colors py-2 px-3 rounded text-sm text-left shadow-sm font-medium; }
-        .btn-cat-rcp { @apply bg-red-50 text-red-900 border border-red-300 hover:bg-red-100 transition-colors py-2 px-3 rounded text-sm text-left shadow-sm font-medium; }
-        .btn-cat-defib { @apply bg-amber-50 text-amber-900 border border-amber-300 hover:bg-amber-100 transition-colors py-2 px-3 rounded text-sm text-left shadow-sm font-medium; }
-        .btn-cat-meds { @apply bg-purple-50 text-purple-900 border border-purple-300 hover:bg-purple-100 transition-colors py-2 px-3 rounded text-sm text-left shadow-sm font-medium; }
+        .btn-cat-eval { background-color: #eff6ff; color: #1e3a8a; border: 1px solid #93c5fd; padding: 0.5rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; text-align: left; font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: background-color 0.15s ease; }
+        .btn-cat-eval:hover { background-color: #dbeafe; }
+        .btn-cat-rcp { background-color: #fef2f2; color: #7f1d1d; border: 1px solid #fca5a5; padding: 0.5rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; text-align: left; font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: background-color 0.15s ease; }
+        .btn-cat-rcp:hover { background-color: #fee2e2; }
+        .btn-cat-defib { background-color: #fffbeb; color: #78350f; border: 1px solid #fcd34d; padding: 0.5rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; text-align: left; font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: background-color 0.15s ease; }
+        .btn-cat-defib:hover { background-color: #fef3c7; }
+        .btn-cat-meds { background-color: #faf5ff; color: #581c87; border: 1px solid #d8b4fe; padding: 0.5rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; text-align: left; font-weight: 500; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: background-color 0.15s ease; }
+        .btn-cat-meds:hover { background-color: #f3e8ff; }
         
         .chat-bubble { max-width: 90%; font-size: 0.875rem; border-radius: 0.5rem; }
         
@@ -34,9 +55,11 @@
         .msg-alerta { background-color: #fff1f2; border-left: 4px solid #f43f5e; }
         .msg-sistema { background-color: #f8fafc; border-left: 4px solid #64748b; }
 
-        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%; background: #d97706; cursor: pointer; margin-top: -10px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; height: 24px; width: 24px; border-radius: 50%; background: #d97706; cursor: pointer; margin-top: -10px; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: #fde68a; border-radius: 3px; border: 1px solid #d97706; }
+        input[type=range]::-moz-range-thumb { height: 24px; width: 24px; border: none; border-radius: 50%; background: #d97706; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+        input[type=range]::-moz-range-track { width: 100%; height: 6px; cursor: pointer; background: #fde68a; border-radius: 3px; border: 1px solid #d97706; }
 
         .ecg-grid {
             background-color: #050b05;
@@ -75,111 +98,53 @@
         }
     </style>
 </head>
-<body class="bg-gray-200 p-2 md:p-6 font-sans">
+<body class="bg-gray-200 p-0 md:p-4 lg:p-6 font-sans overflow-x-hidden">
     
     <!-- MODAL: AYUDAS COGNITIVAS (HPTU) -->
-    <div id="modal-ayudas" onclick="if(event.target === this) closeModal('modal-ayudas')" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex justify-center items-center p-2 md:p-4 backdrop-blur-xs">
-        <div class="bg-white rounded-xl shadow-2xl w-[820px] max-w-[94vw] h-[80vh] max-h-[80vh] flex flex-col overflow-hidden border-2 border-blue-600 animate-fadeIn">
+    <div id="modal-ayudas" onclick="if(event.target === this) closeModal('modal-ayudas')" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex justify-center items-center p-2 md:p-4 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-[860px] max-w-[96vw] h-[88vh] max-h-[88dvh] flex flex-col overflow-hidden border-2 border-blue-600 animate-fadeIn">
             <!-- Header Modal -->
-            <div class="bg-blue-900 text-white px-4 py-2.5 flex justify-between items-center shadow sticky top-0 z-20">
-                <div class="flex items-center space-x-2">
-                    <i class="fas fa-book-medical text-yellow-400 text-base md:text-lg"></i>
-                    <h3 class="font-bold text-sm md:text-base">Ayuda Cognitiva Institucional - HPTU</h3>
+            <div class="bg-blue-900 text-white px-3 md:px-4 py-2.5 flex justify-between items-center gap-2 shadow sticky top-0 z-20">
+                <div class="flex items-center space-x-2 min-w-0">
+                    <i class="fas fa-book-medical text-yellow-400 text-base md:text-lg shrink-0"></i>
+                    <h3 class="font-bold text-xs sm:text-sm md:text-base truncate">Ayuda Cognitiva Institucional - HPTU</h3>
                 </div>
-                <button onclick="closeModal('modal-ayudas')" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg flex items-center shadow transition-all hover:scale-105 active:scale-95 cursor-pointer">
-                    <i class="fas fa-arrow-left mr-1.5"></i> Cerrar y Volver al Caso
+                <button onclick="closeModal('modal-ayudas')" class="shrink-0 whitespace-nowrap bg-red-600 hover:bg-red-700 text-white text-xs font-bold py-1.5 px-3 rounded-lg flex items-center shadow transition-all hover:scale-105 active:scale-95 cursor-pointer">
+                    <i class="fas fa-arrow-left mr-1.5"></i><span class="sm:hidden">Cerrar</span><span class="hidden sm:inline">Cerrar y Volver al Caso</span>
                 </button>
             </div>
             
             <!-- Tabs -->
-            <div class="bg-gray-100 border-b flex px-4 pt-2 gap-2 text-sm font-bold">
-                <button id="tab-btn-algoritmo" onclick="switchAyudaTab('algoritmo')" class="py-2.5 px-5 bg-white border-t-2 border-blue-600 text-blue-900 rounded-t shadow-sm">
+            <div class="bg-gray-100 border-b flex px-2 md:px-4 pt-2 gap-1.5 md:gap-2 text-xs md:text-sm font-bold shrink-0">
+                <button id="tab-btn-algoritmo" onclick="switchAyudaTab('algoritmo')" class="flex-1 md:flex-initial py-2.5 px-2 md:px-5 bg-white border-t-2 border-blue-600 text-blue-900 rounded-t shadow-sm font-bold text-center cursor-pointer">
                     <i class="fas fa-project-diagram mr-1.5"></i> Algoritmo RCP Pediátrico
                 </button>
-                <button id="tab-btn-causas" onclick="switchAyudaTab('causas')" class="py-2.5 px-5 bg-gray-200 text-gray-600 hover:bg-gray-50 rounded-t">
+                <button id="tab-btn-causas" onclick="switchAyudaTab('causas')" class="flex-1 md:flex-initial py-2.5 px-2 md:px-5 bg-gray-200 text-gray-600 hover:bg-gray-50 rounded-t font-bold text-center cursor-pointer">
                     <i class="fas fa-search-plus mr-1.5"></i> Causas Reversibles (Hs y Ts)
                 </button>
             </div>
 
             <!-- Content Area -->
-            <div class="p-3 md:p-4 overflow-y-auto flex-1 text-sm bg-gray-100 flex flex-col items-center">
+            <div class="p-2 md:p-4 overflow-y-auto flex-1 text-sm bg-gray-100 flex flex-col items-center">
                 <!-- Tab 1: FOTO DEL ALGORITMO INSTITUCIONAL -->
                 <div id="tab-content-algoritmo" class="w-full flex flex-col items-center">
-                    <div class="bg-white p-2 rounded-lg shadow border border-gray-300 max-w-3xl w-full">
-                        <img src="algoritmo_rcp.png" alt="Algoritmo de RCP Pediátrico HPTU" class="w-full h-auto rounded border border-gray-200 object-contain shadow-sm" />
+                    <div class="bg-white p-1.5 md:p-2 rounded-lg shadow border border-gray-300 max-w-3xl w-full mx-auto">
+                        <img src="algoritmo_rcp.png?v=2" alt="Algoritmo de Paro Cardíaco Pediátrico" class="w-full h-auto rounded border border-gray-200 object-contain shadow-sm" />
                     </div>
                 </div>
 
-                <!-- Tab 2: Causas Reversibles (Tabla HPTU) -->
-                <div id="tab-content-causas" class="w-full hidden space-y-3 max-w-3xl">
-                    <div class="bg-white p-4 rounded-lg border shadow-sm">
-                        <h4 class="font-bold text-blue-900 text-base mb-3 border-b pb-2 flex items-center">
-                            <i class="fas fa-clipboard-list mr-2 text-blue-700"></i> Tabla Institucional de Causas Reversibles (HPTU)
-                        </h4>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-xs text-left border-collapse">
-                                <thead>
-                                    <tr class="bg-blue-900 text-white">
-                                        <th class="p-2.5 border">Causa</th>
-                                        <th class="p-2.5 border">Manejo y Dosis según Guía HPTU</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200">
-                                    <tr class="bg-red-50 font-semibold text-red-950">
-                                        <td class="p-2.5 border font-bold">Hipercalemia (K alto) ⚠️</td>
-                                        <td class="p-2.5 border">
-                                            • <strong>Gluconato de Calcio:</strong> 50 mg/kg IV o IO (estabilizador de membrana).<br/>
-                                            • <strong>Bicarbonato de Sodio:</strong> 1-2 mEq/kg IV o IO.<br/>
-                                            <em>(Indicación excepcional autorizada en paro secundario a falla renal / hipercalemia).</em>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="p-2.5 border font-bold">Hipovolemia</td>
-                                        <td class="p-2.5 border">10 a 20 mL/kg de SS 0.9% o Lactato de Ringer.</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="p-2.5 border font-bold">Hipoxia</td>
-                                        <td class="p-2.5 border">Optimizar ventilación con BVM y considerar vía aérea avanzada.</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="p-2.5 border font-bold">Hidrogeniones (Acidosis)</td>
-                                        <td class="p-2.5 border">Prioridad: ventilación asistida efectiva. Bicarbonato 1-2 mEq/kg solo en acidosis metabólica severa documentada.</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="p-2.5 border font-bold">Hipoglicemia</td>
-                                        <td class="p-2.5 border">Glicemia &lt; 60 mg/dL &rarr; Dextrosa al 10% a 2-4 mL/kg en bolo.</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="p-2.5 border font-bold">Hipotermia</td>
-                                        <td class="p-2.5 border">Líquidos tibios y recalentamiento activo.</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="p-2.5 border font-bold">Neumotórax a Tensión</td>
-                                        <td class="p-2.5 border">Descompresión con Yelco N. 18 en 2do EIC línea medioclavicular.</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="p-2.5 border font-bold">Taponamiento Cardíaco</td>
-                                        <td class="p-2.5 border">POCUS (FAST) y pericardiocentesis evacuadora.</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="p-2.5 border font-bold">Tóxicos (Opioides)</td>
-                                        <td class="p-2.5 border">Naloxona 0.1 mg/kg IV-IO (máx 2 mg).</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="p-2.5 border font-bold">Trombosis (TEP / IAM)</td>
-                                        <td class="p-2.5 border">Evaluar factores de riesgo y trombolíticos/heparina según caso.</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                <!-- Tab 2: Causas Reversibles (Actualizado) -->
+                <div id="tab-content-causas" class="w-full hidden">
+                    <div class="bg-white p-1.5 md:p-2 rounded-lg shadow border border-gray-300 max-w-3xl w-full mx-auto">
+                        <img src="causas_reversibles.png?v=2" alt="Causas Reversibles de Paro Cardíaco" class="w-full h-auto rounded border border-gray-200 object-contain shadow-sm" />
                     </div>
                 </div>
             </div>
 
             <!-- Footer Modal -->
-            <div class="bg-gray-100 px-4 py-2 border-t flex justify-between items-center text-xs text-gray-600">
+            <div class="bg-gray-100 px-4 py-2 border-t flex justify-between items-center text-xs text-gray-600 shrink-0">
                 <span class="truncate pr-2">Directrices de Reanimación Pediátrica - Hospital Pablo Tobón Uribe</span>
-                <button onclick="closeModal('modal-ayudas')" class="px-4 py-1.5 bg-gray-700 hover:bg-gray-800 text-white rounded-lg font-bold text-xs flex items-center shadow cursor-pointer">
+                <button onclick="closeModal('modal-ayudas')" class="shrink-0 whitespace-nowrap px-4 py-1.5 bg-gray-700 hover:bg-gray-800 text-white rounded-lg font-bold text-xs flex items-center shadow cursor-pointer">
                     <i class="fas fa-times mr-1.5"></i> Cerrar Ayuda
                 </button>
             </div>
@@ -187,8 +152,8 @@
     </div>
 
     <!-- MODAL: ASIGNACIÓN DE ROLES (LISTA ÚNICA) -->
-    <div id="modal-roles" class="fixed inset-0 bg-black bg-opacity-60 hidden z-50 flex justify-center items-center">
-        <div class="bg-white p-6 rounded-lg shadow-xl w-[540px] max-w-full max-h-[90vh] overflow-y-auto">
+    <div id="modal-roles" class="fixed inset-0 bg-black bg-opacity-60 hidden z-50 flex justify-center items-center p-2">
+        <div class="bg-white p-5 md:p-6 rounded-lg shadow-xl w-[540px] max-w-full max-h-[90vh] overflow-y-auto mx-2">
             <h3 class="font-bold text-lg mb-2 text-blue-800"><i class="fas fa-users-cog mr-2"></i>Asignación de Roles del Equipo</h3>
             <p class="text-xs text-gray-600 mb-4">Selecciona los roles que asignarás a los miembros del equipo que acaban de llegar con el carro de paros:</p>
             
@@ -275,7 +240,7 @@
 
     <!-- MODAL: SELECCIÓN DE VOLUMEN DE ADRENALINA -->
     <div id="modal-adrenalina" class="fixed bottom-[85px] md:bottom-6 left-2 right-2 md:left-auto md:right-12 hidden z-50 md:w-[420px] max-w-[calc(100vw-16px)]">
-        <div class="bg-white border-2 border-purple-500 p-5 rounded-xl shadow-2xl">
+        <div class="bg-white border-2 border-purple-500 p-4 md:p-5 rounded-xl shadow-2xl max-h-[70vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-2">
                 <h3 class="font-bold text-base text-purple-900 flex items-center">
                     <i class="fas fa-syringe mr-2 text-purple-600"></i>Dilución Adrenalina
@@ -313,7 +278,7 @@
 
     <!-- MODAL: IDENTIFICACIÓN DEL RITMO (DISEÑO FLOTANTE) -->
     <div id="modal-ritmo" class="fixed bottom-[85px] md:bottom-6 left-2 right-2 md:left-auto md:right-12 hidden z-50 md:w-96 max-w-[calc(100vw-16px)]">
-        <div class="bg-white border-2 border-yellow-500 p-5 rounded-xl shadow-2xl">
+        <div class="bg-white border-2 border-yellow-500 p-4 md:p-5 rounded-xl shadow-2xl max-h-[70vh] overflow-y-auto">
             <div class="flex justify-between items-center mb-2">
                 <h3 class="font-bold text-base text-yellow-800 flex items-center">
                     <i class="fas fa-heartbeat mr-2 text-yellow-600 animate-pulse"></i>Identificación del Ritmo
@@ -353,8 +318,8 @@
     </div>
 
     <!-- MODAL: PARÁMETROS DE RCP -->
-    <div id="modal-rcp" class="fixed inset-0 bg-black bg-opacity-60 hidden z-50 flex justify-center items-center">
-        <div class="bg-white p-6 rounded-lg shadow-xl w-96 max-w-full">
+    <div id="modal-rcp" class="fixed inset-0 bg-black bg-opacity-60 hidden z-50 flex justify-center items-center p-2">
+        <div class="bg-white p-5 md:p-6 rounded-lg shadow-xl w-96 max-w-full max-h-[90vh] overflow-y-auto mx-2">
             <h3 class="font-bold text-lg mb-4 text-red-700"><i class="fas fa-heartbeat mr-2"></i>Parámetros de Compresiones</h3>
             <div class="mb-3">
                 <label class="block text-sm font-bold text-gray-700 mb-1">Frecuencia de compresiones:</label>
@@ -381,8 +346,8 @@
     </div>
 
     <!-- MODAL: VÍA AÉREA -->
-    <div id="modal-via-aerea" class="fixed inset-0 bg-black bg-opacity-60 hidden z-50 flex justify-center items-center">
-        <div class="bg-white p-6 rounded-lg shadow-xl w-96 max-w-full">
+    <div id="modal-via-aerea" class="fixed inset-0 bg-black bg-opacity-60 hidden z-50 flex justify-center items-center p-2">
+        <div class="bg-white p-5 md:p-6 rounded-lg shadow-xl w-96 max-w-full max-h-[90vh] overflow-y-auto mx-2">
             <h3 class="font-bold text-lg mb-4 text-blue-700"><i class="fas fa-lungs mr-2"></i>Parámetros de Intubación</h3>
             <div class="mb-3">
                 <label class="block text-sm font-bold text-gray-700 mb-1">Número de Tubo Orotraqueal:</label>
@@ -410,8 +375,8 @@
     </div>
 
     <!-- MODAL: CUIDADOS POSPARO -->
-    <div id="modal-posparo" class="fixed inset-0 bg-black bg-opacity-70 hidden z-50 flex justify-center items-center">
-        <div class="bg-white p-6 rounded-lg shadow-xl w-[500px] max-w-full">
+    <div id="modal-posparo" class="fixed inset-0 bg-black bg-opacity-70 hidden z-50 flex justify-center items-center p-2">
+        <div class="bg-white p-5 md:p-6 rounded-lg shadow-xl w-[500px] max-w-full max-h-[90vh] overflow-y-auto mx-2">
             <h3 class="font-bold text-lg mb-2 text-green-800"><i class="fas fa-clipboard-check mr-2"></i>Lista de Chequeo: Cuidados Posparo</h3>
             <p class="text-xs text-gray-600 mb-4">Seleccione las indicaciones inmediatas para el manejo post reanimación (RCE):</p>
             
@@ -468,7 +433,7 @@
 
     <!-- MODAL: DESFIBRILADOR MANUAL (CIRCULAR DIAL) -->
     <div id="modal-desfibrilador" class="fixed inset-0 bg-black bg-opacity-75 hidden z-50 flex justify-center items-center p-2">
-        <div class="bg-gray-900 border-4 border-gray-700 p-5 rounded-2xl shadow-2xl w-full max-w-sm text-white flex flex-col items-center">
+        <div class="bg-gray-900 border-4 border-gray-700 p-4 md:p-5 rounded-2xl shadow-2xl w-full max-w-sm text-white flex flex-col items-center max-h-[92vh] overflow-y-auto">
             
             <!-- Header Monitor -->
             <div class="w-full flex justify-between items-center border-b border-gray-700 pb-2 mb-3">
@@ -684,12 +649,12 @@
     </div>
 
     <!-- MODAL: REGISTRO PARTICIPANTE -->
-    <div id="modal-registro" class="fixed inset-0 bg-black bg-opacity-80 z-50 flex justify-center items-center">
-        <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md mx-4">
-            <div class="text-center mb-6">
-                <i class="fas fa-user-md text-5xl text-blue-600 mb-4"></i>
-                <h2 class="text-2xl font-bold text-gray-800">Simulador Avanzado HPTU</h2>
-                <p class="text-sm text-gray-500 mt-2">Por favor ingresa tus datos para llevar el registro de tu desempeño y enviarte el debriefing con IA.</p>
+    <div id="modal-registro" class="fixed inset-0 bg-black bg-opacity-80 z-50 flex justify-center items-center p-3 overflow-y-auto">
+        <div class="bg-white p-5 md:p-8 rounded-xl shadow-2xl w-full max-w-md mx-auto max-h-[92vh] overflow-y-auto">
+            <div class="text-center mb-4 md:mb-6">
+                <i class="fas fa-user-md text-4xl md:text-5xl text-blue-600 mb-3 md:mb-4"></i>
+                <h2 class="text-xl md:text-2xl font-bold text-gray-800">Simulador Avanzado HPTU</h2>
+                <p class="text-xs md:text-sm text-gray-500 mt-2">Por favor ingresa tus datos para llevar el registro de tu desempeño y enviarte el debriefing con IA.</p>
             </div>
             
             <div class="space-y-4">
@@ -703,32 +668,33 @@
                 </div>
             </div>
 
-            <button onclick="iniciarSimulador()" class="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-lg transition-colors cursor-pointer">
+            <button onclick="iniciarSimulador()" class="w-full mt-6 md:mt-8 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-lg transition-colors cursor-pointer">
                 <i class="fas fa-arrow-right mr-2"></i> Ingresar al Simulador
             </button>
         </div>
     </div>
 
     <!-- MAIN APP CONTAINER -->
-    <div class="w-full md:max-w-6xl mx-auto bg-white shadow-2xl md:rounded-xl overflow-hidden flex flex-col h-screen md:h-[92vh]">
+    <div class="w-full md:max-w-6xl mx-auto bg-white shadow-2xl md:rounded-xl overflow-hidden flex flex-col app-shell">
         
-        <!-- Header con Botón de Ayuda Cognitiva Altamente Visible -->
-        <div class="bg-blue-900 text-white p-3 flex justify-between items-center shadow-md z-30 relative">
-            <div class="flex items-center space-x-3">
-                <h1 class="text-xl font-bold"><i class="fas fa-hospital-user mr-2"></i> Sala de Reanimación - HPTU</h1>
-                <span class="text-xs bg-blue-800 px-3 py-1 rounded hidden md:inline">Augusto | 7 años | 20 kg</span>
+        <!-- Header Responsivo (2 filas limpias en móvil, 1 fila en escritorio) -->
+        <div class="bg-blue-900 text-white px-3 py-2 md:p-3 flex flex-col md:flex-row md:justify-between md:items-center gap-2 shadow-md z-30 relative flex-shrink-0">
+            <div class="flex items-center justify-between md:justify-start md:space-x-3 min-w-0">
+                <h1 class="text-sm sm:text-base md:text-xl font-bold truncate"><i class="fas fa-hospital-user mr-1.5 md:mr-2"></i>Sala de Reanimaci&oacute;n - HPTU</h1>
+                <span class="text-[11px] md:text-xs bg-blue-800 px-2 md:px-3 py-0.5 md:py-1 rounded font-semibold shrink-0 ml-2">Augusto | 7 a&ntilde;os | 20 kg</span>
             </div>
             
-            <div class="flex items-center space-x-3">
-                <button id="btn-ayudas" onclick="consultarAyudaCognitiva()" class="bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-blue-950 font-extrabold px-3.5 py-1.5 rounded-lg shadow-lg text-xs flex items-center btn-ayuda-glow border-2 border-yellow-200 transition-all cursor-pointer">
-                    <i class="fas fa-book-medical mr-2 text-base text-blue-950"></i> 
-                    <span class="tracking-wide uppercase">Ayudas Cognitivas (HPTU)</span>
+            <div class="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto">
+                <button id="btn-ayudas" onclick="consultarAyudaCognitiva()" class="flex-1 md:flex-initial justify-center bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-blue-950 font-extrabold px-2.5 md:px-3.5 py-1.5 rounded-lg shadow-lg text-[11px] sm:text-xs flex items-center btn-ayuda-glow border-2 border-yellow-200 transition-all cursor-pointer whitespace-nowrap">
+                    <i class="fas fa-book-medical mr-1.5 text-sm md:text-base text-blue-950 shrink-0"></i> 
+                    <span class="tracking-wide uppercase">Ayudas Cognitivas</span>
+                    <span class="hidden sm:inline tracking-wide uppercase ml-1">(HPTU)</span>
                 </button>
 
-                <div class="bg-black bg-opacity-40 px-3 py-1 rounded border border-blue-400 flex items-center">
-                    <i id="timer-icon" class="fas fa-stopwatch text-yellow-400 mr-2 text-base"></i>
-                    <span class="text-xs text-gray-300 mr-2">TIEMPO:</span>
-                    <span class="font-mono text-base font-bold text-yellow-300" id="timer-display">00:00</span>
+                <div class="shrink-0 bg-black bg-opacity-40 px-2.5 md:px-3 py-1.5 md:py-1 rounded-lg border border-blue-400 flex items-center whitespace-nowrap">
+                    <i id="timer-icon" class="fas fa-stopwatch text-yellow-400 mr-1.5 text-sm md:text-base"></i>
+                    <span class="text-[11px] md:text-xs text-gray-300 mr-1.5">TIEMPO:</span>
+                    <span class="font-mono text-sm md:text-base font-bold text-yellow-300" id="timer-display">00:00</span>
                 </div>
             </div>
         </div>
@@ -737,7 +703,7 @@
         <div class="bg-black text-green-400 p-2 md:p-4 flex flex-col md:flex-row justify-between items-center monitor-text border-b-4 md:border-b-8 border-gray-800 relative z-30 shadow-inner flex-shrink-0">
             <div class="absolute top-1 right-2 md:top-2 md:right-3 text-[10px] md:text-xs text-gray-500 hidden md:block">CORPULS 3 / ZOLL X SERIES</div>
             
-            <div class="w-full md:w-1/2 grid grid-cols-4 md:grid-cols-2 gap-1 md:gap-3 pr-0 md:pr-4 mt-2 md:mt-0">
+            <div class="w-full md:w-1/2 grid grid-cols-4 md:grid-cols-2 gap-1 md:gap-3 pr-0 md:pr-4 mt-0">
                 <div class="bg-gray-900 p-1 md:p-2 rounded border border-gray-700 flex flex-col justify-center">
                     <div class="text-[9px] md:text-xs text-gray-400 leading-tight">MONITOR</div>
                     <div class="text-xs md:text-base font-bold truncate text-green-400" id="val-rhythm">Apagado</div>
@@ -764,29 +730,29 @@
         </div>
 
         <!-- Main Content Area -->
-        <div class="flex flex-col md:flex-row flex-1 overflow-hidden relative z-10 pb-[70px] md:pb-0 min-h-0">
+        <div class="flex flex-col md:flex-row flex-1 overflow-hidden relative z-10 min-h-0">
             
             <!-- Logs / Chat Area con Time Stamps en Cada Mensaje -->
-            <div class="w-full md:w-3/5 p-4 bg-gray-50 border-r log-container flex flex-col h-full overflow-y-auto" id="chat-box">
-                <div id="start-sim-card" class="m-auto my-8 max-w-md w-full bg-white border-2 border-blue-600 rounded-2xl shadow-xl p-6 text-center">
-                    <div class="w-16 h-16 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
-                        <i class="fas fa-play text-2xl ml-1"></i>
+            <div class="w-full md:w-3/5 p-3 md:p-4 bg-gray-50 border-r log-container flex flex-col flex-1 md:h-full min-h-0 overflow-y-auto" id="chat-box">
+                <div id="start-sim-card" class="mx-auto my-2 md:my-auto max-w-md w-full bg-white border-2 border-blue-600 rounded-2xl shadow-xl p-4 md:p-6 text-center">
+                    <div class="w-11 h-11 md:w-16 md:h-16 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center mx-auto mb-2 md:mb-4 shadow-inner">
+                        <i class="fas fa-play text-lg md:text-2xl ml-0.5"></i>
                     </div>
-                    <h2 class="text-xl font-extrabold text-blue-950 mb-2">Escenario de Simulaci&oacute;n Listo</h2>
-                    <p class="text-sm text-gray-600 mb-5 leading-relaxed">
+                    <h2 class="text-base md:text-xl font-extrabold text-blue-950 mb-1.5 md:mb-2">Escenario de Simulaci&oacute;n Listo</h2>
+                    <p class="text-xs md:text-sm text-gray-600 mb-3.5 md:mb-5 leading-relaxed">
                         El cron&oacute;metro est&aacute; detenido en <strong>00:00</strong>. T&oacute;mate un momento para conocer los botones de las &oacute;rdenes y la interfaz. Cuando est&eacute;s listo(a), presiona el bot&oacute;n para comenzar el escenario e iniciar el tiempo.
                     </p>
-                    <div id="start-sim-warning" class="hidden mb-4 p-2.5 bg-amber-50 border border-amber-400 text-amber-900 text-xs font-bold rounded-lg">
+                    <div id="start-sim-warning" class="hidden mb-3 p-2 bg-amber-50 border border-amber-400 text-amber-900 text-xs font-bold rounded-lg">
                         <i class="fas fa-exclamation-circle mr-1"></i> Primero presiona &laquo;Iniciar la simulaci&oacute;n&raquo; para habilitar las &oacute;rdenes.
                     </div>
-                    <button id="btn-iniciar-simulacion" onclick="comenzarEscenario()" class="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 active:scale-95 text-white font-extrabold text-base md:text-lg py-4 px-6 rounded-xl shadow-lg transition-all cursor-pointer flex items-center justify-center">
-                        <i class="fas fa-play-circle mr-2 text-xl"></i> Iniciar la simulaci&oacute;n
+                    <button id="btn-iniciar-simulacion" onclick="comenzarEscenario()" class="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 active:scale-95 text-white font-extrabold text-sm md:text-lg py-3 md:py-4 px-5 md:px-6 rounded-xl shadow-lg transition-all cursor-pointer flex items-center justify-center">
+                        <i class="fas fa-play-circle mr-2 text-lg md:text-xl"></i> Iniciar la simulaci&oacute;n
                     </button>
                 </div>
             </div>
 
             <!-- Controls Panel -->
-            <div class="w-full md:w-2/5 p-4 bg-gray-100 overflow-y-auto border-l border-gray-300 shadow-inner space-y-3 hidden md:block h-full" id="controls-panel">
+            <div class="w-full md:w-2/5 p-3 md:p-4 bg-gray-100 overflow-y-auto border-l border-gray-300 shadow-inner space-y-3 hidden md:block flex-1 md:h-full min-h-0" id="controls-panel">
                 <div id="start-sim-controls-banner" class="bg-emerald-50 border-2 border-emerald-500 rounded-xl p-3 mb-3 shadow-sm text-center">
                     <p class="text-xs text-emerald-900 font-bold mb-2">
                         <i class="fas fa-clock mr-1"></i> Tiempo detenido (00:00). Pulsa abajo para comenzar el escenario:
@@ -923,7 +889,7 @@
 
             
             <!-- Contenedor Final de Debriefing -->
-            <div class="w-full md:w-2/5 p-4 bg-gray-100 overflow-y-auto border-l border-gray-300 shadow-inner hidden h-full" id="debriefing-panel">
+            <div class="w-full md:w-2/5 p-3 md:p-4 bg-gray-100 overflow-y-auto border-l border-gray-300 shadow-inner hidden flex-1 md:h-full min-h-0" id="debriefing-panel">
                 <h2 class="font-bold text-2xl text-gray-800 mb-4 border-b-2 border-green-500 pb-2"><i class="fas fa-clipboard-check mr-2"></i> Resumen de Simulación</h2>
                 
                 <button onclick="mostrarNotaRCP()" class="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 border-2 border-blue-400 text-white py-3.5 rounded-xl font-extrabold shadow-xl text-base flex items-center justify-center mb-4 transition-all transform hover:scale-[1.02]">
@@ -946,7 +912,7 @@
         </div>
         
         <!-- Mobile Bottom Tab Bar -->
-        <div class="md:hidden flex bg-blue-900 text-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-40 fixed bottom-0 left-0 right-0 h-[70px] border-t-2 border-yellow-400 justify-around items-center" style="padding-bottom: env(safe-area-inset-bottom);">
+        <div class="md:hidden flex flex-shrink-0 bg-blue-900 text-white shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-40 border-t-2 border-yellow-400 justify-around items-center" style="min-height: 60px; padding-top: 6px; padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));">
             <button onclick="switchMobileTab('chat')" id="tab-btn-chat" class="flex-1 h-full text-center flex flex-col items-center justify-center text-sm opacity-100 text-yellow-400 font-bold transition-opacity relative">
                 <i class="fas fa-comments text-xl mb-1"></i>
                 <span>Bit&aacute;cora</span>
@@ -1077,17 +1043,23 @@
             const conCau = document.getElementById('tab-content-causas');
 
             if (tab === 'algoritmo') {
-                btnAlg.className = "py-2.5 px-5 bg-white border-t-2 border-blue-600 text-blue-900 rounded-t shadow-sm font-bold";
-                btnCau.className = "py-2.5 px-5 bg-gray-200 text-gray-600 hover:bg-gray-50 rounded-t font-bold";
+                btnAlg.className = "flex-1 md:flex-initial py-2.5 px-2 md:px-5 bg-white border-t-2 border-blue-600 text-blue-900 rounded-t shadow-sm font-bold text-center cursor-pointer";
+                btnCau.className = "flex-1 md:flex-initial py-2.5 px-2 md:px-5 bg-gray-200 text-gray-600 hover:bg-gray-50 rounded-t font-bold text-center cursor-pointer";
                 conAlg.classList.remove('hidden');
                 conCau.classList.add('hidden');
             } else {
-                btnCau.className = "py-2.5 px-5 bg-white border-t-2 border-blue-600 text-blue-900 rounded-t shadow-sm font-bold";
-                btnAlg.className = "py-2.5 px-5 bg-gray-200 text-gray-600 hover:bg-gray-50 rounded-t font-bold";
+                btnCau.className = "flex-1 md:flex-initial py-2.5 px-2 md:px-5 bg-white border-t-2 border-blue-600 text-blue-900 rounded-t shadow-sm font-bold text-center cursor-pointer";
+                btnAlg.className = "flex-1 md:flex-initial py-2.5 px-2 md:px-5 bg-gray-200 text-gray-600 hover:bg-gray-50 rounded-t font-bold text-center cursor-pointer";
                 conCau.classList.remove('hidden');
                 conAlg.classList.add('hidden');
             }
         }
+
+        function syncAppHeight() {
+            document.documentElement.style.setProperty('--app-height', window.innerHeight + 'px');
+        }
+        syncAppHeight();
+        window.addEventListener('orientationchange', () => setTimeout(syncAppHeight, 150));
 
         const canvas = document.getElementById('ecg-canvas');
         const ctx = canvas.getContext('2d');
@@ -1095,6 +1067,7 @@
         const scanSpeed = 2.5;
 
         function resizeCanvas() {
+            if (!canvas || !canvas.parentElement) return;
             canvas.width = canvas.parentElement.clientWidth;
             canvas.height = canvas.parentElement.clientHeight;
             ctx.fillStyle = '#050b05';
@@ -1102,6 +1075,9 @@
         }
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
+        if ('ResizeObserver' in window && canvas && canvas.parentElement) {
+            new ResizeObserver(() => resizeCanvas()).observe(canvas.parentElement);
+        }
 
         function getEcgY(x, type, height) {
             const mid = height / 2;
@@ -1284,12 +1260,12 @@
                 debriefingPanel.classList.remove('block');
                 debriefingPanel.classList.add('hidden');
                 
-                btnChat.classList.replace('opacity-60', 'opacity-100');
-                btnChat.classList.add('text-yellow-400', 'font-bold');
+                btnChat.classList.remove('opacity-60');
+                btnChat.classList.add('opacity-100', 'text-yellow-400', 'font-bold');
                 btnChat.classList.remove('text-white', 'font-medium');
                 
-                btnControls.classList.replace('opacity-100', 'opacity-60');
-                btnControls.classList.add('text-white', 'font-medium');
+                btnControls.classList.remove('opacity-100');
+                btnControls.classList.add('opacity-60', 'text-white', 'font-medium');
                 btnControls.classList.remove('text-yellow-400', 'font-bold');
                 
                 unreadMessages = 0;
@@ -1313,17 +1289,18 @@
                     debriefingPanel.classList.remove('block');
                 }
                 
-                btnControls.classList.replace('opacity-60', 'opacity-100');
-                btnControls.classList.add('text-yellow-400', 'font-bold');
+                btnControls.classList.remove('opacity-60');
+                btnControls.classList.add('opacity-100', 'text-yellow-400', 'font-bold');
                 btnControls.classList.remove('text-white', 'font-medium');
                 
-                btnChat.classList.replace('opacity-100', 'opacity-60');
-                btnChat.classList.add('text-white', 'font-medium');
+                btnChat.classList.remove('opacity-100');
+                btnChat.classList.add('opacity-60', 'text-white', 'font-medium');
                 btnChat.classList.remove('text-yellow-400', 'font-bold');
             }
         }
 
         window.addEventListener('resize', () => {
+            syncAppHeight();
             const chatBox = document.getElementById('chat-box');
             const controlsPanel = document.getElementById('controls-panel');
             const debriefingPanel = document.getElementById('debriefing-panel');
