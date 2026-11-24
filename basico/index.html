@@ -323,7 +323,7 @@
                 </button>
 
                 <div class="bg-black bg-opacity-40 px-3 py-1 rounded border border-blue-400 flex items-center">
-                    <i class="fas fa-stopwatch text-yellow-400 mr-2 text-base animate-pulse"></i>
+                    <i id="timer-icon" class="fas fa-stopwatch text-yellow-400 mr-2 text-base"></i>
                     <span class="text-xs text-gray-300 mr-2">TIEMPO:</span>
                     <span class="font-mono text-base font-bold text-yellow-300" id="timer-display">00:00</span>
                 </div>
@@ -356,13 +356,37 @@
         </div>
 
         <!-- Main Content Area -->
-        <div class="flex flex-col md:flex-row flex-1 overflow-hidden relative z-10 pb-[60px] md:pb-0">
+        <div class="flex flex-col md:flex-row flex-1 overflow-hidden relative z-10 pb-[70px] md:pb-0 min-h-0">
             
             <!-- Logs / Chat Area con Time Stamps en Cada Mensaje -->
-            <div class="w-full md:w-3/5 p-4 bg-gray-50 border-r log-container flex flex-col h-full overflow-y-auto" id="chat-box"></div>
+            <div class="w-full md:w-3/5 p-4 bg-gray-50 border-r log-container flex flex-col h-full overflow-y-auto" id="chat-box">
+                <div id="start-sim-card" class="m-auto my-8 max-w-md w-full bg-white border-2 border-blue-600 rounded-2xl shadow-xl p-6 text-center">
+                    <div class="w-16 h-16 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+                        <i class="fas fa-play text-2xl ml-1"></i>
+                    </div>
+                    <h2 class="text-xl font-extrabold text-blue-950 mb-2">Escenario de Simulaci&oacute;n Listo</h2>
+                    <p class="text-sm text-gray-600 mb-5 leading-relaxed">
+                        El cron&oacute;metro est&aacute; detenido en <strong>00:00</strong>. Puedes observar primero la interfaz y los botones de &oacute;rdenes. Cuando est&eacute;s listo(a), presiona el bot&oacute;n para comenzar el escenario e iniciar el tiempo.
+                    </p>
+                    <div id="start-sim-warning" class="hidden mb-4 p-2.5 bg-amber-50 border border-amber-400 text-amber-900 text-xs font-bold rounded-lg">
+                        <i class="fas fa-exclamation-circle mr-1"></i> Primero presiona &laquo;Iniciar la simulaci&oacute;n&raquo; para habilitar las &oacute;rdenes.
+                    </div>
+                    <button id="btn-iniciar-simulacion" onclick="comenzarEscenario()" class="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 active:scale-95 text-white font-extrabold text-base md:text-lg py-4 px-6 rounded-xl shadow-lg transition-all cursor-pointer flex items-center justify-center">
+                        <i class="fas fa-play-circle mr-2 text-xl"></i> Iniciar la simulaci&oacute;n
+                    </button>
+                </div>
+            </div>
 
             <!-- Controls Panel -->
             <div class="w-full md:w-2/5 p-4 bg-gray-100 overflow-y-auto border-l border-gray-300 shadow-inner space-y-3 hidden md:block h-full" id="controls-panel">
+                <div id="start-sim-controls-banner" class="bg-emerald-50 border-2 border-emerald-500 rounded-xl p-3 mb-3 shadow-sm text-center">
+                    <p class="text-xs text-emerald-900 font-bold mb-2">
+                        <i class="fas fa-clock mr-1"></i> Tiempo detenido (00:00). Pulsa abajo para comenzar el escenario:
+                    </p>
+                    <button onclick="comenzarEscenario()" class="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 active:scale-95 text-white font-extrabold text-sm py-2.5 px-4 rounded-lg shadow transition-all cursor-pointer flex items-center justify-center">
+                        <i class="fas fa-play-circle mr-2"></i> Iniciar la simulaci&oacute;n
+                    </button>
+                </div>
                 <div class="md:hidden bg-blue-50 text-blue-800 text-xs p-2 rounded border border-blue-200 mb-3 shadow-sm font-semibold flex items-center justify-between">
                     <span><i class="fas fa-info-circle mr-1"></i>Despu&eacute;s de cada orden, pulsa "Bit&aacute;cora" abajo para ver el efecto.</span>
                 </div>
@@ -602,6 +626,7 @@
             logDeAcciones: [],
             timerSegundos: 0,
             timerActivo: false,
+            simulacionIniciada: false,
             deaEncendido: false,
             
             // OVACE counters
@@ -650,27 +675,52 @@
         function printSystem(text) { printMsg('🏥', 'Contexto clínico / Desarrollo del caso', text, 'msg-sistema'); }
 
         
-        function iniciarSimulador() {
-            document.getElementById('btn-ayudas').classList.add('animate-pulse');
-            setTimeout(() => document.getElementById('btn-ayudas').classList.remove('animate-pulse'), 5000);
-            
-            state.timerActivo = true;
+        function mostrarAvisoIniciar() {
+            const warn = document.getElementById('start-sim-warning');
+            if (warn) warn.classList.remove('hidden');
+            const btn = document.getElementById('btn-iniciar-simulacion');
+            if (btn) {
+                btn.classList.add('ring-4', 'ring-amber-400', 'animate-bounce');
+                setTimeout(() => btn.classList.remove('animate-bounce', 'ring-4', 'ring-amber-400'), 1200);
+            }
+            const banner = document.getElementById('start-sim-controls-banner');
+            if (banner) {
+                banner.classList.add('ring-4', 'ring-amber-400');
+                banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                setTimeout(() => banner.classList.remove('ring-4', 'ring-amber-400'), 1500);
+            }
+        }
 
-            // Mensaje inicial del caso
-            printSystem(`👩‍⚕️ **Contexto Clínico:** Estás en el octavo piso del hospital. Acompañado de dos enfermeras (Enfermera 1 y Enfermera 2). De repente, de una habitación, una madre grita desesperada. Te acercas y ves a un lactante de 8 meses en la cama. La madre te dice que le estaba dando huevo al desayuno. Notas que el bebé se está moviendo agitado, no emite ningún sonido, no tose, tiene los ojos muy abiertos con angustia y sus labios se están poniendo rápidamente cianóticos. ¿Cuál es tu primera acción?`);
+        function comenzarEscenario() {
+            if (state.simulacionIniciada) return;
+            state.simulacionIniciada = true;
+
+            const card = document.getElementById('start-sim-card');
+            if (card) card.remove();
+            const banner = document.getElementById('start-sim-controls-banner');
+            if (banner) banner.remove();
+
+            if (window.innerWidth < 768) {
+                switchMobileTab('chat');
+            }
+
+            const btnAyudas = document.getElementById('btn-ayudas');
+            if (btnAyudas) {
+                btnAyudas.classList.add('animate-pulse');
+                setTimeout(() => btnAyudas.classList.remove('animate-pulse'), 5000);
+            }
+
+            const timerIcon = document.getElementById('timer-icon');
+            if (timerIcon) timerIcon.classList.add('animate-pulse');
+
+            // Mensaje inicial del caso en 00:00
+            printSystem(`👩‍⚕️ <strong>Contexto Clínico:</strong> Estás en el octavo piso del hospital. Acompañado de dos enfermeras (Enfermera 1 y Enfermera 2). De repente, de una habitación, una madre grita desesperada. Te acercas y ves a un lactante de 8 meses en la cama. La madre te dice que le estaba dando huevo al desayuno. Notas que el bebé se está moviendo agitado, no emite ningún sonido, no tose, tiene los ojos muy abiertos con angustia y sus labios se están poniendo rápidamente cianóticos. ¿Cuál es tu primera acción?`);
+
+            state.timerActivo = true;
         }
-        
-        var simuladorIniciado = false;
-        function autoIniciar() {
-            if (simuladorIniciado) return;
-            simuladorIniciado = true;
-            iniciarSimulador();
-        }
-        if (document.readyState === 'complete' || document.readyState === 'interactive') {
-            autoIniciar();
-        } else {
-            document.addEventListener('DOMContentLoaded', autoIniciar);
-            window.addEventListener('load', autoIniciar);
+
+        function iniciarSimulador() {
+            comenzarEscenario();
         }
 
         
@@ -784,91 +834,99 @@
         }
 
         const canvas = document.getElementById('ecg-canvas');
-        const ctx = canvas.getContext('2d');
-        let scanX = 0;
-        const scanSpeed = 2.5;
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            let scanX = 0;
+            const scanSpeed = 2.5;
 
-        function resizeCanvas() {
-            canvas.width = canvas.parentElement.clientWidth;
-            canvas.height = canvas.parentElement.clientHeight;
-            ctx.fillStyle = '#050b05';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            function resizeCanvas() {
+                canvas.width = canvas.parentElement.clientWidth;
+                canvas.height = canvas.parentElement.clientHeight;
+                ctx.fillStyle = '#050b05';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+            }
+            window.addEventListener('resize', resizeCanvas);
+            resizeCanvas();
+
+            function getEcgY(x, type, height) {
+                const mid = height / 2;
+                const s = height / 100; // factor de escala para que se adapte al contenedor (100px es la base ideal)
+                if (type === 'OFF') return mid + (Math.random() - 0.5) * 1.5 * s;
+                if (type === 'CPR_ARTIFACT') {
+                    const t = x * 0.15;
+                    return mid + (Math.sin(t) * 35 + (Math.random() - 0.5) * 20) * s; // Ruido de compresiones
+                }
+                if (type === 'VF') {
+                    const t = x * 0.12;
+                    return mid + (Math.sin(t) * 22 + Math.sin(t * 2.3 + 1.2) * 14 + Math.sin(t * 4.7) * 8 + (Math.random() - 0.5) * 6) * s;
+                }
+                if (type === 'SINUS') {
+                    const cycle = (x % 90);
+                    if (cycle > 10 && cycle < 20) return mid - (Math.sin((cycle - 10) * Math.PI / 10) * 6) * s;
+                    if (cycle >= 28 && cycle < 32) return mid + 4 * s;
+                    if (cycle >= 32 && cycle < 38) return mid - 38 * s;
+                    if (cycle >= 38 && cycle < 42) return mid + 10 * s;
+                    if (cycle > 50 && cycle < 70) return mid - (Math.sin((cycle - 50) * Math.PI / 20) * 10) * s;
+                    return mid + (Math.random() - 0.5) * 1.2 * s;
+                }
+                return mid;
+            }
+
+            let prevY = canvas.height / 2;
+
+            function drawEcg() {
+                const h = canvas.height;
+                const w = canvas.width;
+
+                ctx.fillStyle = 'rgba(5, 11, 5, 0.15)';
+                ctx.fillRect(scanX, 0, 12, h);
+
+                const nextX = scanX + scanSpeed;
+                
+                let currentRhythm = state.ritmoECG;
+                if (state.rcpEnCurso && currentRhythm !== 'OFF') {
+                    currentRhythm = 'CPR_ARTIFACT';
+                }
+                const curY = getEcgY(scanX, currentRhythm, h);
+
+                // Actualizar etiqueta del monitor para compresiones
+                const leadLabel = document.getElementById('lead-label');
+                if (leadLabel) {
+                    if (state.rcpEnCurso && state.ritmoECG !== 'OFF') {
+                        leadLabel.innerText = "⚠️ COMPRESIONES EN CURSO (ARTEFACTO)";
+                        leadLabel.classList.add('text-yellow-400', 'font-bold');
+                        leadLabel.classList.remove('text-green-600');
+                    } else {
+                        leadLabel.innerText = "DERIVACIÓN II";
+                        leadLabel.classList.remove('text-yellow-400', 'font-bold');
+                        leadLabel.classList.add('text-green-600');
+                    }
+                }
+
+                ctx.beginPath();
+                ctx.strokeStyle = '#22c55e';
+                ctx.lineWidth = 2.2;
+                ctx.shadowBlur = 6;
+                ctx.shadowColor = '#4ade80';
+                ctx.moveTo(scanX, prevY);
+                ctx.lineTo(nextX, curY);
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+
+                prevY = curY;
+                scanX = nextX;
+                if (scanX >= w) scanX = 0;
+
+                requestAnimationFrame(drawEcg);
+            }
+            drawEcg();
         }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
 
-        function getEcgY(x, type, height) {
-            const mid = height / 2;
-            const s = height / 100; // factor de escala para que se adapte al contenedor (100px es la base ideal)
-            if (type === 'OFF') return mid + (Math.random() - 0.5) * 1.5 * s;
-            if (type === 'CPR_ARTIFACT') {
-                const t = x * 0.15;
-                return mid + (Math.sin(t) * 35 + (Math.random() - 0.5) * 20) * s; // Ruido de compresiones
+        function openModal(id) {
+            if (id !== 'modal-ayudas' && !state.simulacionIniciada) {
+                mostrarAvisoIniciar();
+                return;
             }
-            if (type === 'VF') {
-                const t = x * 0.12;
-                return mid + (Math.sin(t) * 22 + Math.sin(t * 2.3 + 1.2) * 14 + Math.sin(t * 4.7) * 8 + (Math.random() - 0.5) * 6) * s;
-            }
-            if (type === 'SINUS') {
-                const cycle = (x % 90);
-                if (cycle > 10 && cycle < 20) return mid - (Math.sin((cycle - 10) * Math.PI / 10) * 6) * s;
-                if (cycle >= 28 && cycle < 32) return mid + 4 * s;
-                if (cycle >= 32 && cycle < 38) return mid - 38 * s;
-                if (cycle >= 38 && cycle < 42) return mid + 10 * s;
-                if (cycle > 50 && cycle < 70) return mid - (Math.sin((cycle - 50) * Math.PI / 20) * 10) * s;
-                return mid + (Math.random() - 0.5) * 1.2 * s;
-            }
-            return mid;
-        }
-
-        let prevY = canvas.height / 2;
-
-        function drawEcg() {
-            const h = canvas.height;
-            const w = canvas.width;
-
-            ctx.fillStyle = 'rgba(5, 11, 5, 0.15)';
-            ctx.fillRect(scanX, 0, 12, h);
-
-            const nextX = scanX + scanSpeed;
-            
-            let currentRhythm = state.ritmoECG;
-            if (state.rcpEnCurso && currentRhythm !== 'OFF') {
-                currentRhythm = 'CPR_ARTIFACT';
-            }
-            const curY = getEcgY(scanX, currentRhythm, h);
-
-            // Actualizar etiqueta del monitor para compresiones
-            const leadLabel = document.getElementById('lead-label');
-            if (state.rcpEnCurso && state.ritmoECG !== 'OFF') {
-                leadLabel.innerText = "⚠️ COMPRESIONES EN CURSO (ARTEFACTO)";
-                leadLabel.classList.add('text-yellow-400', 'font-bold');
-                leadLabel.classList.remove('text-green-600');
-            } else {
-                leadLabel.innerText = "DERIVACIÓN II";
-                leadLabel.classList.remove('text-yellow-400', 'font-bold');
-                leadLabel.classList.add('text-green-600');
-            }
-
-            ctx.beginPath();
-            ctx.strokeStyle = '#22c55e';
-            ctx.lineWidth = 2.2;
-            ctx.shadowBlur = 6;
-            ctx.shadowColor = '#4ade80';
-            ctx.moveTo(scanX, prevY);
-            ctx.lineTo(nextX, curY);
-            ctx.stroke();
-            ctx.shadowBlur = 0;
-
-            prevY = curY;
-            scanX = nextX;
-            if (scanX >= w) scanX = 0;
-
-            requestAnimationFrame(drawEcg);
-        }
-        drawEcg();
-
-                function openModal(id) {
             if (id === 'modal-roles' && !state.codigoAzulActivado) {
                 printRegistro("Doctor(a), el equipo de reanimación aún no ha llegado al cubículo. Primero debe activar el <strong>Código Azul (#90)</strong> para que acuda el personal con el carro de paro.");
                 return;
@@ -908,6 +966,8 @@
         function finalizarSimulacion() {
             simulacionTerminada = true;
             state.timerActivo = false;
+            const timerIcon = document.getElementById('timer-icon');
+            if (timerIcon) timerIcon.classList.remove('animate-pulse');
             
             // Pausar y ocultar controles, mostrar panel de debriefing
             const controlsPanel = document.getElementById('controls-panel');
@@ -1123,6 +1183,10 @@
         }
 
         function takeAction(actionId, payload = null) {
+            if (!state.simulacionIniciada) {
+                mostrarAvisoIniciar();
+                return;
+            }
             var accionEsCorrecta = true;
             state.logDeAcciones.push({ time: state.timerSegundos, action: actionId, payload });
 
@@ -1216,10 +1280,12 @@
                         printSystem(`El lactante tiene pulso fuerte.`);
                     } else if(state.fase_caso === 'ROSC') {
                         printSystem(`Tiene pulso de 120 lpm.`);
-                        document.getElementById('val-fc').innerText = "120";
+                        const fcEl = document.getElementById('val-hr') || document.getElementById('val-fc');
+                        if (fcEl) fcEl.innerText = "120";
                     } else {
                         printSystem(`No se palpa pulso. (Paro Cardiorrespiratorio).`);
-                        document.getElementById('val-fc').innerText = "0";
+                        const fcEl = document.getElementById('val-hr') || document.getElementById('val-fc');
+                        if (fcEl) fcEl.innerText = "0";
                     }
                     break;
                 case 'abrir_codigo_azul':

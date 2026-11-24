@@ -703,8 +703,8 @@
                 </div>
             </div>
 
-            <button onclick="iniciarSimulador()" class="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-lg transition-colors">
-                <i class="fas fa-play-circle mr-2"></i> Iniciar Simulación
+            <button onclick="iniciarSimulador()" class="w-full mt-8 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-lg transition-colors cursor-pointer">
+                <i class="fas fa-arrow-right mr-2"></i> Ingresar al Simulador
             </button>
         </div>
     </div>
@@ -726,7 +726,7 @@
                 </button>
 
                 <div class="bg-black bg-opacity-40 px-3 py-1 rounded border border-blue-400 flex items-center">
-                    <i class="fas fa-stopwatch text-yellow-400 mr-2 text-base animate-pulse"></i>
+                    <i id="timer-icon" class="fas fa-stopwatch text-yellow-400 mr-2 text-base"></i>
                     <span class="text-xs text-gray-300 mr-2">TIEMPO:</span>
                     <span class="font-mono text-base font-bold text-yellow-300" id="timer-display">00:00</span>
                 </div>
@@ -767,10 +767,34 @@
         <div class="flex flex-col md:flex-row flex-1 overflow-hidden relative z-10 pb-[70px] md:pb-0 min-h-0">
             
             <!-- Logs / Chat Area con Time Stamps en Cada Mensaje -->
-            <div class="w-full md:w-3/5 p-4 bg-gray-50 border-r log-container flex flex-col h-full overflow-y-auto" id="chat-box"></div>
+            <div class="w-full md:w-3/5 p-4 bg-gray-50 border-r log-container flex flex-col h-full overflow-y-auto" id="chat-box">
+                <div id="start-sim-card" class="m-auto my-8 max-w-md w-full bg-white border-2 border-blue-600 rounded-2xl shadow-xl p-6 text-center">
+                    <div class="w-16 h-16 bg-blue-100 text-blue-700 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner">
+                        <i class="fas fa-play text-2xl ml-1"></i>
+                    </div>
+                    <h2 class="text-xl font-extrabold text-blue-950 mb-2">Escenario de Simulaci&oacute;n Listo</h2>
+                    <p class="text-sm text-gray-600 mb-5 leading-relaxed">
+                        El cron&oacute;metro est&aacute; detenido en <strong>00:00</strong>. T&oacute;mate un momento para conocer los botones de las &oacute;rdenes y la interfaz. Cuando est&eacute;s listo(a), presiona el bot&oacute;n para comenzar el escenario e iniciar el tiempo.
+                    </p>
+                    <div id="start-sim-warning" class="hidden mb-4 p-2.5 bg-amber-50 border border-amber-400 text-amber-900 text-xs font-bold rounded-lg">
+                        <i class="fas fa-exclamation-circle mr-1"></i> Primero presiona &laquo;Iniciar la simulaci&oacute;n&raquo; para habilitar las &oacute;rdenes.
+                    </div>
+                    <button id="btn-iniciar-simulacion" onclick="comenzarEscenario()" class="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 active:scale-95 text-white font-extrabold text-base md:text-lg py-4 px-6 rounded-xl shadow-lg transition-all cursor-pointer flex items-center justify-center">
+                        <i class="fas fa-play-circle mr-2 text-xl"></i> Iniciar la simulaci&oacute;n
+                    </button>
+                </div>
+            </div>
 
             <!-- Controls Panel -->
             <div class="w-full md:w-2/5 p-4 bg-gray-100 overflow-y-auto border-l border-gray-300 shadow-inner space-y-3 hidden md:block h-full" id="controls-panel">
+                <div id="start-sim-controls-banner" class="bg-emerald-50 border-2 border-emerald-500 rounded-xl p-3 mb-3 shadow-sm text-center">
+                    <p class="text-xs text-emerald-900 font-bold mb-2">
+                        <i class="fas fa-clock mr-1"></i> Tiempo detenido (00:00). Pulsa abajo para comenzar el escenario:
+                    </p>
+                    <button onclick="comenzarEscenario()" class="w-full bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 active:scale-95 text-white font-extrabold text-sm py-2.5 px-4 rounded-lg shadow transition-all cursor-pointer flex items-center justify-center">
+                        <i class="fas fa-play-circle mr-2"></i> Iniciar la simulaci&oacute;n
+                    </button>
+                </div>
                 <div class="md:hidden bg-blue-50 text-blue-800 text-xs p-2 rounded border border-blue-200 mb-3 shadow-sm font-semibold flex items-center justify-between">
 <span><i class="fas fa-info-circle mr-1"></i>Despu&eacute;s de cada orden, pulsa "Bit&aacute;cora" abajo para ver el efecto.</span>
 </div>
@@ -970,6 +994,7 @@
             logDeAcciones: [],
             timerSegundos: 0,
             timerActivo: false,
+            simulacionIniciada: false,
             rcpInicioTiempo: null,
             adrenalinaTiempo: null,
             // Variables para la nota de RCP:
@@ -990,8 +1015,6 @@
             state.participante.nombre = nombre;
             state.participante.email = email;
             document.getElementById('modal-registro').classList.add('hidden');
-            document.getElementById('btn-ayudas').classList.add('animate-pulse');
-            setTimeout(() => document.getElementById('btn-ayudas').classList.remove('animate-pulse'), 5000);
         }
 
         const chatBox = document.getElementById('chat-box');
@@ -1152,6 +1175,10 @@
         drawEcg();
 
         function openModal(id) {
+            if (id !== 'modal-ayudas' && id !== 'modal-nota-rcp' && id !== 'modal-registro' && !state.simulacionIniciada) {
+                mostrarAvisoIniciar();
+                return;
+            }
             if (id === 'modal-roles' && !state.codigoAzulActivado) {
                 printRegistro("Doctor(a), el equipo de reanimación aún no ha llegado al cubículo. Primero debe activar el <strong>Código Azul (#90)</strong> para que acuda el personal con el carro de paro.");
                 return;
@@ -1360,8 +1387,49 @@ if (typeof activeMobileTab !== 'undefined' && activeMobileTab !== 'chat') {
         function printAlert(text) { printMsg('⚠️', 'Ayuda Cognitiva (Rescate)', text, 'msg-alerta'); }
         function printSystem(text) { printMsg('🏥', 'Contexto clínico / Desarrollo del caso', text, 'msg-sistema'); }
 
-        // Mensaje inicial con tiempo 00:00
-        printSystem("Ingresas al cubículo de urgencias. Augusto (7 años, 20 kg) tiene antecedente de Enfermedad Renal Crónica. La madre refiere que la diálisis peritoneal ha estado disfuncional en los últimos días y le acababan de tomar unos exámenes de control. Repentinamente, la madre grita angustiada: '¡Doctor(a), mi hijo no me responde!'. Ves a Augusto flácido y cianótico. ¿Cuál es tu primera acción? (Tómate un momento para conocer los botones de las órdenes. Despu&eacute;s de indicar cada orden, recuerda volver a esta pantalla de la Bit&aacute;cora para ver la respuesta del equipo).");
+        function mostrarAvisoIniciar() {
+            const warn = document.getElementById('start-sim-warning');
+            if (warn) warn.classList.remove('hidden');
+            const btn = document.getElementById('btn-iniciar-simulacion');
+            if (btn) {
+                btn.classList.add('ring-4', 'ring-amber-400', 'animate-bounce');
+                setTimeout(() => btn.classList.remove('animate-bounce', 'ring-4', 'ring-amber-400'), 1200);
+            }
+            const banner = document.getElementById('start-sim-controls-banner');
+            if (banner) {
+                banner.classList.add('ring-4', 'ring-amber-400');
+                banner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                setTimeout(() => banner.classList.remove('ring-4', 'ring-amber-400'), 1500);
+            }
+        }
+
+        function comenzarEscenario() {
+            if (state.simulacionIniciada) return;
+            state.simulacionIniciada = true;
+
+            const card = document.getElementById('start-sim-card');
+            if (card) card.remove();
+            const banner = document.getElementById('start-sim-controls-banner');
+            if (banner) banner.remove();
+
+            if (window.innerWidth < 768) {
+                switchMobileTab('chat');
+            }
+
+            const btnAyudas = document.getElementById('btn-ayudas');
+            if (btnAyudas) {
+                btnAyudas.classList.add('animate-pulse');
+                setTimeout(() => btnAyudas.classList.remove('animate-pulse'), 5000);
+            }
+
+            const timerIcon = document.getElementById('timer-icon');
+            if (timerIcon) timerIcon.classList.add('animate-pulse');
+
+            // Mensaje inicial con tiempo 00:00
+            printSystem("Ingresas al cubículo de urgencias. Augusto (7 años, 20 kg) tiene antecedente de Enfermedad Renal Crónica. La madre refiere que la diálisis peritoneal ha estado disfuncional en los últimos días y le acababan de tomar unos exámenes de control. Repentinamente, la madre grita angustiada: '¡Doctor(a), mi hijo no me responde!'. Ves a Augusto flácido y cianótico. ¿Cuál es tu primera acción? (Despu&eacute;s de indicar cada orden, recuerda volver a esta pantalla de la Bit&aacute;cora para ver la respuesta del equipo).");
+
+            iniciarTimer();
+        }
 
         function updateMonitor(params) {
             if(params.rhythm) document.getElementById('val-rhythm').innerText = params.rhythm;
@@ -1475,6 +1543,9 @@ if (typeof activeMobileTab !== 'undefined' && activeMobileTab !== 'chat') {
         
         function finalizarSimulacion() {
             simulacionTerminada = true;
+            state.timerActivo = false;
+            const timerIcon = document.getElementById('timer-icon');
+            if (timerIcon) timerIcon.classList.remove('animate-pulse');
             document.getElementById('controls-panel').classList.add('hidden');
             document.getElementById('debriefing-panel').classList.remove('hidden');
             
@@ -1640,6 +1711,10 @@ if (typeof activeMobileTab !== 'undefined' && activeMobileTab !== 'chat') {
         }
 
         function takeAction(actionId, payload = null) {
+            if (!state.simulacionIniciada) {
+                mostrarAvisoIniciar();
+                return;
+            }
             let accionEsCorrecta = false;
             iniciarTimer();
             
